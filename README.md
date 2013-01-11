@@ -2,7 +2,7 @@
 
 The Vehicle Commander template demonstrates best practices for building in-vehicle military applications with ArcGIS Runtime.  The Vehicle Commander template contains source code for an in-vehicle application 
 
-![Image of VehicleCommander](documentation/ScreenShot.png "VehicleCommander")
+![Image of VehicleCommander]( ScreenShot.png "VehicleCommander")
 
 ## Features
 
