@@ -79,8 +79,10 @@
   <target name="create">
     <mkdir dir="${dir.build}"/>
     <mkdir dir="${dir.dist}"/>
+    <mkdir dir="${dir.deploy}"/>
     <echo message="Creating: ${dir.build}" />
     <echo message="Creating: ${dir.dist}" />
+    <echo message="Creating: ${dir.deploy}" />
   </target>
 
 </project>
