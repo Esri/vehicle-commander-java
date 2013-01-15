@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+
+<project name="VehicleCommander" basedir="." default="build">
+
+  <property name="version" value="0.1"/>
+  <property name="dir.arcgis.jars" value="C:\Program Files (x86)\ArcGIS SDKs\java10.1.1\sdk\jars"/>
+  <property name="dir.src" value="."/>
+  <property name="dir.build" value="bin"/>
+  <property name="dir.dist" value="dist"/>
+  <property name="dir.lib3rdParty" value="lib"/>
+  <property name="dir.deploy" value="../../application"/>
+
+  <path id="project.classpath">
+    <pathelement location="${dir.dist}\VehicleCommander.jar"/>
+    <pathelement location="${dir.lib3rdParty}\beansbinding-1.2.1.jar"/>
+    <pathelement location="${dir.arcgis.jars}\ArcGIS_Runtime_Java.jar"/>
+    <pathelement location="${dir.arcgis.jars}\ArcGIS_Runtime_Java_Toolkit.jar"/>
+    <pathelement location="${dir.arcgis.jars}\apache-mime4j.jar"/>
+    <pathelement location="${dir.arcgis.jars}\commons-codec.jar"/>
+    <pathelement location="${dir.arcgis.jars}\commons-logging.jar"/>
+    <pathelement location="${dir.arcgis.jars}\gluegen-rt.jar"/>
+    <pathelement location="${dir.arcgis.jars}\gluegen-rt-natives-windows-i586.jar"/>
+    <pathelement location="${dir.arcgis.jars}\httpclient.jar"/>
+    <pathelement location="${dir.arcgis.jars}\httpcore.jar"/>
+    <pathelement location="${dir.arcgis.jars}\httpmime.jar"/>
+    <pathelement location="${dir.arcgis.jars}\jackson-core-lgpl.jar"/>
+    <pathelement location="${dir.arcgis.jars}\jackson-mapper-lgpl.jar"/>
+    <pathelement location="${dir.arcgis.jars}\jogl.all.jar"/>
+    <pathelement location="${dir.arcgis.jars}\jogl-all-natives-windows-i586.jar"/>
+    <pathelement location="${dir.arcgis.jars}\json.jar"/>
+  </path>
+
+  <target name="build" depends="create,compile,jar,dist-files">
+  </target>
+
+  <target name="dist-files" depends="jar">
+    <!-- copy any additional dependent files here -->
+    <copy todir="${dir.dist}">
+      <fileset dir="${dir.lib3rdParty}" />
+    </copy>
+  </target>
+
+  <target name="compile" depends="create">
+    <javac srcdir="${dir.src}" classpathref="project.classpath" destdir="${dir.build}" includeantruntime="true" />
+  </target>
+
+  <target name="jar" depends="compile">
+    <jar destfile="${dir.dist}/VehicleCommander.jar">
+      <fileset dir="${dir.build}" />
+        <manifest>
+            <attribute name="Main-Class" value="com.esri.vehiclecommander.VehicleCommanderJFrame" />
+            <attribute name="Class-Path" value="${project.classpath}" />
+        </manifest>
+    </jar>
+  </target>
+
+  <target name="run" depends="jar">
+      <java classname="com.esri.vehiclecommander.VehicleCommanderJFrame" fork="true" failonerror="true">
+         <classpath refid="project.classpath"/>
+      </java>
+  </target>
+
+  <target name="deploy" depends="dist-files">
+<!-- copy from dist folder to {github root}\vehicle-commander\application -->
+    <copy todir="${dir.deploy}">
+      <fileset dir="${dir.dist}"/>
+      <fileset file="${dir.src}/coa.xml" />
+      <fileset file="${dir.src}/mapconfig.xml" />
+    </copy>
+  </target>
+
+  <target name="clean">
+    <delete dir="${dir.build}" />
+    <delete dir="${dir.dist}" />
+    <echo message="Deleting path: ${dir.build}" />
+    <echo message="Deleting path: ${dir.dist}" />
+  </target>
+
+  <target name="create">
+    <mkdir dir="${dir.build}"/>
+    <mkdir dir="${dir.dist}"/>
+    <echo message="Creating: ${dir.build}" />
+    <echo message="Creating: ${dir.dist}" />
+  </target>
+
+</project>
