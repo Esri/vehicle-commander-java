@@ -35,37 +35,60 @@
 
   <target name="dist-files" depends="jar">
     <!-- copy any additional dependent files here -->
-    <copy todir="${dir.dist}">
+    <copy todir="${dir.dist}/lib">
       <fileset dir="${dir.lib3rdParty}" />
+      <fileset dir="${dir.arcgis.jars}" />
+    </copy>
+    <copy todir="${dir.dist}">
+      <fileset file="${dir.src}/coa.xml" />
+      <fileset file="${dir.src}/mapconfig.xml" />
+    </copy>
+  </target>
+  
+  <target name="compile" depends="create">
+    <javac srcdir="${dir.src}" classpathref="project.classpath" destdir="${dir.build}" includeantruntime="true" />
+    <copy todir="${dir.build}">
+      <fileset dir="${dir.src}/src" excludes="**/*.java,**/*.form" />
     </copy>
   </target>
 
-  <target name="compile" depends="create">
-    <javac srcdir="${dir.src}" classpathref="project.classpath" destdir="${dir.build}" includeantruntime="true" />
-  </target>
-
   <target name="jar" depends="compile">
+    <copy overwrite="true" file="${dir.src}/src/version.properties" todir="${dir.build}" />
+    <pathconvert pathsep=" " property="project.classpath.string" refid="project.classpath">
+      <chainedmapper>
+        <flattenmapper/>
+        <filtermapper>
+          <replacestring from=" " to="%20"/>
+        </filtermapper>
+        <globmapper from="*" to="lib/*"/>
+      </chainedmapper>
+    </pathconvert>
     <jar destfile="${dir.dist}/VehicleCommander.jar">
       <fileset dir="${dir.build}" />
-        <manifest>
-            <attribute name="Main-Class" value="com.esri.vehiclecommander.VehicleCommanderJFrame" />
-            <attribute name="Class-Path" value="${project.classpath}" />
-        </manifest>
+      <manifest>
+        <attribute name="Main-Class" value="com.esri.vehiclecommander.VehicleCommanderJFrame" />
+        <attribute name="Class-Path" value="${project.classpath.string}" />
+      </manifest>
     </jar>
   </target>
 
   <target name="run" depends="jar">
-      <java classname="com.esri.vehiclecommander.VehicleCommanderJFrame" fork="true" failonerror="true">
-         <classpath refid="project.classpath"/>
-      </java>
+    <java classname="com.esri.vehiclecommander.VehicleCommanderJFrame" fork="true" failonerror="true">
+      <classpath refid="project.classpath"/>
+    </java>
   </target>
 
-  <target name="deploy" depends="dist-files">
+  <target name="increment-build">
+    <propertyfile file="${dir.src}/src/version.properties">
+      <entry key="BUILD" value="1" type="int" operation="+"/>
+    </propertyfile>
+  </target>
+
+  <target name="deploy" depends="increment-build,dist-files">
 <!-- copy from dist folder to {github root}\vehicle-commander\application -->
+    <delete dir="${dir.deploy}" />
     <copy todir="${dir.deploy}">
       <fileset dir="${dir.dist}"/>
-      <fileset file="${dir.src}/coa.xml" />
-      <fileset file="${dir.src}/mapconfig.xml" />
     </copy>
   </target>
 
