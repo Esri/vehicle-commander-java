@@ -303,7 +303,7 @@ public class IdentifyResultsJPanel extends RoundedJPanel implements GPSEventList
                 double bearing = Utilities.calculateBearingDegrees(gpsLocationLatLon, destinationLatLon);
 
                 jLabel_distance.setText("Distance: " + Math.round(distance) + " " + mapController.getSpatialReference().getUnit().getAbbreviation());
-                jLabel_bearing.setText("Bearing: " + Math.round(bearing) + "°");
+                jLabel_bearing.setText("Bearing: " + Math.round(bearing) + "\u00B0");
                 showedDistanceAndBearing = true;
             }
             if (!showedDistanceAndBearing) {

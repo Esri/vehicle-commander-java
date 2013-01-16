@@ -275,10 +275,10 @@ public class Utilities {
                 public String getAbbreviation() {
                     switch (wkid) {
                         case AngularUnit.Code.DEGREE: {
-                            return "°";
+                            return "\u00B0";
                         }
                         case AngularUnit.Code.MIL_6400: {
-                            return "₥";
+                            return "\u20A5";
                         }
                     }
                     return super.getAbbreviation();
