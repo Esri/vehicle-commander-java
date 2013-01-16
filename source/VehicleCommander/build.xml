@@ -42,6 +42,9 @@
 
   <target name="compile" depends="create">
     <javac srcdir="${dir.src}" classpathref="project.classpath" destdir="${dir.build}" includeantruntime="true" />
+    <copy todir="${dir.build}/com">
+      <fileset dir="${dir.src}/src/com" excludes="**/*.java"/>
+    </copy>
   </target>
 
   <target name="jar" depends="compile">
