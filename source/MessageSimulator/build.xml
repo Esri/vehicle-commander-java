@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+
+<project name="MessageSimulator" basedir="." default="build">
+
+  <property name="version" value="0.1"/>
+  <property name="dir.src" value="."/>
+  <property name="dir.build" value="bin"/>
+  <property name="dir.dist" value="dist"/>
+  <property name="dir.lib3rdParty" value="lib"/>
+  <property name="dir.deploy" value="../../application"/>
+  <property name="dir.deployData" value="../../data"/>
+
+  <path id="project.classpath">
+    <pathelement location="${dir.dist}\MessageSimulator.jar"/>
+  </path>
+
+  <target name="build" depends="create,compile,jar">
+  </target>
+
+  <target name="compile" depends="create">
+    <javac srcdir="${dir.src}" classpathref="project.classpath" destdir="${dir.build}" includeantruntime="true" />
+  </target>
+
+  <target name="jar" depends="compile">
+    <jar destfile="${dir.dist}/MessageSimulator.jar">
+      <fileset dir="${dir.build}" />
+        <manifest>
+            <attribute name="Main-Class" value="com.esri.messagesimulator.MessageSimulatorJFrame" />
+            <attribute name="Class-Path" value="${project.classpath}" />
+        </manifest>
+    </jar>
+  </target>
+
+  <target name="run" depends="jar">
+      <java classname="com.esri.messagesimulator.MessageSimulatorJFrame" fork="true" failonerror="true">
+         <classpath refid="project.classpath"/>
+      </java>
+  </target>
+
+  <target name="deploy" depends="build">
+<!-- copy from dist folder to {github root}\vehicle-commander\application -->
+    <copy todir="${dir.deploy}">
+      <fileset dir="${dir.dist}"/>
+    </copy>
+    <copy todir="${dir.deployData}">
+      <fileset dir="${dir.src}/SampleMessages" />
+    </copy>
+  </target>
+
+  <target name="clean">
+    <delete dir="${dir.build}" />
+    <delete dir="${dir.dist}" />
+    <echo message="Deleting path: ${dir.build}" />
+    <echo message="Deleting path: ${dir.dist}" />
+  </target>
+
+  <target name="create">
+    <mkdir dir="${dir.build}"/>
+    <mkdir dir="${dir.dist}"/>
+    <mkdir dir="${dir.deploy}"/>
+    <mkdir dir="${dir.deployData}"/>
+    <echo message="Creating: ${dir.build}" />
+    <echo message="Creating: ${dir.dist}" />
+    <echo message="Creating: ${dir.deploy}" />
+    <echo message="Creating: ${dir.deployData}" />
+  </target>
+
+</project>
