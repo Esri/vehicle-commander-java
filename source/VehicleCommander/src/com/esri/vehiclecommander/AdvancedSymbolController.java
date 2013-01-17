@@ -222,7 +222,7 @@ public class AdvancedSymbolController {
                          */
                         synchronized (uniqueIds) {
                             if (uniqueIds.contains(message.getID())) {
-                                messageProcessor.processMessage(MessageHelper.create2525CRemoveMessage(message.getID(), messageType));
+                                messageProcessor.processMessage(MessageHelper.createRemoveMessage(dictionaryType, message.getID(), messageType));
                                 uniqueIds.remove(message.getID());
                             }
                         }
@@ -235,7 +235,7 @@ public class AdvancedSymbolController {
                                 String uniqueId = uniqueDesignationToId.get(uniqueDesignation);
                                 synchronized (uniqueIds) {
                                     if (uniqueIds.contains(uniqueId)) {
-                                        messageProcessor.processMessage(MessageHelper.create2525CRemoveMessage(uniqueId, messageType));
+                                        messageProcessor.processMessage(MessageHelper.createRemoveMessage(dictionaryType, uniqueId, messageType));
                                         uniqueIds.remove(uniqueId);
                                     }
                                 }
