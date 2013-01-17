@@ -2,11 +2,16 @@
 ## Eclipse
 #################
 
+# Defense Template specific ignores
+application/
+data/
+
 *.pydevproject
-.project
+# .project
 .metadata
 bin/
 tmp/
+dist/
 *.tmp
 *.bak
 *.swp
