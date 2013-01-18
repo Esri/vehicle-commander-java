@@ -1,6 +1,6 @@
 # vehicle-commander
 
-The Vehicle Commander template demonstrates best practices for building in-vehicle military applications with ArcGIS Runtime.  The Vehicle Commander template contains source code for an in-vehicle application 
+The Vehicle Commander template demonstrates best practices for building in-vehicle military applications with ArcGIS Runtime.  The Vehicle Commander template contains source code for creating a sample in-vehicle application.
 
 ![Image of Vehicle Commander]( https://github.com/Esri/vehicle-commander/blob/master/ScreenShot.png?raw=true "VehicleCommander")
 
@@ -15,22 +15,25 @@ The Vehicle Commander template demonstrates best practices for building in-vehic
 ## Instructions
 
 ### General Help
-[New to Github? Get started here.](http://htmlpreview.github.com/?https://github.com/Esri/esri.github.com/blob/master/help/esri-getting-to-know-github.html)
+
+* [New to Github? Get started here.](http://htmlpreview.github.com/?https://github.com/Esri/esri.github.com/blob/master/help/esri-getting-to-know-github.html)
 
 ## Requirements
 
-ArcGIS Runtime SDK for Java 10.1.1
+* ArcGIS Runtime SDK for Java 10.1.1
+* Java Development Environment (this template has been tested with Ant and Eclipse)
+* See the [ArcGIS Runtime SDK for Java](http://resources.arcgis.com/en/help/system-requirements/10.1/index.html#/ArcGIS_Runtime_SDK_10_1_1_for_Java/015100000093000000/) page for detailed system requirements
 
-### Your Services
+### Services
 
-* TBD - no Online services but may require some datasets to be downloaded from ArcGIS Online
+* The default application uses ArcGIS Online services to display basemaps. See the configuration file mapconfig.xml for the services used.
 
 ## Resources
 
-Learn more about Esri's [ArcGIS for Defense maps and apps](http://resources.arcgis.com/en/communities/defense-and-intelligence/).
-
-This application uses [Esri's ArcGIS Runtime SDK for Java 10.1.1](http://resources.arcgis.com/en/communities/runtime-java/);
+* Learn more about Esri's [ArcGIS for Defense maps and apps](http://resources.arcgis.com/en/communities/defense-and-intelligence/).
+* This application uses [Esri's ArcGIS Runtime SDK for Java 10.1.1](http://resources.arcgis.com/en/communities/runtime-java/);
 see the site for concepts, samples, and references for using the API to create mapping applications.
+* A deployment release and a more detailed description of this template, including operating instructions, are included with the current release of this template available at [ArcGIS Online](http://www.arcgis.com/home/item.html?id=ae30551d12f443cb903f4829b03de315)
 
 ## Issues
 
@@ -58,3 +61,7 @@ limitations under the License.
 
 A copy of the license is available in the repository's
 [license.txt](https://raw.github.com/MikeTschudi/lgonline/master/license.txt) file.
+
+Note: Portions of this code use Beans Binding (JSR-295) which is licensed under 
+GNU Lesser General Public License 2.1. See license-ThirdParty.txt for the details 
+of this license or visit the [Beans Binding](http://java.net/projects/beansbinding/) project for more details 
