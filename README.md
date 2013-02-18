@@ -1,8 +1,8 @@
 # vehicle-commander
 
-The Vehicle Commander template demonstrates best practices for building in-vehicle military applications with ArcGIS Runtime.  The Vehicle Commander template contains source code for creating a sample in-vehicle application.
+The Vehicle Commander template demonstrates best practices for building in-vehicle military applications with ArcGIS Runtime.  The Vehicle Commander template contains source code for creating a sample in-vehicle, touchscreen application.
 
-![Image of Vehicle Commander]( https://github.com/Esri/vehicle-commander/blob/master/ScreenShot.png?raw=true "VehicleCommander")
+![Image of Vehicle Commander]( ScreenShot.png "vehicle-commander")
 
 ## Features
 
@@ -18,10 +18,25 @@ The Vehicle Commander template demonstrates best practices for building in-vehic
 
 * [New to Github? Get started here.](http://htmlpreview.github.com/?https://github.com/Esri/esri.github.com/blob/master/help/esri-getting-to-know-github.html)
 
+### Getting Started with the Vehicle Commander
+* Install and configure Apache Ant
+    * Download Ant from the [Apache Ant Project](http://ant.apache.org/bindownload.cgi) and unzip to a location on your machine
+    * Set environment variable `ANT_HOME` to Ant Install Location
+    * Add Ant\bin to your path: `%ANT_HOME%\bin`
+    * NOTE: Ant requires the [Java Developer Kit (JDK)](http://www.oracle.com/technetwork/java/javase/downloads/index.html) to be installed and the environment variable `JAVA_HOME` to be set to this location
+    * To verify your Ant Installation: Open Command Prompt> `ant -v` and verify it runs and returns the version correctly 
+* To build or run an application
+    * Open Command Prompt>
+    * > cd vehicle-commander\source\ `{Project/Application}`
+    * To Build: > ant
+    * To Run: > ant run
+    * Verify “Build Succeeded” 
+
 ## Requirements
 
 * ArcGIS Runtime SDK for Java 10.1.1
 * Java Development Environment (this template has been tested with Ant and Eclipse)
+* Apache Ant - used to compile and run source
 * See the [ArcGIS Runtime SDK for Java](http://resources.arcgis.com/en/help/system-requirements/10.1/index.html#/ArcGIS_Runtime_SDK_10_1_1_for_Java/015100000093000000/) page for detailed system requirements
 
 ### Services
@@ -60,8 +75,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 A copy of the license is available in the repository's
-[license.txt](https://raw.github.com/MikeTschudi/lgonline/master/license.txt) file.
+[license.txt](license.txt) file.
 
 Note: Portions of this code use Beans Binding (JSR-295) which is licensed under 
-GNU Lesser General Public License 2.1. See license-ThirdParty.txt for the details 
+GNU Lesser General Public License 2.1. See [license-ThirdParty.txt](license-ThirdParty.txt) for the details 
 of this license or visit the [Beans Binding](http://java.net/projects/beansbinding/) project for more details 
+
+[](Esri Tags: ArcGIS Defense and Intelligence Situational Awareness ArcGIS Runtime JavaSE 10.1.1)
+[](Esri Language: Java)
