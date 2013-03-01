@@ -591,7 +591,7 @@ public class AppConfigController {
      * @return true if the application should be decorated (title bar, resizable, etc.).
      */
     public boolean isDecorated() {
-        return preferences.getBoolean(KEY_DECORATED, false);
+        return preferences.getBoolean(KEY_DECORATED, true);
     }
 
     /**

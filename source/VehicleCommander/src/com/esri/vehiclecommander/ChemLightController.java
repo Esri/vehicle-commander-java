@@ -79,8 +79,8 @@ public class ChemLightController extends GraphicsLayerController {
                 point.getX() + "," + point.getY());
         Utilities.writeTextElement(xmlStreamWriter,
                 MessageHelper.MESSAGE_ACTION_PROPERTY_NAME, "UPDATE");
-        Utilities.writeTextElement(xmlStreamWriter, "uniquedesignation", appConfig.getUsername());
-        Utilities.writeTextElement(xmlStreamWriter, "color", getChemLightColorString(color));
+        Utilities.writeTextElement(xmlStreamWriter, "uniquedesignation", "Chem Light " + id);
+        Utilities.writeTextElement(xmlStreamWriter, "color", Utilities.getAFMGeoEventColorString(color));
         String dateString = Utilities.DATE_FORMAT_GEOMESSAGE.format(new Date());
         Utilities.writeTextElement(xmlStreamWriter, "datetimesubmitted", dateString);
         Utilities.writeTextElement(xmlStreamWriter, "datetimemodified", dateString);
@@ -98,21 +98,5 @@ public class ChemLightController extends GraphicsLayerController {
         
     }
 
-    private static String getChemLightColorString(Color color) {
-        if (Color.RED.equals(color)) {
-            return "1";
-        } else if (Color.YELLOW.equals(color)) {
-            return "4";
-        } else if (Color.GREEN.equals(color)) {
-            return "2";
-        } else if (Color.BLUE.equals(color)) {
-            return "3";
-        } else {
-            /**
-             * ArcGIS Runtime does not currently support custom chem light colors.
-             * But we can send a hex string in case some client can use it.
-             */
-            return "#" + Integer.toHexString(color.getRed()) + Integer.toHexString(color.getGreen()) + Integer.toHexString(color.getBlue());
-        }
-    }
+    
 }

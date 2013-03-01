@@ -1,0 +1,11 @@
+{
+  "type": "trackrep",
+  "layerName": "trackrep",
+  "renderer":
+  {
+    "type"           : "dictionary",
+    "description"    : "",
+    "dictionaryType" : "2525C",
+    "field" 	     : "sic"
+  }
+}

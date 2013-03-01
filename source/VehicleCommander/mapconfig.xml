@@ -37,10 +37,10 @@
             <datasetpath>C:/Program Files (x86)/ArcGIS SDKs/java10.1.1/sdk/samples/data/tpks/Topographic.tpk</datasetpath>
         </layer>
         <!--layer name="Bihsud Bridge and Environs" visible="true" type="LocalDynamicMapLayer" basemap="false">
-            <datasetpath>C:/DefenseTemplates/VehicleCommander/VehicleCommanderTemplate/Data/BihsudBridgeVCP_att.mpk</datasetpath>
+            <datasetpath>../../BihsudBridgeVCP.mpk</datasetpath>
         </layer> -->
         <layer name="COA Sketch" visible="true" type="Mil2525CMessageLayer" basemap="false">
-            <datasetpath>./coa.xml</datasetpath>
+            <datasetpath>../../data/coa.xml</datasetpath>
         </layer>
     </layers>
     <initialextent>

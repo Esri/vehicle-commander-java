@@ -111,7 +111,7 @@ public class AdvancedSymbolController {
         if (null != mapController) {
             mapController.setAdvancedSymbolController(this);
         }
-        messageParser = new Mil2525CMessageParser(appConfig.isShowMessageLabels());
+        messageParser = new Mil2525CMessageParser();
         this.appConfig = appConfig;
         initializeMessageProcessor();
     }
@@ -207,12 +207,16 @@ public class AdvancedSymbolController {
                 for (int i = 0; i < messages.size(); i++) {
                     Message message = messages.get(i);
                     String messageType = (String) message.getProperty(MessageHelper.MESSAGE_2525C_TYPE_PROPERTY_NAME);
+                    if ("chemlight".equals(messageType)) {
+                        messageType = "afmchemlight";
+                        message.setProperty(MessageHelper.MESSAGE_2525C_TYPE_PROPERTY_NAME, messageType);
+                    }
                     if (null != message.getID() && !appConfig.getUniqueId().equals(message.getID())
                             /**
                              * If we do something with other report types,
                              * we can remove this next check.
                              */
-                            && ("position_report".equals(messageType) || "spotrep".equals(messageType) || "chemlight".equals(messageType))) {
+                            && ("position_report".equals(messageType) || "spotrep".equals(messageType) || "afmchemlight".equals(messageType))) {
 
                         String sic = (String) message.getProperty("sic");
                         if (null == sic || 15 != sic.length()) {
@@ -224,7 +228,7 @@ public class AdvancedSymbolController {
                             }
                         }
                         //Workaround for odd chem light behavior
-                        if ("chemlight".equals(messageType) && (null == sic || 0 == sic.length())) {
+                        if ("afmchemlight".equals(messageType) && (null == sic || 0 == sic.length())) {
                             sic = " ";
                             message.setProperty("sic", sic);
                         }
@@ -261,6 +265,7 @@ public class AdvancedSymbolController {
                         if (!appConfig.isShowMessageLabels()) {
                             message.setProperty("AdditionalInformation", "");
                             message.setProperty("UniqueDesignation", "");
+                            message.setProperty("speed", "");
                         }
 
                         try {

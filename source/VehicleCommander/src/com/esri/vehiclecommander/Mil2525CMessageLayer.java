@@ -77,7 +77,7 @@ public class Mil2525CMessageLayer extends MessageGroupLayer {
         final MessageProcessor processor = null == symbolDictionaryPath ?
             new MessageProcessor(DictionaryType.Mil2525C, this) :
             new MessageProcessor(DictionaryType.Mil2525C, this, symbolDictionaryPath);
-        Mil2525CMessageParser parser = new Mil2525CMessageParser(appConfig.isShowMessageLabels());
+        Mil2525CMessageParser parser = new Mil2525CMessageParser();
         final ArrayList<Message> messages = parser.parseMessages(new File(xmlMessageFilename));
         mapController.addListener(new MapControllerListenerAdapter() {
 

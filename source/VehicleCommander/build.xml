@@ -8,7 +8,8 @@
   <property name="dir.build" value="bin"/>
   <property name="dir.dist" value="dist"/>
   <property name="dir.lib3rdParty" value="lib"/>
-  <property name="dir.deploy" value="../../application"/>
+  <property name="dir.deploy" value="../../application/VehicleCommander"/>
+  <property name="version.runtime" value="10.1.1" />
 
   <path id="project.classpath">
     <pathelement location="${dir.dist}\VehicleCommander.jar"/>
@@ -40,13 +41,12 @@
       <fileset dir="${dir.arcgis.jars}" />
     </copy>
     <copy todir="${dir.dist}">
-      <fileset file="${dir.src}/coa.xml" />
       <fileset file="${dir.src}/mapconfig.xml" />
     </copy>
   </target>
   
   <target name="compile" depends="create">
-    <javac srcdir="${dir.src}" classpathref="project.classpath" destdir="${dir.build}" includeantruntime="true" />
+    <javac srcdir="${dir.src}" classpathref="project.classpath" destdir="${dir.build}" includeantruntime="true" debug="${debug}" />
     <copy todir="${dir.build}">
       <fileset dir="${dir.src}/src" excludes="**/*.java,**/*.form" />
     </copy>
@@ -86,9 +86,14 @@
 
   <target name="deploy" depends="increment-build,dist-files">
 <!-- copy from dist folder to {github root}\vehicle-commander\application -->
-    <delete dir="${dir.deploy}" />
+    <delete dir="${dir.deploy}" >
+        <exclude name="ArcGISRuntime*/**" />
+    </delete>
     <copy todir="${dir.deploy}">
       <fileset dir="${dir.dist}"/>
+    </copy>
+    <copy todir="${dir.deploy}/ArcGISRuntime${version.runtime}/resources/symbols/mil2525c/messagetypes">
+      <fileset dir="${dir.src}" includes="afm*.json" />
     </copy>
   </target>
 

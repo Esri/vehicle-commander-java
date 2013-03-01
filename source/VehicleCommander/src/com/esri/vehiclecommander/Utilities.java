@@ -19,6 +19,7 @@ import com.esri.core.geometry.AngularUnit;
 import com.esri.core.geometry.MgrsConversionMode;
 import com.esri.core.geometry.Point;
 import com.esri.core.geometry.SpatialReference;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Graphics2D;
@@ -444,6 +445,33 @@ public class Utilities {
         Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
         method.setAccessible(true);
         method.invoke(sysloader, new Object[]{f.toURI().toURL()});
+    }
+    
+    /**
+     * Translates the given color to a color string used by the ArcGIS for the Military
+     * GeoEvent Processor schema.
+     * @param color the color.
+     * @return a color string used by the ArcGIS for the Military GeoEvent Processor
+     *         schema.
+     */
+    public static String getAFMGeoEventColorString(Color color) {
+        if (null == color) {
+            return null;
+        } else if (Color.RED.equals(color)) {
+            return "1";
+        } else if (Color.YELLOW.equals(color)) {
+            return "4";
+        } else if (Color.GREEN.equals(color)) {
+            return "2";
+        } else if (Color.BLUE.equals(color)) {
+            return "3";
+        } else {
+            /**
+             * ArcGIS Runtime does not currently support custom chem light colors.
+             * But we can send a hex string in case some client can use it.
+             */
+            return "#" + Integer.toHexString(color.getRed()) + Integer.toHexString(color.getGreen()) + Integer.toHexString(color.getBlue());
+        }
     }
     
 }

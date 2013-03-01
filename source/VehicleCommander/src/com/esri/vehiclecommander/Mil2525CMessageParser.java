@@ -42,16 +42,14 @@ public class Mil2525CMessageParser extends DefaultHandler {
     private final ArrayList<Message> messages = new ArrayList<Message>();
     private Message message = null;
     private String version = null;
-    private final boolean showLabels;
 
     /**
      * Creates a new Mil2525CMessageParser.
      * @throws ParserConfigurationException
      * @throws SAXException
      */
-    public Mil2525CMessageParser(boolean showLabels) throws ParserConfigurationException, SAXException {
+    public Mil2525CMessageParser() throws ParserConfigurationException, SAXException {
         saxParser = SAXParserFactory.newInstance().newSAXParser();
-        this.showLabels = showLabels;
     }
 
     private static String translateElementName(String elementName) {
@@ -60,26 +58,16 @@ public class Mil2525CMessageParser extends DefaultHandler {
          * element names should be all lowercase, so when that changes in Runtime,
          * we'll have to change it here.
          */
-        if ("UniqueDesignation".equalsIgnoreCase(elementName) || "Unique_Designation".equalsIgnoreCase(elementName)) {
-            elementName = "UniqueDesignation";
-        } else if ("AdditionalInformation".equalsIgnoreCase(elementName)) {
+        if ("AdditionalInformation".equalsIgnoreCase(elementName)) {
             elementName = "AdditionalInformation";
         }
         return elementName;
     }
 
-
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         qName = translateElementName(qName);
         if ("message".equals(qName) || "geomessage".equals(qName)) {
-            if (null != message) {
-                if (!showLabels) {
-                    message.setProperty(translateElementName("uniquedesignation"), "");
-                    message.setProperty(translateElementName("additionalinformation"), "");
-                }
-            }
-
             message = new Message();
             messages.add(message);
             version = attributes.getValue("v");

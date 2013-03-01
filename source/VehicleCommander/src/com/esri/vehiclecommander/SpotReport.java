@@ -277,7 +277,7 @@ public class SpotReport {
                     getLocation().getX() + "," + getLocation().getY());
             Utilities.writeTextElement(spotReport,
                     MessageHelper.MESSAGE_ACTION_PROPERTY_NAME, "UPDATE");
-            Utilities.writeTextElement(spotReport, "uniquedesignation", appConfig.getUsername());
+            Utilities.writeTextElement(spotReport, "uniquedesignation", "Spot Report " + messageId);
             try {
                 // symbol and text modifiers
                 Utilities.writeTextElement(spotReport, "sic", mil2525CSymbolController.getSic(getEquipment()));
