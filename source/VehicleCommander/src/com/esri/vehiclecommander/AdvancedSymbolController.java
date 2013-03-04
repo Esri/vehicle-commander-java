@@ -210,13 +210,16 @@ public class AdvancedSymbolController {
                     if ("chemlight".equals(messageType)) {
                         messageType = "afmchemlight";
                         message.setProperty(MessageHelper.MESSAGE_2525C_TYPE_PROPERTY_NAME, messageType);
+                    } else if ("position_report".equals(messageType)) {
+                        messageType = "trackrep";
+                        message.setProperty(MessageHelper.MESSAGE_2525C_TYPE_PROPERTY_NAME, messageType);
                     }
                     if (null != message.getID() && !appConfig.getUniqueId().equals(message.getID())
                             /**
                              * If we do something with other report types,
                              * we can remove this next check.
                              */
-                            && ("position_report".equals(messageType) || "spotrep".equals(messageType) || "afmchemlight".equals(messageType))) {
+                            && ("trackrep".equals(messageType) || "spotrep".equals(messageType) || "afmchemlight".equals(messageType))) {
 
                         String sic = (String) message.getProperty("sic");
                         if (null == sic || 15 != sic.length()) {
@@ -282,9 +285,9 @@ public class AdvancedSymbolController {
                                     }
                                 }
                             }
-                            if ("trackrep".equals(messageType)) {// && !"0".equals(message.getProperty("status911"))) {
-                                boolean status911 = !"0".equals(message.getProperty("status911"));
-                                message.setProperty(MessageHelper.MESSAGE_ACTION_PROPERTY_NAME, (status911 ? "" : "un-") + "highlight");
+                            if ("trackrep".equals(messageType)) {
+                                boolean status911 = null != message.getProperty("status911") && !"0".equals(message.getProperty("status911"));
+                                message.setProperty(MessageHelper.MESSAGE_ACTION_PROPERTY_NAME, (status911 ? "" : "un-") + "select");
                                 processed = messageProcessor.processMessage(message);
                                 if (!processed) {
                                     Logger.getLogger(getClass().getName()).log(Level.WARNING, "Could not display message: {0}", message);
