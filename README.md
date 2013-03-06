@@ -19,15 +19,23 @@ The Vehicle Commander template demonstrates best practices for building in-vehic
 * [New to Github? Get started here.](http://htmlpreview.github.com/?https://github.com/Esri/esri.github.com/blob/master/help/esri-getting-to-know-github.html)
 
 ### Getting Started with the Vehicle Commander
+* Copy required message resources.  
+    * In a file browser or shell, navigate to source/VehicleCommander. Copy all files named afm*.json to <RuntimeSDKJava>/ArcGISRuntime10.1.1/Resources/Symbols/Mil2525c/MessageTypes. This enables the application to display certain message types that other instances of the application send.
 * Install and configure Apache Ant
     * Download Ant from the [Apache Ant Project](http://ant.apache.org/bindownload.cgi) and unzip to a location on your machine
     * Set environment variable `ANT_HOME` to Ant Install Location
     * Add Ant\bin to your path: `%ANT_HOME%\bin`
     * NOTE: Ant requires the [Java Developer Kit (JDK)](http://www.oracle.com/technetwork/java/javase/downloads/index.html) to be installed and the environment variable `JAVA_HOME` to be set to this location
     * To verify your Ant Installation: Open Command Prompt> `ant -v` and verify it runs and returns the version correctly 
-* To build or run an application
+* To build or run the Vehicle Commander application
     * Open Command Prompt>
-    * > cd vehicle-commander\source\ `{Project/Application}`
+    * > cd vehicle-commander\source\VehicleCommander
+    * To Build: > ant
+    * To Run: > ant run
+    * Verify “Build Succeeded” 
+* (_Optional_) To build or run the Message Simulator application
+    * Open Command Prompt>
+    * > cd vehicle-commander\source\MessageSimulator
     * To Build: > ant
     * To Run: > ant run
     * Verify “Build Succeeded” 
