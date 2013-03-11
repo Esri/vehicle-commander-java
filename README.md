@@ -33,7 +33,7 @@ The Vehicle Commander template demonstrates best practices for building in-vehic
     * To Build: > ant
     * To Run: > ant run
     * Verify “Build Succeeded” 
-* (Optional) To build or run the Message Simulator application
+* \(**Optional**\) To build or run the Message Simulator application
     * Open Command Prompt>
     * > cd vehicle-commander\source\MessageSimulator
     * To Build: > ant
