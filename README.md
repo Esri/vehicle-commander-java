@@ -37,7 +37,8 @@ If you simply want to run the precompiled applications, skip the [Building](#Bui
 * Uses new directory structure.
 * Bug fixes and performance improvements.
 
-## <a id="Requirements"></a>Hardware and Software Requirements
+<a id="Requirements"></a>
+## Hardware and Software Requirements
 
 ###Hardware requirements
 Hardware requirements for this template are the same as those for ArcGIS Runtime SDK for Java, which you can review [here](http://resources.arcgis.com/en/help/system-requirements/10.1/index.html#//01510000008t000000). In particular, note the video adapter requirement for either DirectX with Shader Model 2.0 or higher (Windows only), or OpenGL 2.0 or higher (Windows or Linux). One way to verify OpenGL 2.0 or higher is to download and run the [OpenGL Extensions Viewer](http://www.realtech-vr.com/glview/download.php).
