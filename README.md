@@ -37,7 +37,7 @@ If you simply want to run the precompiled applications, skip the [Building](#Bui
 * Uses new directory structure.
 * Bug fixes and performance improvements.
 
-<a id="Requirements"></a>
+<a link="Requirements"></a>
 ## Hardware and Software Requirements
 
 ###Hardware requirements
