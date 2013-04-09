@@ -4,7 +4,7 @@
 
 # Defense Template specific ignores
 application/
-data/
+#data/
 
 *.pydevproject
 # .project
