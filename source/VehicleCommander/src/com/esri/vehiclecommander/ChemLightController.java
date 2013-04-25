@@ -79,7 +79,7 @@ public class ChemLightController extends GraphicsLayerController {
                 point.getX() + "," + point.getY());
         Utilities.writeTextElement(xmlStreamWriter,
                 MessageHelper.MESSAGE_ACTION_PROPERTY_NAME, "UPDATE");
-        Utilities.writeTextElement(xmlStreamWriter, "uniquedesignation", "Chem Light " + id);
+        Utilities.writeTextElement(xmlStreamWriter, "uniquedesignation", appConfig.getUsername());
         Utilities.writeTextElement(xmlStreamWriter, "color", Utilities.getAFMGeoEventColorString(color));
         String dateString = Utilities.DATE_FORMAT_GEOMESSAGE.format(new Date());
         Utilities.writeTextElement(xmlStreamWriter, "datetimesubmitted", dateString);
