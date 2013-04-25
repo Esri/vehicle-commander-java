@@ -59,6 +59,10 @@ public class AppConfigDialog extends javax.swing.JDialog {
         if (null != username) {
             jTextField_username.setText(username);
         }
+        String vehicleType = appConfigController.getVehicleType();
+        if (null != username) {
+            jTextField_vehicleType.setText(vehicleType);
+        }
         String uniqueId = appConfigController.getUniqueId();
         if (null != uniqueId) {
             jTextField_uniqueId.setText(uniqueId);
@@ -134,6 +138,8 @@ public class AppConfigDialog extends javax.swing.JDialog {
         jRadioButton_mils = new javax.swing.JRadioButton();
         jComboBox_geomessageVersion = new javax.swing.JComboBox();
         jLabel_geomessageVersion = new javax.swing.JLabel();
+        jLabel_vehicleType = new javax.swing.JLabel();
+        jTextField_vehicleType = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("About Me");
@@ -260,21 +266,27 @@ public class AppConfigDialog extends javax.swing.JDialog {
         jLabel_geomessageVersion.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
         jLabel_geomessageVersion.setText("Geomessage v.");
 
+        jLabel_vehicleType.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
+        jLabel_vehicleType.setText("Vehicle Type");
+
+        jTextField_vehicleType.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
+        jTextField_vehicleType.setText("HMMWV");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jButton_resetAll, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButton_resetAll, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jLabel_appBuild)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButton_ok)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton_cancel))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                    .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel_positionMessageInterval)
                             .addComponent(jLabel_messagingPort)
@@ -285,30 +297,21 @@ public class AppConfigDialog extends javax.swing.JDialog {
                             .addComponent(jSpinner_messagingPort, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jSpinner_positionMessageInterval)
                             .addComponent(jButton_generateUniqueId, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                    .addGroup(layout.createSequentialGroup()
                         .addComponent(jCheckBox_showMessageLabels)
                         .addGap(29, 29, 29)
                         .addComponent(jCheckBox_showLocalTimeZone)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 31, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 33, Short.MAX_VALUE)
                         .addComponent(jCheckBox_decorated))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                    .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel_vehicleStatusMessageInterval)
                         .addGap(10, 10, 10)
                         .addComponent(jSpinner_vehicleStatusMessageInterval))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                    .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel_speedMultiplier)
                         .addGap(133, 133, 133)
                         .addComponent(jSpinner_speedMultiplier))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel_uniqueId)
-                            .addComponent(jLabel_username))
-                        .addGap(223, 223, 223)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jTextField_uniqueId)
-                            .addComponent(jTextField_username, javax.swing.GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                    .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jRadioButton_degrees)
@@ -317,7 +320,19 @@ public class AppConfigDialog extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel_geomessageVersion)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jComboBox_geomessageVersion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jComboBox_geomessageVersion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel_vehicleType)
+                            .addComponent(jLabel_uniqueId))
+                        .addGap(201, 201, 201)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jTextField_vehicleType)
+                            .addComponent(jTextField_uniqueId)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel_username)
+                        .addGap(223, 223, 223)
+                        .addComponent(jTextField_username)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -329,7 +344,11 @@ public class AppConfigDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel_username)
                     .addComponent(jTextField_username, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel_vehicleType)
+                    .addComponent(jTextField_vehicleType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel_uniqueId)
                     .addComponent(jTextField_uniqueId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -367,12 +386,12 @@ public class AppConfigDialog extends javax.swing.JDialog {
                     .addComponent(jRadioButton_mils)
                     .addComponent(jComboBox_geomessageVersion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel_geomessageVersion))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 6, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton_cancel)
                     .addComponent(jButton_ok)
                     .addComponent(jLabel_appBuild))
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -392,6 +411,7 @@ public class AppConfigDialog extends javax.swing.JDialog {
         this.requestFocus();
         
         appConfigController.setUsername(jTextField_username.getText().trim());
+        appConfigController.setVehicleType(jTextField_vehicleType.getText().trim());
         appConfigController.setUniqueId(jTextField_uniqueId.getText().trim());
         appConfigController.setSic(jTextField_sic.getText().trim());
         Object port = jSpinner_messagingPort.getValue();
@@ -473,6 +493,7 @@ public class AppConfigDialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel_uniqueId;
     private javax.swing.JLabel jLabel_username;
     private javax.swing.JLabel jLabel_vehicleStatusMessageInterval;
+    private javax.swing.JLabel jLabel_vehicleType;
     private javax.swing.JRadioButton jRadioButton_degrees;
     private javax.swing.JRadioButton jRadioButton_mils;
     private javax.swing.JSpinner jSpinner_messagingPort;
@@ -482,5 +503,6 @@ public class AppConfigDialog extends javax.swing.JDialog {
     private javax.swing.JTextField jTextField_sic;
     private javax.swing.JTextField jTextField_uniqueId;
     private javax.swing.JTextField jTextField_username;
+    private javax.swing.JTextField jTextField_vehicleType;
     // End of variables declaration//GEN-END:variables
 }

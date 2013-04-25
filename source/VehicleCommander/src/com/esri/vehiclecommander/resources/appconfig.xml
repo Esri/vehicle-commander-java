@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <appconfig>
-	<user name="Vehicle Commander">
+	<user name="Vehicle Commander" type="HMMWV">
 		<code>SFGPEVATM-EDUSG</code>
 	</user>
 	<messaging>

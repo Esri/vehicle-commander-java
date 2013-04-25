@@ -45,6 +45,7 @@ import org.xml.sax.helpers.DefaultHandler;
 public class AppConfigController {
 
     private static final String KEY_USERNAME = AppConfigController.class.getName() + "username";
+    private static final String KEY_VEHICLE_TYPE = AppConfigController.class.getName() + "vehicleType";
     private static final String KEY_UNIQUE_ID = AppConfigController.class.getName() + "uniqueId";
     private static final String KEY_SIC = AppConfigController.class.getName() + "sic";
     private static final String KEY_PORT = AppConfigController.class.getName() + "port";
@@ -67,6 +68,7 @@ public class AppConfigController {
     private class AppConfigHandler extends DefaultHandler {
 
         private String username = null;
+        private String vehicleType = null;
         private String uniqueId = null;
         private String sic = null;
         private int port = -1;
@@ -91,6 +93,7 @@ public class AppConfigController {
             if ("user".equalsIgnoreCase(qName)) {
                 readingUser = true;
                 username = attributes.getValue("name");
+                vehicleType = attributes.getValue("type");
                 uniqueId = attributes.getValue("id");
             } else if (readingUser) {
                 if ("code".equalsIgnoreCase(qName)) {
@@ -219,6 +222,7 @@ public class AppConfigController {
      */
     public final void resetFromAppConfigFile(boolean overwriteExistingSettings) throws ParserConfigurationException, SAXException, IOException, URISyntaxException {
         if (overwriteExistingSettings || null == getUsername() || null == getUniqueId()
+                || null == getVehicleType()
                 || null == getGpsType() || null == getGpx() || 0 >= getSpeedMultiplier()
                 || null == getSic() || -1 == getPort() || -1 == getPositionMessageInterval()
                 || -1 == getVehicleStatusMessageInterval()) {
@@ -227,6 +231,9 @@ public class AppConfigController {
             parser.parse(getAppConfigFileUri().toString(), handler);
             if (overwriteExistingSettings || null == getUsername()) {
                 setUsername(handler.username);
+            }
+            if (overwriteExistingSettings || null == getVehicleType()) {
+                setVehicleType(handler.vehicleType);
             }
             if (overwriteExistingSettings || null == getUniqueId()) {
                 setUniqueId(handler.uniqueId);
@@ -295,6 +302,22 @@ public class AppConfigController {
      */
     public final String getUsername() {
         return preferences.get(KEY_USERNAME, null);
+    }
+
+    /**
+     * Saves the specified vehicle type to the application configuration settings.
+     * @param vehicleType the vehicle type, or null to erase the setting.
+     */
+    public void setVehicleType(String vehicleType) {
+        setPreference(KEY_VEHICLE_TYPE, vehicleType);
+    }
+
+    /**
+     * Returns the stored vehicle type, or null if no vehicle type has been set.
+     * @return the stored vehicle type, or null if no vehicle type has been set.
+     */
+    public final String getVehicleType() {
+        return preferences.get(KEY_VEHICLE_TYPE, null);
     }
 
     /**

@@ -178,6 +178,7 @@ public class GPSController implements GPSEventListener {
                             MessageHelper.MESSAGE_WKID_PROPERTY_NAME, Integer.toString(previousMapPointWkid));
                     Utilities.writeTextElement(xmlStreamWriter, "sic", appConfig.getSic());
                     Utilities.writeTextElement(xmlStreamWriter, "uniquedesignation", appConfig.getUsername());
+                    Utilities.writeTextElement(xmlStreamWriter, "type", appConfig.getVehicleType());
                     Date currentTime = new Date();
                     Utilities.writeTextElement(xmlStreamWriter, "datetimevalid", Utilities.DATE_FORMAT_GEOMESSAGE.format(currentTime));
                     Utilities.writeTextElement(xmlStreamWriter, "speed", 

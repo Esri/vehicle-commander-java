@@ -117,6 +117,7 @@ public class VehicleStatusController implements GPSEventListener {
                     MessageHelper.MESSAGE_2525C_CONTROL_POINTS_PROPERTY_NAME,
                     x + "," + y);
             Utilities.writeTextElement(xmlStreamWriter, "uniquedesignation", appConfig.getUsername());
+            Utilities.writeTextElement(xmlStreamWriter, "type", appConfig.getVehicleType());
             String dateString = Utilities.DATE_FORMAT_GEOMESSAGE.format(new Date());
             Utilities.writeTextElement(xmlStreamWriter, "datetimevalid", dateString);
             Utilities.writeTextElement(xmlStreamWriter, "fuel_state", "100");
