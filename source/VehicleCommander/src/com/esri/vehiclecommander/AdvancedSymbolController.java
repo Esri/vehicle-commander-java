@@ -46,6 +46,8 @@ import org.xml.sax.SAXException;
  */
 public class AdvancedSymbolController {
     
+    private static final Logger logger = Logger.getLogger(AdvancedSymbolController.class.getName());
+    
     /**
      * Set <unique ID>
      */
@@ -252,16 +254,18 @@ public class AdvancedSymbolController {
                         if (null != uniqueDesignation && "".equals(uniqueDesignation.trim())) {
                             uniqueDesignation = null;
                         }
-                        synchronized (uniqueDesignationToId) {
-                            if (null != uniqueDesignation && uniqueDesignationToId.containsKey(uniqueDesignation)) {
-                                String uniqueId = uniqueDesignationToId.get(uniqueDesignation);
-                                synchronized (uniqueIds) {
-                                    if (uniqueIds.contains(uniqueId)) {
-                                        messageProcessor.processMessage(MessageHelper.createRemoveMessage(dictionaryType, uniqueId, messageType));
-                                        uniqueIds.remove(uniqueId);
+                        if (!"afmchemlight".equals(messageType) && !"spotrep".equals(messageType)) {
+                            synchronized (uniqueDesignationToId) {
+                                if (null != uniqueDesignation && uniqueDesignationToId.containsKey(uniqueDesignation)) {
+                                    String uniqueId = uniqueDesignationToId.get(uniqueDesignation);
+                                    synchronized (uniqueIds) {
+                                        if (uniqueIds.contains(uniqueId)) {
+                                            messageProcessor.processMessage(MessageHelper.createRemoveMessage(dictionaryType, uniqueId, messageType));
+                                            uniqueIds.remove(uniqueId);
+                                        }
                                     }
+                                    uniqueDesignationToId.remove(uniqueDesignation);
                                 }
-                                uniqueDesignationToId.remove(uniqueDesignation);
                             }
                         }
 
@@ -274,7 +278,7 @@ public class AdvancedSymbolController {
                         try {
                             boolean processed = messageProcessor.processMessage(message);
                             if (!processed) {
-                                Logger.getLogger(getClass().getName()).log(Level.WARNING, "Could not display message: {0}", message);
+                                logger.log(Level.WARNING, "Could not display message: {0}", message);
                             } else {
                                 synchronized (uniqueIds) {
                                     uniqueIds.add(message.getID());
@@ -290,7 +294,7 @@ public class AdvancedSymbolController {
                                 message.setProperty(MessageHelper.MESSAGE_ACTION_PROPERTY_NAME, (status911 ? "" : "un-") + "select");
                                 processed = messageProcessor.processMessage(message);
                                 if (!processed) {
-                                    Logger.getLogger(getClass().getName()).log(Level.WARNING, "Could not display message: {0}", message);
+                                    logger.log(Level.WARNING, "Could not display message: {0}", message);
                                 }
                             }
                         } catch (Throwable t) {
