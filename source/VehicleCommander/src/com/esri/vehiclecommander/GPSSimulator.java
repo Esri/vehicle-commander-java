@@ -41,6 +41,11 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class GPSSimulator extends GPSProvider {
 
+    @Override	
+	public void dispose() { 
+    	// required by IGPSWatcher at 10.2
+    }
+	 
     private class GPXHandler extends DefaultHandler {
 
         private List<GPSTrackPoint> gpsTrackPoints = new ArrayList<GPSTrackPoint>();
