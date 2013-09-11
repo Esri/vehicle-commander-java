@@ -16,7 +16,7 @@
 
 <!-- Set these to the default locations for the platform (win vs. linux): -->
 <property name="dir_agsruntime_win_base" value="C:\Program Files (x86)\ArcGIS SDKs"/>
-<property name="dir_agsruntime_linux_base" value="/home/jbc/arcgis/runtime_sdk"/>
+<property name="dir_agsruntime_linux_base" value="${user.home}/arcgis/runtime_sdk"/>
 
 <!-- ************************************************************************************************************ -->
 <!-- IMPORTANT: If you have *NOT* installed ArcGIS to the default install location, you will need to set the following: -->
