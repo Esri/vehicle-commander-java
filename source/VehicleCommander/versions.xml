@@ -1,8 +1,8 @@
-<project name="ArcGIS Versions" default="set_variables" basedir=".">
+<project name="ArcGIS Versions" default="set_version_variables" basedir=".">
     <description>
-        Sets the correct ArcGIS Folder location depending on version detected.
-        Sets folder values of ${dir.agsruntimejavasdk} to the current
-        ArcGIS release version and verifies that the folder exists
+	OUTPUTS: ${version.runtime}, ${dir.agsruntimejavasdk}
+	Checks filesystem and sets the correct values depending on version detected.
+        Checks based on the default SDK folder locations and verifies that the folder exists
 	If 2 versions are installed, it uses the current version first
         IMPORTANT: If ArcGIS is not installed at the default location,
                    you will need to edit the value at task "SET_CUSTOM_AGS_RUNTIME_LOCATION"
@@ -10,32 +10,73 @@
 	
 <!-- Set these to the default locations of ArcGIS/ArcPy for the current version (ex. 10.2): -->
 <property name="version.runtime_current_release" value="10.2"/>
-<property name="dir_agsruntimejava_current_release" value="C:\Program Files (x86)\ArcGIS SDKs\java${version.runtime_current_release}"/>
 
 <!-- Set these to the default locations for the previous release (ex. 10.1.1): -->
 <property name="version.runtime_previous_release" value="10.1.1"/>
-<property name="dir_agsruntimejava_previous_release" value="C:\Program Files (x86)\ArcGIS SDKs\java${version.runtime_previous_release}"/>
-	
+
+<!-- Set these to the default locations for the platform (win vs. linux): -->
+<property name="dir_agsruntime_win_base" value="C:\Program Files (x86)\ArcGIS SDKs"/>
+<property name="dir_agsruntime_linux_base" value="/home/jbc/arcgis/runtime_sdk"/>
+
 <!-- ************************************************************************************************************ -->
 <!-- IMPORTANT: If you have *NOT* installed ArcGIS to the default install location, you will need to set the following: -->
 <!-- If you want to use a custom AGS Location Uncomment the line below and set the values in the "SET_CUSTOM_AGS_RUNTIME_LOCATION" target -->
-<!-- UNCOMMENT THIS PROPERTY: -->
-<!-- <property name="USE_CUSTOM_AGS_LOCATION" value="true"/> -->
+<!-- EXTRA IMPORTANT: UNCOMMENT THIS PROPERTY if you need a custom SDK location: -->
+  <!-- <property name="USE_CUSTOM_AGS_LOCATION" value="true"/> -->
 <!-- SET THESE VALUES TO YOUR CUSTOM INSTALL LOCATION: -->
 <target name="SET_CUSTOM_AGS_RUNTIME_LOCATION" if="USE_CUSTOM_AGS_LOCATION">
 	<echo message="Setting Custom Values for ArcGIS Runtime"/>
 	<property name="version.runtime" value="10._SET_ME_"/>
-	<property name="dir.agsruntimejavasdk" value="C:\Program Files (x86)\ArcGIS\SDKXXX.__SET_ME__"/> <!-- CHANGE TO YOUR LOCATION -->
+	<property name="dir.agsruntimejavasdk" value="_SET_ME_EX_/home/arcgis/runtime_sdk/java10._SET_ME_"/> <!-- CHANGE TO YOUR LOCATION -->
 </target>
 <!-- ************************************************************************************************************* -->
 
-<target name="checkdirCurrentVersion">
+<!-- Check for Windows or Linux -->
+<target name="checkWindows">
+  <condition property="PresentOnWindows">
+    <available file="${dir_agsruntime_win_base}" type="dir"/>
+  </condition>
+</target>
+
+<target name="checkLinux">
+  <condition property="PresentOnLinux">
+    <available file="${dir_agsruntime_linux_base}" type="dir"/>
+  </condition>
+</target>
+
+<target name="setBaseFoldersWin" depends="checkWindows" if="PresentOnWindows">
+  <property name="dir_agsruntimejava_current_release" value="${dir_agsruntime_win_base}\java${version.runtime_current_release}"/>
+  <property name="dir_agsruntimejava_previous_release" value="${dir_agsruntime_win_base}\java${version.runtime_previous_release}"/>
+</target>
+
+<target name="setBaseFoldersLinux" depends="checkLinux" if="PresentOnLinux">
+  <property name="dir_agsruntimejava_current_release" value="${dir_agsruntime_linux_base}/java${version.runtime_current_release}"/>
+  <property name="dir_agsruntimejava_previous_release" value="${dir_agsruntime_linux_base}/java${version.runtime_previous_release}"/>
+</target>
+
+<target name="checkWindowsOrLinux" depends="setBaseFoldersWin,setBaseFoldersLinux">
+  <condition property="platformnotfound">
+    <and>
+      <not>
+        <isset property="PresentOnWindows"/>
+      </not>
+      <not>
+        <isset property="PresentOnLinux"/>
+      </not>      
+    </and>
+   </condition>
+   <fail message="**** COULD NOT FIND *DEFAULT* ArcGIS Runtime SDK INSTALLATION FOLDER ****" if="platformnotfound"/>	
+</target>
+
+<!-- Check for version installed -->
+
+<target name="checkdirCurrentVersion" depends="checkWindowsOrLinux">
 	<condition property="PresentCurrentVersion">
 		<available file="${dir_agsruntimejava_current_release}" type="dir"/>
 	</condition>
 </target>
 
-<target name="checkdirPreviousVersion">
+<target name="checkdirPreviousVersion" depends="checkWindowsOrLinux">
 	<condition property="PresentPreviousVersion">
 		<available file="${dir_agsruntimejava_previous_release}" type="dir"/>
 	</condition>
@@ -53,6 +94,8 @@
 	<property name="version.runtime" value="${version.runtime_previous_release}"/>
 </target>
 
+<!-- Check that expected variables exists -->
+
 <target name="check_agsruntime_sdk_exists" depends="SET_CUSTOM_AGS_RUNTIME_LOCATION,setvariablesCurrentVersion,setvariablesPreviousVersion">
 	<echo message="Checking for ArcGIS Runtime SDK at these Locations: ${dir.agsruntimejavasdk}"/>	
 	<condition property="agsnotfound">
@@ -65,7 +108,7 @@
 		</not>       
 	    </or>
 	</condition>
-	<fail message="****** COULD NOT FIND VALID ArcGIS Runtime SDK INSTALLATION FOLDER ******" if="agsnotfound"/>	
+	<fail message="**** COULD NOT FIND VALID ArcGIS Runtime SDK INSTALLATION FOLDER ****" if="agsnotfound"/>	
 </target>
 
 <target name="set_version_variables" depends="check_agsruntime_sdk_exists">
