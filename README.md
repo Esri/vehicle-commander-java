@@ -17,7 +17,7 @@ The Vehicle Commander template demonstrates best practices for building in-vehic
 The documentation is divided between Quick Start, Detailed Usage, and other sections. These sections include: 
 
 * [Hardware and software requirements](#hardware-and-software-requirements)
-* [Quick Start](#quick-start-instructions)
+* [Quick Start and Build Instructions](#quick-start-instructions)
 * [Release Notes](#release-notes--known-issues)
 * [Detailed Usage](#detailed-instructions)
 * [Conclusion](#conclusion)
@@ -59,6 +59,7 @@ This section is for developers who just need to quickly build and run the applic
     * Set environment variable `ANT_HOME` to Ant Install Location
     * Add Ant\bin to your path: `%ANT_HOME%\bin`
     * To verify your Ant Installation: Open Command Prompt> `ant -version` and verify it runs and returns the help correctly 
+
 ### Configure/copy the required files
 * Some files will need manually updated/copied on your system
     * Copy new Message Types 
@@ -66,13 +67,18 @@ This section is for developers who just need to quickly build and run the applic
         * This enables the application to display certain message types that other instances of the application send.
 * Check the contents of  source/VehicleCommander/mapconfig.xml
     * On non-windows systems, you may need to edit the default locations in this file to locations on your system 
+
 ### Build and run the application
-* To build or run an application
+* (Linux only) Initialize runtime. From a Command Prompt> `> . {RuntimeSDKHome}/init_sdk_java.sh`
+* To build or run the application with ant
     * Open Command Prompt>
     * `> cd vehicle-commander\source\VehicleCommander`
     * To Build: `> ant`
     * To Run: `> ant run`
     * Verify “Build Succeeded” 
+* To run the application
+    * From a Command Prompt> `> java -jar VehicleCommander.jar`
+    * See [Running the application](#running) for more detailed command line options
 
 ## Release Notes / Known Issues
 
@@ -109,7 +115,7 @@ This section contains more detailed instructions that will help you learn more a
 * [Running the Vehicle Commander application](#running)
 * [Using the Vehicle Commander application](#using-the-application)
 
-## Configuring the Build
+### Configuring the Build
 
 1. (Optional) If you want to open map packages and/or run viewshed analysis in the compiled application, you need to use an ArcGIS Runtime license string. Copy your license string from the ArcGIS Runtime SDK License Viewer. Open the class com.esri.vehiclecommander.VehicleCommanderJFrame Java source file. Look for the BUILT_IN_LICENSE_STRING static field, and paste your license string as the value of this field. (Alternatively, you can pass a license string as a command line argument to the application.)
 2. (Optional) If you want to run viewshed analysis in the compiled application, you need to use an ArcGIS Runtime Spatial Analyst license string. Copy your license string from the ArcGIS Runtime SDK License Viewer. Open the class com.esri.vehiclecommander.VehicleCommanderJFrame Java source file. Look for the BUILT_IN_EXTS_STRING static field, and paste your license string as the value of this field.
@@ -121,7 +127,7 @@ If you wish to use an IDE, configure it to use the included Ant build.xml script
 
 Note: if you wish to run the application from your IDE on Linux, you must run the initialization shell script found in <RuntimeSDKJava>, and then run your IDE from the same shell. If desired, you can automate running this script using /etc/profile or ~/.bash_profile.
 
-## Deploying the Application
+### Deploying the Application
 
 1. Using the directions in [Quick Start Instructions](#quick-start-instructions), build the Vehicle Commander application using  ant deploy. This will build the application.
 2. Add an ArcGIS Runtime deployment to the application/VehicleCommander directory. The simplest way is to use the ArcGISRuntime{Version} directory that came with the prebuilt template from ArcGIS Online in the application/VehicleCommander. You can also create an ArcGIS Runtime deployment with the the [ArcGIS Runtime SDK Deployment Builder](http://resources.arcgis.com/en/help/runtime-java/concepts/index.html#/Creating_a_runtime_deployment/01qv00000013000000/). If you create your own:
@@ -148,7 +154,7 @@ Note: if you wish to run the application from your IDE on Linux, you must run th
    * GPS speed multiplier: a multiplier for simulated GPS speed. The default is 1 (actual speed). 0.5 means half-speed, and 2 means double-speed. Set the value of the <gps> element’s speedMultiplier attribute to the desired GPS speed multiplier.
 If appconfig.xml is absent the first time the application runs, the application will use default values. The user can change these values in the running application, as described in [Running the Vehicle Commander application.](#running)
 
-## Running
+### Running
 
 This section assumes that you have deployed the Vehicle Commander application, or you are running it from the application/VehicleCommander directory.
 
@@ -198,13 +204,13 @@ The application opens as shown in [Using the Application.](#using-the-applicatio
 *  If the map opens blank, verify the paths in mapconfig.xml.
 5.If you want to change user settings, click the Main Menu button and go to Options > About Me. A dialog box lets you change the user settings described in [Deploying the Application.](#deploying-the-application)
 
-## Using the Application
+### Using the Application
 
 ![Image of Vehicle Commander](ScreenShotLabels.png "vehicle-commander")
 
 Vehicle Commander provides high performance mapping, situational awareness, and reporting for mounted units. It is intended for touchscreen use, though it also works properly with a mouse; in that sense, the words “click” and “tap” are interchangeable in this section.
 
-## Mapping
+#### Mapping
 
 To pan the map, press the mouse and drag, or use the navigation buttons. To zoom in or out, use the mouse wheel or the navigation buttons. To navigate to an MGRS coordinate, go to Main Menu > Navigation and type a valid MGRS string, then type Enter or tap the Go button.
 
@@ -230,7 +236,7 @@ A panel at the bottom of the application displays the current position, heading,
 
 To close the Main Menu, click the back arrow button at the top of the menu.
 
-## Situational awareness and reporting
+#### Situational awareness and reporting
 
 The map displays moving locations of friendly forces if you run the Vehicle Commander on multiple machines that are connected to the same network router. These machines must have the messaging port (default 45678; see [Deploying the Application](#deploying-the-application) ) open for UDP sending and receiving in the machine’s firewall settings. They must also have unique IDs set under Main Menu > Options > About Me > Unique ID.
 
@@ -250,7 +256,7 @@ To create a spot report:
 * After completing the final field, Equipment, you can click any field to change its value before sending.
 * When you are satisfied with your spot report values, click Send. The spot report displays on your map, as well as the maps in vehicles that receive your position reports.
 
-## Analysis
+#### Analysis
 
 When properly configured, the application provides advanced geospatial analysis. Tap the Tools button to open the toolbar.
 To calculate a viewshed, tap the Viewshed button and follow the dialog’s instructions:
