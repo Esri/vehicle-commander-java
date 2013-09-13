@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012 Esri
+ * Copyright 2012-2013 Esri
  * 
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -41,9 +41,8 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class GPSSimulator extends GPSProvider {
 
-    @Override	
 	public void dispose() { 
-    	// required by IGPSWatcher at 10.2
+    	// required by IGPSWatcher at 10.2 (note: can't use @Override or it won't build with pre-10.2)
     }
 	 
     private class GPXHandler extends DefaultHandler {
