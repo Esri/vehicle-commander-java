@@ -25,8 +25,13 @@ import com.esri.core.symbol.advanced.SymbolProperties;
 import com.esri.map.GraphicsLayer;
 import com.esri.map.Layer;
 import com.esri.map.MessageGroupLayer;
+import com.esri.runtime.ArcGISRuntime;
+
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,7 +42,9 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.xml.sax.SAXException;
 
 /**
@@ -82,7 +89,7 @@ public class AdvancedSymbolController {
             String layerName,
             AppConfigController appConfig,
             MapController mapController) throws ParserConfigurationException, SAXException {
-        this(type, layerName, appConfig, null, mapController);
+        this(type, layerName, appConfig, null, mapController);                
     }
 
     /**
@@ -118,7 +125,46 @@ public class AdvancedSymbolController {
         initializeMessageProcessor();
     }
 
+	private static final String FSP = System.getProperty("file.separator");
+	private boolean afmMessagesExist = false;
+
+    private String getPathMessageTypes() {
+        String dataPath = null; 
+        String binaryPath = ArcGISRuntime.getRuntimeBinariesDir();
+        if (binaryPath != null) { 
+          if (!(binaryPath.endsWith("/") || binaryPath.endsWith("\\"))){ 
+        	  binaryPath += FSP; 
+          } 
+          dataPath = binaryPath + ".." + FSP + ".." + FSP + "resources" 
+        		  + FSP + "symbols" + FSP + "mil2525c" + FSP + "messagetypes";          
+        } 
+        Path path = Paths.get(dataPath);
+        Path normalizedDataPath = path.normalize();
+        
+        File dataFile = normalizedDataPath.toFile();
+        if (!dataFile.exists()) {  
+            System.err.println ("Could not find resources at: " + dataFile); 
+        } 
+        return normalizedDataPath.toString(); 
+      } 
+    
+    private boolean checkAfmMessageTypesExist() {
+    	
+    	String resourcePath = getPathMessageTypes();    	
+    	String requiredResource = resourcePath + FSP + "afmchemlight.json";
+        File dataFile = new File(requiredResource); 
+        if (!dataFile.exists()) {  
+            System.err.println ("Could not find required resource at: " + dataFile);
+            return false;
+        }     	
+    	
+    	return true;
+    }
+    
     private void initializeMessageProcessor() {
+    	    	
+    	afmMessagesExist = checkAfmMessageTypesExist();
+    	
         if (null == symbolDictionaryPath) {
             symbolLayer = new MessageGroupLayer(dictionaryType);
         } else {
@@ -207,6 +253,9 @@ public class AdvancedSymbolController {
             final List<Message> messages = Collections.synchronizedList(messageParser.parseMessages(xmlMessages));
             synchronized (messages) {
                 for (int i = 0; i < messages.size(); i++) {
+                	
+                	// TODO: this could probably use some refactoring
+                	
                     Message message = messages.get(i);
                     String messageType = (String) message.getProperty(MessageHelper.MESSAGE_2525C_TYPE_PROPERTY_NAME);
                     if ("chemlight".equals(messageType)) {
@@ -275,6 +324,18 @@ public class AdvancedSymbolController {
                             message.setProperty("speed", "");
                         }
 
+                        if (!afmMessagesExist) {
+                        	// substitute to a known, fall-back one
+                        	if (messageType.contains("afm"))
+                        		messageType = messageType.replace("afm", "");
+                        	else if (messageType == "trackrep")
+                        		messageType = "position_report";
+                        		
+                        	// fall back to regular ones
+                        	message.setProperty(MessageHelper.MESSAGE_2525C_TYPE_PROPERTY_NAME, messageType);
+                            System.err.println ("AFM resouce not found, using alternate (may not display as expected)");
+                        }
+                        	                        
                         try {
                             boolean processed = messageProcessor.processMessage(message);
                             if (!processed) {
