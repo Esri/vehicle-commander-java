@@ -33,6 +33,7 @@ import com.esri.vehiclecommander.analysis.ToolbarToggleButton;
 import com.esri.vehiclecommander.analysis.ViewshedController;
 import com.esri.vehiclecommander.analysis.ViewshedJPanel;
 import com.esri.vehiclecommander.messaging.VehicleStatusController;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -58,6 +59,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.swing.JButton;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
@@ -65,6 +67,7 @@ import javax.swing.JToggleButton;
 import javax.swing.Timer;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
+
 import org.xml.sax.SAXException;
 
 /**
@@ -77,7 +80,8 @@ import org.xml.sax.SAXException;
 public class VehicleCommanderJFrame extends javax.swing.JFrame
         implements IdentifyListener, AppConfigListener {
     
-    private class ChemLightButton extends ToolbarToggleButton {
+    @SuppressWarnings("serial")
+	private class ChemLightButton extends ToolbarToggleButton {
     
         private final Color color;
 
@@ -98,7 +102,7 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
                         /**
                          * Sleep for a few millis so that any existing component's call to
                          * cancelTrackAsync can finish first.
-                         * TODO this depends on a race conditon; it's probably fine but we
+                         * TODO this depends on a race condition; it's probably fine but we
                          * might want to clean this up in the future.
                          */
                         try {
