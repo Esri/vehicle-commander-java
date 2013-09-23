@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012 Esri
+ * Copyright 2012-2013 Esri
  * 
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -30,8 +30,6 @@ import com.esri.runtime.ArcGISRuntime;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -54,6 +52,7 @@ import org.xml.sax.SAXException;
 public class AdvancedSymbolController {
     
     private static final Logger logger = Logger.getLogger(AdvancedSymbolController.class.getName());
+	private static final String FSP = System.getProperty("file.separator");
     
     /**
      * Set <unique ID>
@@ -68,6 +67,7 @@ public class AdvancedSymbolController {
     private final SymbolDictionary symbolDictionary;
     private MessageProcessor messageProcessor;
     private MessageGroupLayer symbolLayer;
+	private boolean afmMessagesExist = false;
     private final String layerName;
     private final String symbolDictionaryPath;
     private final DictionaryType dictionaryType;
@@ -125,9 +125,6 @@ public class AdvancedSymbolController {
         initializeMessageProcessor();
     }
 
-	private static final String FSP = System.getProperty("file.separator");
-	private boolean afmMessagesExist = false;
-
     private String getPathMessageTypes() {
         String dataPath = null; 
         String binaryPath = ArcGISRuntime.getRuntimeBinariesDir();
@@ -138,14 +135,11 @@ public class AdvancedSymbolController {
           dataPath = binaryPath + ".." + FSP + ".." + FSP + "resources" 
         		  + FSP + "symbols" + FSP + "mil2525c" + FSP + "messagetypes";          
         } 
-        Path path = Paths.get(dataPath);
-        Path normalizedDataPath = path.normalize();
-        
-        File dataFile = normalizedDataPath.toFile();
+        File dataFile = new File(dataPath);
         if (!dataFile.exists()) {  
             System.err.println ("Could not find resources at: " + dataFile); 
         } 
-        return normalizedDataPath.toString(); 
+        return dataPath;
       } 
     
     private boolean checkAfmMessageTypesExist() {
