@@ -1,4 +1,4 @@
-# vehicle-commander
+﻿# vehicle-commander
 
 The Vehicle Commander template demonstrates best practices for building in-vehicle military applications with ArcGIS.  The Vehicle Commander template contains source code for an in-vehicle application and directions for building the application from source.  To download a precompiled distribution of the application, visit: 
 [ArcGIS for Defense and Intelligence](http://www.arcgis.com/home/group.html?owner=Arcgisonline_defense&title=ArcGIS%20for%20Defense%20and%20Intelligence).
@@ -324,5 +324,5 @@ Note: Portions of this code use Beans Binding (JSR-295) which is licensed under
 GNU Lesser General Public License 2.1. See [license-ThirdParty.txt](license-ThirdParty.txt) for the details 
 of this license or visit the [Beans Binding](http://java.net/projects/beansbinding/) project for more details 
 
-[](Esri Tags: ArcGIS Defense and Intelligence Situational Awareness ArcGIS Runtime JavaSE)
+[](Esri Tags: ArcGIS Defense and Intelligence Situational Awareness ArcGIS Runtime JavaSE Military)
 [](Esri Language: Java)

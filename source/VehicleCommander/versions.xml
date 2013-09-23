@@ -66,6 +66,7 @@
 <target name="set_version_variables" depends="check_agsruntime_sdk_exists">
 	<echo message="ArcGIS Runtime SDK found at this locations: ${dir.agsruntimejavasdk}" />
 	<echo message="ArcGIS Runtime Version: ${version.runtime}" />
+	<echo message="Java Version: ${java.version}" />
 </target>
 
 </project>
