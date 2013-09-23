@@ -52,21 +52,8 @@ public class Mil2525CMessageParser extends DefaultHandler {
         saxParser = SAXParserFactory.newInstance().newSAXParser();
     }
 
-    private static String translateElementName(String elementName) {
-        /**
-         * TODO these will have to change when message formats change. In particular,
-         * element names should be all lowercase, so when that changes in Runtime,
-         * we'll have to change it here.
-         */
-        if ("AdditionalInformation".equalsIgnoreCase(elementName)) {
-            elementName = "AdditionalInformation";
-        }
-        return elementName;
-    }
-
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-        qName = translateElementName(qName);
         if ("message".equals(qName) || "geomessage".equals(qName)) {
             message = new Message();
             messages.add(message);
@@ -89,7 +76,6 @@ public class Mil2525CMessageParser extends DefaultHandler {
 
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
-        qName = translateElementName(qName);
         if (MessageHelper.MESSAGE_ID_PROPERTY_NAME.equals(qName)) {
             readingId = false;
         }

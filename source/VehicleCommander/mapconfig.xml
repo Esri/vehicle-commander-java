@@ -34,7 +34,7 @@
               <datasetpath>http://services.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer</datasetpath>
         </layer>
         <layer name="Topo" visible="false" type="TiledCacheLayer" basemap="true">
-            <datasetpath>C:/Program Files (x86)/ArcGIS SDKs/java10.1.1/sdk/samples/data/tpks/Topographic.tpk</datasetpath>
+            <datasetpath>C:/Program Files (x86)/ArcGIS SDKs/java10.2/sdk/samples/data/tpks/Topographic.tpk</datasetpath>
         </layer>
         <!--layer name="Bihsud Bridge and Environs" visible="true" type="LocalDynamicMapLayer" basemap="false">
             <datasetpath>../../BihsudBridgeVCP.mpk</datasetpath>
@@ -52,7 +52,7 @@
         <rotation>0</rotation>
     </initialextent>
     <viewshed>
-        <servicepath>\data\FastVisibilityByDistance.gpk</servicepath>
+        <servicepath>../../data/FastVisibilityByDistance.gpk</servicepath>
         <taskname>Fast Visibility By Distance</taskname>
         <observerheight>2.0</observerheight>
         <observerparamname>Observer</observerparamname>
