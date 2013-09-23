@@ -1,14 +1,19 @@
 <?xml version="1.0"?>
 
 <project name="MessageSimulator" basedir="." default="build">
+  <description>
+    Builds and deploys the MessageSimulator from source files
+    Defines these primary tasks:
+    build - (default) creates jar file
+    deploy - creates a standalone, runnable deployment in the applications folder
+  </description>
 
-  <property name="version" value="0.1"/>
+  <property name="version" value="10.2"/>
   <property name="dir.src" value="."/>
   <property name="dir.build" value="bin"/>
   <property name="dir.dist" value="dist"/>
-  <property name="dir.lib3rdParty" value="lib"/>
-  <property name="dir.deploy" value="../../application"/>
-  <property name="dir.deployData" value="../../data"/>
+  <property name="dir.deploy" value="../../application/MessageSimulator"/>
+  <property name="dir.deployData" value="../../data/SampleMessages"/>
 
   <path id="project.classpath">
     <pathelement location="${dir.dist}\MessageSimulator.jar"/>

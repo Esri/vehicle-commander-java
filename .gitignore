@@ -1,10 +1,16 @@
-#################
-## Eclipse
-#################
-
 # Defense Template specific ignores
 application/
 #data/
+data/SampleMessages
+*.zip
+*-old
+*-old.*
+*-sav
+*-sav.*
+
+#################
+## Eclipse
+#################
 
 *.pydevproject
 # .project
@@ -20,6 +26,7 @@ local.properties
 .classpath
 .settings/
 .loadpath
+
 
 # External tool builders
 .externalToolBuilders/

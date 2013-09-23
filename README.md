@@ -1,11 +1,11 @@
-# vehicle-commander
+﻿# vehicle-commander
 
 The Vehicle Commander template demonstrates best practices for building in-vehicle military applications with ArcGIS.  The Vehicle Commander template contains source code for an in-vehicle application and directions for building the application from source.  To download a precompiled distribution of the application, visit: 
 [ArcGIS for Defense and Intelligence](http://www.arcgis.com/home/group.html?owner=Arcgisonline_defense&title=ArcGIS%20for%20Defense%20and%20Intelligence).
 
-![Image of Vehicle Commander]( ScreenShot.png "vehicle-commander")
+![Image of Vehicle Commander](ScreenShot.png "vehicle-commander")
 
-## The Vehicle Commander template
+## The Vehicle Commander
 
 * Displays high-performance touchscreen maps, including provisioned basemaps and operational data
 * Displays a GPS location (simulated or serial GPS)
@@ -13,66 +13,92 @@ The Vehicle Commander template demonstrates best practices for building in-vehic
 * Allows users to open map packages as layers on the map
 * Allows users to run viewshed analysis using a geoprocessing package
 
-## About the template documentation
-Before you work with the template, review the "Getting Started" part of this document to help you install and set up the template. This part is divided into the following sections:
+## About the Readme documentation
+The documentation is divided between Quick Start, Detailed Usage, and other sections. These sections include: 
 
-* [Hardware and software requirements](#Requirements)
-* [Release notes](#ReleaseNotes)
+* [Hardware and software requirements](#hardware-and-software-requirements)
+* [Quick Start and Build Instructions](#quick-start-instructions)
+* [Release Notes](#release-notes--known-issues)
+* [Detailed Usage](#detailed-instructions)
+* [Conclusion](#conclusion)
 
-Once you have installed and set up the template, review the "Using" part of this document, which contains instructions that will help you learn to build and use the Vehicle Commander application. This part is divided into the following sections:
+## General Help
 
-* [Building the Vehicle Commander application from source](#Building)
-* [Deploying the Vehicle Commander application](#Deploying)
-* [Running the Vehicle Commander application](#Running)
-* [Using the Vehicle Commander application](#Using)
-* [Conclusion to Vehicle Commander](#Conclusion)
+* [New to Github? Get started here.](http://htmlpreview.github.com/?https://github.com/Esri/esri.github.com/blob/master/help/esri-getting-to-know-github.html)
 
-If you simply want to run the precompiled applications, skip the [Building](#Building) and [Deploying](#Deploying) sections and go to the [Running](#Running) section.
-
-## What’s New in Vehicle Commander 10.1.1
-* Uses ArcGIS Runtime 10.1.1.
-    * Works with OpenGL 2.1 and higher.
-* Precompiled application includes Linux binaries and hence runs on both Windows and Linux.
-* Uses updated license file that lasts until October 15, 2013.
-* Uses new directory structure.
-* Bug fixes and performance improvements.
-
-<a link="Requirements"></a>
 ## Hardware and Software Requirements
 
-###Hardware requirements
-Hardware requirements for this template are the same as those for ArcGIS Runtime SDK for Java, which you can review [here](http://resources.arcgis.com/en/help/system-requirements/10.1/index.html#//01510000008t000000). In particular, note the video adapter requirement for either DirectX with Shader Model 2.0 or higher (Windows only), or OpenGL 2.0 or higher (Windows or Linux). One way to verify OpenGL 2.0 or higher is to download and run the [OpenGL Extensions Viewer](http://www.realtech-vr.com/glview/download.php).
+### Hardware Requirements
+Hardware requirements for this template are the same as those for ArcGIS Runtime SDK for Java.  See the Runtime SDK documentation for more information. 
 
-### Software requirements
-Requirements for all platforms:
-
-* All users:
-    * [New to Github? Get started here.](http://htmlpreview.github.com/?https://github.com/Esri/esri.github.com/blob/master/help/esri-getting-to-know-github.html)
-    * [ArcGIS Runtime software requirements.](http://resources.arcgis.com/en/help/system-requirements/10.1/index.html#//01510000008t000000) Note the need for Java 6 or 7. Vehicle Commander is not supported with a Java Runtime Environment (JRE) other than Oracle’s JRE.
-    * Vehicle Commander does not run in a Remote Desktop session or as a remote X client.
-    * Appropriate driver for display adapter.
-* Users who want to build the applications from source:
-    * ArcGIS Runtime SDK 10.1.1 for Java.
+### Software Requirements
+* Building Requirements
+    * ArcGIS Runtime SDK for Java (10.1.1 or later).
     * [Java SE Development Kit (JDK)](http://www.oracle.com/technetwork/java/javase/downloads/index.html) 6 or higher.
     * [Apache Ant](http://ant.apache.org/).
     * Optionally, an integrated development environment (IDE). This template’s source code includes project files for the following IDEs:
         * [NetBeans](http://netbeans.org/) 6.9.1 or higher
         * [Eclipse](http://eclipse.org/) Indigo (3.7.1) or higher 
+* Deployed Application Requirements
+    * Software requirements for this template are the same as those for ArcGIS Runtime SDK for Java.  See the Runtime SDK documentation for more information. 
+    * Some important items to note: 
+        * The need for Java 6 or 7 using the Java Runtime Environment (JRE) from Oracle.
+        * The ArcGIS Runtime does not run in a Remote Desktop session or as a remote X client.
+        * The appropriate driver for display adapter should be installed.
 
-Requirements for Linux systems:
+## Quick Start Instructions
 
-* Red Hat Enterprise Linux Server 6, Ubuntu 10.04 LTS, or Ubuntu 12.04 LTS
-* 64-bit operating system, libraries, and Java Runtime Environment (JRE)
-* Specific libraries listed in [ArcGIS Runtime software requirements](http://resources.arcgis.com/en/help/system-requirements/10.1/index.html#//01510000008t000000)
-* On RHEL, Vehicle Commander does not work with the built-in Nouveau video driver.
+This section is for developers who just need to quickly build and run the application.
+ 
+### Verify your development environment
+* Ensure the JavaSE SDK is installed
+    * Java is installed and added to your path and the environment variable `JAVA_HOME` to be set to this location
+    * To verify your Java Installation: Open Command Prompt> `java -version` and verify it runs and returns the version correctly 
+* Ensure Apache Ant is installed and configured 
+    * Download Ant from the [Apache Ant Project](http://ant.apache.org/bindownload.cgi) and unzip to a location on your machine
+    * Set environment variable `ANT_HOME` to Ant Install Location
+    * Add Ant\bin to your path: `%ANT_HOME%\bin`
+    * To verify your Ant Installation: Open Command Prompt> `ant -version` and verify it runs and returns the help correctly 
 
-Requirements for Windows systems:
+### Configure/copy the required files
+* Some files will need manually updated/copied on your system
+    * Copy new Message Types 
+        * In a file browser or shell, navigate to source/VehicleCommander. Copy all files named afm*.json to <RuntimeSDKJava>/ArcGISRuntime{Version}/Resources/Symbols/Mil2525c/MessageTypes. 
+        * This enables the application to display certain message types that other instances of the application send.
+* Check the contents of  source/VehicleCommander/mapconfig.xml
+    * On non-windows systems, you may need to edit the default locations in this file to locations on your system 
 
-* Windows 8, 7, Vista, XP, Windows Server 2008 or 2003
+### Build and run the application
+* (Linux only) Initialize runtime. From a Command Prompt> `> . {RuntimeSDKHome}/init_sdk_java.sh`
+* To build or run the application with ant
+    * Open Command Prompt>
+    * `> cd vehicle-commander\source\VehicleCommander`
+    * To Build: `> ant`
+    * To Run: `> ant run`
+    * Verify “Build Succeeded” 
+* To run the application
+    * From a Command Prompt> `> java -jar VehicleCommander.jar`
+    * See [Running the application](#running) for more detailed command line options
 
-## Release notes
+## Release Notes / Known Issues
 
-* The ArcGIS Runtime license embedded in the compiled application expires on October 15, 2013. After it expires, all application functions will continue to work except for opening map packages and running viewshed analysis. To re-enable those functions, you will have to download the latest version of Vehicle Commander from the ArcGIS Resource Center, or you will have to provide your own license strings via the -license and -exts command line switches. 
+### 10.2
+
+#### What’s New in Vehicle Commander 10.2
+* Uses ArcGIS Runtime 10.2
+    * Works with OpenGL 1.4 and higher and includes Intel GPU.
+* Bug fixes and performance improvements.
+
+### 10.1.1
+
+#### What’s New in Vehicle Commander 10.1.1
+* Uses ArcGIS Runtime 10.1.1.
+    * Works with OpenGL 2.1 and higher.
+* Uses new directory structure.
+* Bug fixes and performance improvements.
+
+#### Release Notes 
+* To deploy this application, you need to rebuild with your own license string or provide your own license strings via the -license and -exts command line switches. 
 * The Buddies and Observations buttons in the main menu currently do nothing. In a future release, each of these buttons will be either implemented or removed.
 * Onboard GPS works only on Windows, not on Linux. This is a limitation of ArcGIS Runtime 10.1.1.
 * (Linux) Rotating by holding the V and B keys rotates only one step at a time. This happens because of a [documented JRE bug](http://bugs.sun.com/view_bug.do?bug_id=4153069) on Linux. This issue might be worked around in a future Vehicle Commander release or a future JRE release.
@@ -80,16 +106,20 @@ Requirements for Windows systems:
 * (Linux) When running in undecorated mode (no title bar), application dialogs can pop under the main application and become difficult to access. Since the checkbox for changing between decorated and undecorated mode is itself on a dialog, decorated mode is now the default. You can use undecorated mode on Linux, but dialogs will be difficult to use.
 * (Linux) If you run the application from a USB drive on a Linux machine, the Runtime deployment (ArcGISRuntime10.1.1 directory) will no longer work on other Linux machines. This limitation is documented in the [ArcGIS Runtime 10.1.1 release notes](http://resources.arcgis.com/en/help/runtime-java/concepts/index.html#//01qv00000036000000). One solution is to copy the application to the hard drive before running. Another solution is to make a backup copy of the ArcGISRuntime10.1.1 directory, especially the ClientLx and LocalServerLx subdirectories.
 
-## <a id="BuildSource"></a>Building the Vehicle Commander application from source
+## Detailed Instructions 
 
-1. Review the [software requirements](#Requirements).
-2. Install JDK 6 or newer if you have not yet done so.
-3. Optionally, install an IDE. This document assumes you will use NetBeans or Eclipse.
-4. Install ArcGIS Runtime SDK 10.1.1 for Java if you have not yet done so. Note the install location. In this document, <RuntimeSDKJava> refers to the java10.1.1 directory.
-5. In a file browser or shell, navigate to source/VehicleCommander. Copy all files named afm*.json to <RuntimeSDKJava>/ArcGISRuntime10.1.1/Resources/Symbols/Mil2525c/MessageTypes. This enables the application to display certain message types that other instances of the application send.
-6. (Optional) If you want to open map packages and/or run viewshed analysis in the compiled application, you need to use an ArcGIS Runtime license string. Copy your license string from the ArcGIS Runtime SDK License Viewer. Open the class com.esri.vehiclecommander.VehicleCommanderJFrame Java source file. Look for the BUILT_IN_LICENSE_STRING static field, and paste your license string as the value of this field. (Alternatively, you can pass a license string as a command line argument to the application.)
-7. (Optional) If you want to run viewshed analysis in the compiled application, you need to use an ArcGIS Runtime Spatial Analyst license string. Copy your license string from the ArcGIS Runtime SDK License Viewer. Open the class com.esri.vehiclecommander.VehicleCommanderJFrame Java source file. Look for the BUILT_IN_EXTS_STRING static field, and paste your license string as the value of this field.
-8. Build the application using Ant with the build.xml file in source/VehicleCommander:
+This section contains more detailed instructions that will help you learn more about the Vehicle Commander application. This part is divided into the following sections:
+
+* [Configuring the  the Vehicle Commander Build](#configuring-the-build)
+* [Deploying the Vehicle Commander application](#deploying-the-application)
+* [Running the Vehicle Commander application](#running)
+* [Using the Vehicle Commander application](#using-the-application)
+
+### Configuring the Build
+
+1. (Optional) If you want to open map packages and/or run viewshed analysis in the compiled application, you need to use an ArcGIS Runtime license string. Copy your license string from the ArcGIS Runtime SDK License Viewer. Open the class com.esri.vehiclecommander.VehicleCommanderJFrame Java source file. Look for the BUILT_IN_LICENSE_STRING static field, and paste your license string as the value of this field. (Alternatively, you can pass a license string as a command line argument to the application.)
+2. (Optional) If you want to run viewshed analysis in the compiled application, you need to use an ArcGIS Runtime Spatial Analyst license string. Copy your license string from the ArcGIS Runtime SDK License Viewer. Open the class com.esri.vehiclecommander.VehicleCommanderJFrame Java source file. Look for the BUILT_IN_EXTS_STRING static field, and paste your license string as the value of this field.
+3. Build the application for deployment using Ant with the build.xml file in source/VehicleCommander:
 
     `C:\vehicle-commander\source\VehicleCommander>ant deploy`
 
@@ -97,22 +127,22 @@ If you wish to use an IDE, configure it to use the included Ant build.xml script
 
 Note: if you wish to run the application from your IDE on Linux, you must run the initialization shell script found in <RuntimeSDKJava>, and then run your IDE from the same shell. If desired, you can automate running this script using /etc/profile or ~/.bash_profile.
 
-## <a id="DeployingVC"></a>Deploying the Vehicle Commander application
+### Deploying the Application
 
-1. Using the directions in [Building the Vehicle Commander application from source](#BuildSource), build the Vehicle Commander application using  ant deploy. This will build the application.
-2. Add an ArcGIS Runtime deployment to the application/VehicleCommander directory. The simplest way is to use the ArcGISRuntime10.1.1 directory that came with the template in application/VehicleCommander. You can also create an ArcGIS Runtime deployment with the the [ArcGIS Runtime SDK Deployment Builder](http://resources.arcgis.com/en/help/runtime-java/concepts/index.html#/Creating_a_runtime_deployment/01qv00000013000000/). If you create your own:
+1. Using the directions in [Quick Start Instructions](#quick-start-instructions), build the Vehicle Commander application using  ant deploy. This will build the application.
+2. Add an ArcGIS Runtime deployment to the application/VehicleCommander directory. The simplest way is to use the ArcGISRuntime{Version} directory that came with the prebuilt template from ArcGIS Online in the application/VehicleCommander. You can also create an ArcGIS Runtime deployment with the the [ArcGIS Runtime SDK Deployment Builder](http://resources.arcgis.com/en/help/runtime-java/concepts/index.html#/Creating_a_runtime_deployment/01qv00000013000000/). If you create your own:
 
    * Include at least Local Server, GPS, and Military Message Processing (MIL2525C).
    * If you want to run viewshed analysis, include Geoprocessing and Spatial Analyst.
-   * In a file browser or shell, navigate to source/VehicleCommander and copy all the afm*.json files to your deployment’s ArcGISRuntime10.1.1/resources/symbols/mil2525c/messagetypes directory. The Ant build script will do this for you if your ArcGIS Runtime deployment is in applications/VehicleCommander/ArcGISRuntime10.1.1.
+   * In a file browser or shell, navigate to source/VehicleCommander and copy all the afm*.json files to your deployment’s ArcGISRuntime{Version}/resources/symbols/mil2525c/messagetypes directory. The Ant build script will do this for you if your ArcGIS Runtime deployment is in applications/VehicleCommander/ArcGISRuntime{Version}.
 3. Your application deployment should contain at least the following:
-   * ArcGISRuntime10.1.1 directory (ArcGIS Runtime deployment)
+   * ArcGISRuntime{Version} directory (ArcGIS Runtime deployment)
    * lib directory (populated by Ant build script)
    * ArcGIS Runtime SDK JAR files from <RuntimeSDKJava>/SDK/jars
    * beansbinding-1.2.1.jar from source/VehicleCommander/lib
    * mapconfig.xml file from source/VehicleCommander (populated by Ant build script)
-   * VehicleCommander.jar file compiled using directions in [Building the Vehicle Commander application from source](#BuildSource) (populated by Ant build script)
-4. Edit your copy of mapconfig.xml as instructed in [Running the Vehicle Commander application](#RunningVC).
+   * VehicleCommander.jar file compiled using directions in [Quick Start](#quick-start-instructions) 
+4. Edit your copy of mapconfig.xml as instructed in [Running the Vehicle Commander application](#running).
 5. (Optional) If you want to set initial user settings using appconfig.xml, copy it from source\VehicleCommander\src\com\esri\vehiclecommander\resources to your application directory, alongside VehicleCommander.jar. Open appconfig.xml in your application directory. You can set the following:
    * User name: a display name for position updates the Vehicle Commander application sends to other applications. This name does not need to be unique. Set the value of the <user> element’s name attribute to the desired user name.
    * User ID: an ID that uniquely identifies the user in position updates that the Vehicle Commander application sends to other applications. The ID should be unique among other machines that will be able to send and receive position updates with this machine. It is recommended, though not required, that the value be a GUID. Set the value of the &lt;user&gt; element’s id attribute to the desired unique ID.
@@ -122,20 +152,20 @@ Note: if you wish to run the application from your IDE on Linux, you must run th
    * GPS type: “simulated” for simulated GPS, or “onboard” for serial GPS. The default is “simulated.” Set the value of the <gps> element’s type attribute to the desired GPS type. [Is this installed in the Dev versions? needs a link to where to get it, unless it is in the GIT pakage, in which case we need to include it in the Template Contents section]
    * GPS GPX file: the filename of a GPX file to use when GPS type is “simulated.” Set the value of the <gps> element’s gpx attribute to the filename. If absent and the GPS type is “simulated,” the application uses a built-in GPS file over Jalalabad, Afghanistan.
    * GPS speed multiplier: a multiplier for simulated GPS speed. The default is 1 (actual speed). 0.5 means half-speed, and 2 means double-speed. Set the value of the <gps> element’s speedMultiplier attribute to the desired GPS speed multiplier.
-If appconfig.xml is absent the first time the application runs, the application will use default values. The user can change these values in the running application, as described in [Running the Vehicle Commander application.](#RunningVC)
+If appconfig.xml is absent the first time the application runs, the application will use default values. The user can change these values in the running application, as described in [Running the Vehicle Commander application.](#running)
 
-## Running the Vehicle Commander application
+### Running
 
 This section assumes that you have deployed the Vehicle Commander application, or you are running it from the application/VehicleCommander directory.
 
-1. Review the [software requirements](#Requirements).
+1. Review the [software requirements](#software-requirements).
 2. In your application directory, open mapconfig.xml in a text editor. If mapconfig.xml is absent, the application will open with a blank map. You can define the following:
    * The initial extent, using a point in the map’s spatial reference and a scale.
    * The spatial reference of the map, using a well-known ID (WKID). Web Mercator (WKID 3857) is used by ArcGIS Online services and is normally recommended.
    * The map layers. You can add the following types of layers:
       * TiledCacheLayer: a compact map cache, or a tile package (.tpk) enabled for ArcGIS Runtime. Set the value of `<datasetpath>` to the .tpk filename or cache directory, using a relative or absolute path. The cache directory is the one that contains conf.xml and conf.cdi.
       * TiledMapServiceLayer: an ArcGIS Server cached map service or image service. Set the value of `<url>` to the service REST URL.
-      * LocalDynamicMapLayer: an ArcGIS 10.1 map package (.mpk) enabled for ArcGIS Runtime. Set the value of `<datasetpath>` to the .mpk filename, using a relative or absolute path.
+      * LocalDynamicMapLayer: an ArcGIS map package (.mpk) enabled for ArcGIS Runtime. Set the value of `<datasetpath>` to the .mpk filename, using a relative or absolute path.
       * DynamicMapServiceLayer: an ArcGIS Server dynamic map service or image service. Set the value of `<url>` to the service REST URL.
       * Mil2525CMessageLayer: an XML file of military messages with MIL-STD-2525C symbol codes. Use one `<geomessages>` tag containing one or more `<geomessage>` tags formatted as follows. Lines and polygons can be used (with appropriate symbol codes) by creating semicolon-separated lists of points in the `<_control_points>` element.
 
@@ -160,28 +190,27 @@ This section assumes that you have deployed the Vehicle Commander application, o
    * `<radiusparamname>`: the name of the radius parameter.
 
 4. Run the Vehicle Commander application:
-   * Linux: in a shell, navigate to application/VehicleCommander and type java -jar VehicleCommander.jar .
-   * Windows: Double-click VehicleCommander.jar, or use a command prompt and type java -jar VehicleCommander.jar in the application directory.
+   * Open a command prompt and navigate to application/VehicleCommander folder
+   * Enter:  `java -jar VehicleCommander.jar`
    * At the end of the command line, you can pass the following parameters:
    * -mapconfig `<XML file>`: use a map configuration file other than the mapconfig.xml file located in the application directory.
    * -license `<license string or file>`: use a license other than the one compiled into the application. This can be either the license string itself or the name of a file containing only the license string. 
    * -exts <extension license strings or file>: use a set of extension license strings other than the ones compiled into the application. This can be either a semicolon-separated list of extension license strings or the name of a file containing only a semicolon-separated list of extension license strings. 
    * -version: print the application version and exit.
 
-The application opens as shown in [Using the Vehicle Commander application.](#UsingVC)
+The application opens as shown in [Using the Application.](#using-the-application)
 
-* If the application crashes, it is possible the machine does not have the proper OpenGL capabilities. Refer to [Hardware requirements](#Requirements) to learn how to verify OpenGL.
+* If the application crashes, it is possible the machine does not have the proper OpenGL capabilities. Refer to [Hardware Requirements](#hardware-requirements) to learn how to verify OpenGL.
 *  If the map opens blank, verify the paths in mapconfig.xml.
-5.If you want to change user settings, click the Main Menu button and go to Options > About Me. A dialog box lets you change the user settings described in [Deploying the Vehicle Commander application.
-](#DeployingVC)
+5.If you want to change user settings, click the Main Menu button and go to Options > About Me. A dialog box lets you change the user settings described in [Deploying the Application.](#deploying-the-application)
 
-## <a id="UsingVC"></a>Using the Vehicle Commander application
+### Using the Application
 
-![Image of Vehicle Commander]( ScreenShotLabels.png "vehicle-commander")
+![Image of Vehicle Commander](ScreenShotLabels.png "vehicle-commander")
 
 Vehicle Commander provides high performance mapping, situational awareness, and reporting for mounted units. It is intended for touchscreen use, though it also works properly with a mouse; in that sense, the words “click” and “tap” are interchangeable in this section.
 
-## Mapping
+#### Mapping
 
 To pan the map, press the mouse and drag, or use the navigation buttons. To zoom in or out, use the mouse wheel or the navigation buttons. To navigate to an MGRS coordinate, go to Main Menu > Navigation and type a valid MGRS string, then type Enter or tap the Go button.
 
@@ -199,7 +228,7 @@ While in Follow Me mode, three navigation modes are available and are selected w
 
 To rotate the map clockwise, press and hold the V key. To rotate the map counterclockwise, press and hold the B key. To clear the rotation and orient the map with north up, press the N key.
 
-To add a map overlay, go to Main Menu > Overlays. You can add an ArcGIS 10.1 map package (.mpk) enabled for ArcGIS Runtime. Clicking Map File opens a file chooser dialog. Navigate to the .mpk of your choice.
+To add a map overlay, go to Main Menu > Overlays. You can add an ArcGIS map package (.mpk) enabled for ArcGIS Runtime. Clicking Map File opens a file chooser dialog. Navigate to the .mpk of your choice.
 
 You can click the map to identify features from map packages, as well as MIL-STD-2525C symbols on the map. Identified items are shown in a panel. Click the previous and back buttons to view the attributes of identified items. Click the X button to close the identify panel.
 
@@ -207,9 +236,9 @@ A panel at the bottom of the application displays the current position, heading,
 
 To close the Main Menu, click the back arrow button at the top of the menu.
 
-## Situational awareness and reporting
+#### Situational awareness and reporting
 
-The map displays moving locations of friendly forces if you run the Vehicle Commander on multiple machines that are connected to the same network router. These machines must have the messaging port (default 45678; see [Deploying the Vehicle Commander application](#DeployingVC)) open for UDP sending and receiving in the machine’s firewall settings. They must also have unique IDs set under Main Menu > Options > About Me > Unique ID.
+The map displays moving locations of friendly forces if you run the Vehicle Commander on multiple machines that are connected to the same network router. These machines must have the messaging port (default 45678; see [Deploying the Application](#deploying-the-application) ) open for UDP sending and receiving in the machine’s firewall settings. They must also have unique IDs set under Main Menu > Options > About Me > Unique ID.
 
 Toggle the 911 button to indicate to friendly forces that you need immediate assistance. Your position marker will flash on the display of other vehicles that receive your position reports. Toggle the 911 button off to clear your emergency status.
 
@@ -227,7 +256,7 @@ To create a spot report:
 * After completing the final field, Equipment, you can click any field to change its value before sending.
 * When you are satisfied with your spot report values, click Send. The spot report displays on your map, as well as the maps in vehicles that receive your position reports.
 
-## Analysis
+#### Analysis
 
 When properly configured, the application provides advanced geospatial analysis. Tap the Tools button to open the toolbar.
 To calculate a viewshed, tap the Viewshed button and follow the dialog’s instructions:
@@ -253,16 +282,14 @@ You can use the Route panel to create a route with waypoints. To create a route,
 
 To hide the route, go to Main Menu > Overlays and turn off the Route overlay.
 
-## Conclusion to Vehicle Commander
+## Conclusion
 
-This template has shown how to build the Vehicle Commander application. You can use the Vehicle Commander application as-is for in-vehicle situations. You can also use the Vehicle Commander application as a starting point for your own application development.
-Refer to the [ArcGIS Runtime SDK for Java documentation](http://resources.arcgis.com/en/help/runtime-java/concepts/index.html#/ArcGIS_Runtime_SDK_for_Java/01qv0000001n000000/), as well as the [ArcGIS Runtime SDK for Java Resource Center](http://resources.arcgis.com/en/communities/runtime-java/index.html), in order to get the most out of ArcGIS Runtime.
-
+You can use the Vehicle Commander application as-is for in-vehicle situations. You can also use the Vehicle Commander application as a starting point for your own application development. Refer to the [ArcGIS Runtime SDK for Java documentation](http://resources.arcgis.com/en/help/runtime-java/concepts/index.html#/ArcGIS_Runtime_SDK_for_Java/01qv0000001n000000/), as well as the [ArcGIS Runtime SDK for Java Resource Center](http://resources.arcgis.com/en/communities/runtime-java/index.html), in order to get the most out of ArcGIS Runtime.
 
 ## Resources
 
 * Learn more about Esri's [ArcGIS for Defense maps and apps](http://resources.arcgis.com/en/communities/defense-and-intelligence/).
-* This application uses [Esri's ArcGIS Runtime SDK for Java 10.1.1](http://resources.arcgis.com/en/communities/runtime-java/);
+* This application uses [Esri's ArcGIS Runtime SDK for Java](http://resources.arcgis.com/en/communities/runtime-java/);
 see the site for concepts, samples, and references for using the API to create mapping applications.
 * A deployment release and a more detailed description of this template, including operating instructions, are included with the current release of this template available at [ArcGIS Online](http://www.arcgis.com/home/item.html?id=ae30551d12f443cb903f4829b03de315)
 
@@ -272,11 +299,11 @@ Find a bug or want to request a new feature?  Please let us know by submitting a
 
 ## Contributing
 
-Anyone and everyone is welcome to contribute.
+Esri welcomes contributions from anyone and everyone. Please see our [guidelines for contributing](https://github.com/esri/contributing).
 
 ## Licensing
 
-Copyright 2012 Esri
+Copyright 2012-2013 Esri
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -297,5 +324,5 @@ Note: Portions of this code use Beans Binding (JSR-295) which is licensed under
 GNU Lesser General Public License 2.1. See [license-ThirdParty.txt](license-ThirdParty.txt) for the details 
 of this license or visit the [Beans Binding](http://java.net/projects/beansbinding/) project for more details 
 
-[](Esri Tags: ArcGIS Defense and Intelligence Situational Awareness ArcGIS Runtime JavaSE 10.1.1)
+[](Esri Tags: ArcGIS Defense and Intelligence Situational Awareness ArcGIS Runtime JavaSE Military)
 [](Esri Language: Java)
