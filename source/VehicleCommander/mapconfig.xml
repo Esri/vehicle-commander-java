@@ -33,9 +33,9 @@
         <layer name="Scanned" visible="true" type="TiledMapServiceLayer" basemap="true">
               <datasetpath>http://services.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer</datasetpath>
         </layer>
-        <layer name="Topo" visible="false" type="TiledCacheLayer" basemap="true">
-            <datasetpath>C:/Program Files (x86)/ArcGIS SDKs/java10.2/sdk/samples/data/tpks/Topographic.tpk</datasetpath>
-        </layer>
+        <layer name="Topo" visible="false" type="TiledMapServiceLayer" basemap="true">
+            <datasetpath>http://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer</datasetpath>
+        </layer>        
         <!--layer name="Bihsud Bridge and Environs" visible="true" type="LocalDynamicMapLayer" basemap="false">
             <datasetpath>../../BihsudBridgeVCP.mpk</datasetpath>
         </layer> -->
