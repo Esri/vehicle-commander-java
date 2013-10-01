@@ -1370,6 +1370,10 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
                 + "\t-exts \"<extensions license filename>\" OR \"<extension license string 1>;<ext license 2>;...;<ext license n>\" (optional)");
         System.out.println("(To print version number and exit, simply type java -jar " + jarName + " -version)");
         if (isPrintVersion) {
+            // Not sure why, but was throwing license error on deploy machine with only " -version" option 
+            // so adding setLicense as a workaround
+            ArcGISRuntime.setLicense((null != finalLicense) ? finalLicense : BUILT_IN_LICENSE_STRING, 
+                (null != finalExts) ? finalExts : BUILT_IN_EXTS_STRING);
             System.out.println("Vehicle Commander Build " + Utilities.getBuildId());
             System.exit(0);
         } else {
