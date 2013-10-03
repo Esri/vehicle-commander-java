@@ -44,6 +44,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -1114,7 +1116,18 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
         );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        
+        // WORKAROUND: at 10.2 map.dispose needs called on exit or map may hang on Linux
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent windowEvent) {
+                super.windowClosing(windowEvent);
+                map.dispose();
+            }
+        });
+        
         setTitle("Vehicle Commander");
+        
         setUndecorated(!appConfigController.isDecorated());
 
         map.addComponentListener(new java.awt.event.ComponentAdapter() {
