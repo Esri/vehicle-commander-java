@@ -62,7 +62,7 @@ public class Utilities {
      * A DateFormat object for datetimevalid timestamps.
      */
     public static final SimpleDateFormat DATE_FORMAT_GEOMESSAGE =
-            new SimpleDateFormat("yyyy-dd-MM' 'HH:mm:ss");
+            new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss");
     static {
         DATE_FORMAT_GEOMESSAGE.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
