@@ -288,7 +288,7 @@ You can use the Vehicle Commander application as-is for in-vehicle situations. Y
 
 ## Resources
 
-* Learn more about Esri's [ArcGIS for Defense maps and apps](http://resources.arcgis.com/en/communities/defense-and-intelligence/).
+* Learn more about Esri's [ArcGIS for the Military solution](http://solutions.arcgis.com/military/).
 * This application uses [Esri's ArcGIS Runtime SDK for Java](http://resources.arcgis.com/en/communities/runtime-java/);
 see the site for concepts, samples, and references for using the API to create mapping applications.
 * A deployment release and a more detailed description of this template, including operating instructions, are included with the current release of this template available at [ArcGIS Online](http://www.arcgis.com/home/item.html?id=ae30551d12f443cb903f4829b03de315)
