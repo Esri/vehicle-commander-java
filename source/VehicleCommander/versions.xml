@@ -13,10 +13,10 @@
 <echo message="ARCGISRUNTIMESDKJAVA_10_2 = ${env.ARCGISRUNTIMESDKJAVA_10_2}"/>  	
 
 <!-- Set these to the default locations of ArcGIS/ArcPy for the current version (ex. 10.2): -->
-<property name="version.runtime_current_release" value="10.2.1"/>
+<property name="version.runtime_current_release" value="10.2.2"/>
 
 <!-- Set these to the default locations for the previous release (ex. 10.2): -->
-<property name="version.runtime_previous_release" value="10.2"/>
+<property name="version.runtime_previous_release" value="10.2.1"/>
 
 <!-- Check for version installed -->
 
