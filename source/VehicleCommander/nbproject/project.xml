@@ -22,9 +22,19 @@
                     <encoding>UTF-8</encoding>
                 </source-folder>
                 <source-folder>
+                    <label>source\military-apps-library-java\source\MilitaryAppsLibrary\src</label>
+                    <location>${project.dir}/source/military-apps-library-java/source/MilitaryAppsLibrary/src</location>
+                </source-folder>
+                <source-folder>
                     <label>source\VehicleCommander\src</label>
                     <type>java</type>
                     <location>${project.dir}/source/VehicleCommander/src</location>
+                    <encoding>UTF-8</encoding>
+                </source-folder>
+                <source-folder>
+                    <label>source\military-apps-library-java\source\MilitaryAppsLibrary\src</label>
+                    <type>java</type>
+                    <location>${project.dir}/source/military-apps-library-java/source/MilitaryAppsLibrary/src</location>
                     <encoding>UTF-8</encoding>
                 </source-folder>
             </folders>
@@ -58,6 +68,10 @@
                         <label>source\VehicleCommander\src</label>
                         <location>${project.dir}/source/VehicleCommander/src</location>
                     </source-folder>
+                    <source-folder style="packages">
+                        <label>source\military-apps-library-java\source\MilitaryAppsLibrary\src</label>
+                        <location>${project.dir}/source/military-apps-library-java/source/MilitaryAppsLibrary/src</location>
+                    </source-folder>
                     <source-file>
                         <location>build.xml</location>
                     </source-file>
@@ -79,7 +93,8 @@
         <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/1">
             <compilation-unit>
                 <package-root>${project.dir}/source/VehicleCommander/src</package-root>
-                <classpath mode="compile">C:\Program Files (x86)\ArcGIS SDKs\java10.1.1\sdk\jars\ArcGIS_Runtime_Java_Toolkit-sources.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.1.1\sdk\jars\apache-mime4j.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.1.1\sdk\jars\ArcGIS_Runtime_Java.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.1.1\sdk\jars\ArcGIS_Runtime_Java_Toolkit.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.1.1\sdk\jars\commons-codec.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.1.1\sdk\jars\commons-logging.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.1.1\sdk\jars\gluegen-rt-natives-linux-amd64.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.1.1\sdk\jars\gluegen-rt-natives-windows-amd64.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.1.1\sdk\jars\gluegen-rt-natives-windows-i586.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.1.1\sdk\jars\gluegen-rt.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.1.1\sdk\jars\httpclient.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.1.1\sdk\jars\httpcore.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.1.1\sdk\jars\httpmime.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.1.1\sdk\jars\jackson-core-lgpl.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.1.1\sdk\jars\jackson-mapper-lgpl.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.1.1\sdk\jars\jcommon.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.1.1\sdk\jars\jfreechart.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.1.1\sdk\jars\jogl-all-natives-linux-amd64.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.1.1\sdk\jars\jogl-all-natives-windows-amd64.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.1.1\sdk\jars\jogl-all-natives-windows-i586.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.1.1\sdk\jars\jogl.all.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.1.1\sdk\jars\json.jar;${project.dir}/source/VehicleCommander/lib/beansbinding-1.2.1.jar</classpath>
+                <package-root>${project.dir}/source/military-apps-library-java/source/MilitaryAppsLibrary/src</package-root>
+                <classpath mode="compile">C:\Program Files (x86)\ArcGIS SDKs\java10.2\sdk\jars\apache-mime4j.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.2\sdk\jars\ArcGIS_Runtime_Java.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.2\sdk\jars\ArcGIS_Runtime_Java_Toolkit-sources.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.2\sdk\jars\ArcGIS_Runtime_Java_Toolkit.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.2\sdk\jars\commons-codec.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.2\sdk\jars\commons-logging.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.2\sdk\jars\httpclient.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.2\sdk\jars\httpcore.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.2\sdk\jars\httpmime.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.2\sdk\jars\jackson-core-lgpl.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.2\sdk\jars\jackson-mapper-lgpl.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.2\sdk\jars\jcifs.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.2\sdk\jars\jcommon.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.2\sdk\jars\jfreechart.jar;C:\Program Files (x86)\ArcGIS SDKs\java10.2\sdk\jars\json.jar;${project.dir}/../../source/VehicleCommander/lib/beansbinding-1.2.1.jar</classpath>
                 <built-to>${project.dir}/source/VehicleCommander/dist/VehicleCommander.jar</built-to>
                 <source-level>1.5</source-level>
             </compilation-unit>
