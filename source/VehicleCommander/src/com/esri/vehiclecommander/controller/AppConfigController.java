@@ -13,14 +13,16 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  ******************************************************************************/
-package com.esri.vehiclecommander;
+package com.esri.vehiclecommander.controller;
 
 import com.esri.core.geometry.AngularUnit;
 import com.esri.core.gps.GPSException;
 import com.esri.core.gps.GPSUncheckedException;
 import com.esri.core.gps.IGPSWatcher;
 import com.esri.core.gps.SerialPortGPSWatcher;
-import com.esri.gps.GPSType;
+import com.esri.vehiclecommander.model.GPSSimulator;
+import com.esri.vehiclecommander.model.GPSType;
+import com.esri.vehiclecommander.util.Utilities;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -44,24 +46,24 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class AppConfigController {
 
-    private static final String KEY_USERNAME = AppConfigController.class.getName() + "username";
-    private static final String KEY_VEHICLE_TYPE = AppConfigController.class.getName() + "vehicleType";
-    private static final String KEY_UNIQUE_ID = AppConfigController.class.getName() + "uniqueId";
-    private static final String KEY_SIC = AppConfigController.class.getName() + "sic";
-    private static final String KEY_PORT = AppConfigController.class.getName() + "port";
-    private static final String KEY_POSITION_MESSAGE_INTERVAL = AppConfigController.class.getName() + "positionMessageInterval";
-    private static final String KEY_VEHICLE_STATUS_MESSAGE_INTERVAL = AppConfigController.class.getName() + "vehicleStatusMessageInterval";
-    private static final String KEY_GPS_TYPE = AppConfigController.class.getName() + "gpsType";
-    private static final String KEY_GPX = AppConfigController.class.getName() + "gpx";
-    private static final String KEY_SPEED_MULTIPLIER = AppConfigController.class.getName() + "speedMultiplier";
-    private static final String KEY_MPK_CHOOSER_DIR = AppConfigController.class.getName() + "mpkFileChooserDirectory";
-    private static final String KEY_GPX_CHOOSER_DIR = AppConfigController.class.getName() + "gpxFileChooserDirectory";
-    private static final String KEY_SHOW_MESSAGE_LABELS = AppConfigController.class.getName() + "showMessageLabels";
-    private static final String KEY_DECORATED = AppConfigController.class.getName() + "decorated";
-    private static final String KEY_SHOW_MGRS_GRID = AppConfigController.class.getName() + "showMgrsGrid";
-    private static final String KEY_SHOW_LOCAL_TIME_ZONE = AppConfigController.class.getName() + "showLocalTimeZone";
-    private static final String KEY_HEADING_UNITS = AppConfigController.class.getName() + "headingUnits";
-    private static final String KEY_GEOMESSAGE_VERSION = AppConfigController.class.getName() + "geomessageVersion";
+    private static final String KEY_USERNAME = AppConfigController.class.getSimpleName() + "username";
+    private static final String KEY_VEHICLE_TYPE = AppConfigController.class.getSimpleName() + "vehicleType";
+    private static final String KEY_UNIQUE_ID = AppConfigController.class.getSimpleName() + "uniqueId";
+    private static final String KEY_SIC = AppConfigController.class.getSimpleName() + "sic";
+    private static final String KEY_PORT = AppConfigController.class.getSimpleName() + "port";
+    private static final String KEY_POSITION_MESSAGE_INTERVAL = AppConfigController.class.getSimpleName() + "positionMessageInterval";
+    private static final String KEY_VEHICLE_STATUS_MESSAGE_INTERVAL = AppConfigController.class.getSimpleName() + "vehicleStatusMessageInterval";
+    private static final String KEY_GPS_TYPE = AppConfigController.class.getSimpleName() + "gpsType";
+    private static final String KEY_GPX = AppConfigController.class.getSimpleName() + "gpx";
+    private static final String KEY_SPEED_MULTIPLIER = AppConfigController.class.getSimpleName() + "speedMultiplier";
+    private static final String KEY_MPK_CHOOSER_DIR = AppConfigController.class.getSimpleName() + "mpkFileChooserDirectory";
+    private static final String KEY_GPX_CHOOSER_DIR = AppConfigController.class.getSimpleName() + "gpxFileChooserDirectory";
+    private static final String KEY_SHOW_MESSAGE_LABELS = AppConfigController.class.getSimpleName() + "showMessageLabels";
+    private static final String KEY_DECORATED = AppConfigController.class.getSimpleName() + "decorated";
+    private static final String KEY_SHOW_MGRS_GRID = AppConfigController.class.getSimpleName() + "showMgrsGrid";
+    private static final String KEY_SHOW_LOCAL_TIME_ZONE = AppConfigController.class.getSimpleName() + "showLocalTimeZone";
+    private static final String KEY_HEADING_UNITS = AppConfigController.class.getSimpleName() + "headingUnits";
+    private static final String KEY_GEOMESSAGE_VERSION = AppConfigController.class.getSimpleName() + "geomessageVersion";
 
     private boolean gpsTypeDirty = false;
 
@@ -179,7 +181,7 @@ public class AppConfigController {
      * appconfig.xml.
      */
     public AppConfigController() {
-        preferences = Preferences.userRoot();
+        preferences = Preferences.userNodeForPackage(getClass());
         
         try {
             resetFromAppConfigFile(false);
@@ -209,7 +211,7 @@ public class AppConfigController {
         if (configFile.exists()) {
             return configFile.toURI();
         } else {
-            return getClass().getResource("resources/appconfig.xml").toURI();
+            return getClass().getResource("/com/esri/vehiclecommander/resources/appconfig.xml").toURI();
         }
     }
 

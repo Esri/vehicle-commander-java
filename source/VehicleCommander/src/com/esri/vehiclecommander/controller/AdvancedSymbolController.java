@@ -13,7 +13,7 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  ******************************************************************************/
-package com.esri.vehiclecommander;
+package com.esri.vehiclecommander.controller;
 
 import com.esri.core.map.Graphic;
 import com.esri.core.symbol.advanced.Message;
@@ -25,7 +25,11 @@ import com.esri.core.symbol.advanced.SymbolProperties;
 import com.esri.map.GraphicsLayer;
 import com.esri.map.Layer;
 import com.esri.map.MessageGroupLayer;
+import com.esri.militaryapps.util.Utilities;
 import com.esri.runtime.ArcGISRuntime;
+import com.esri.vehiclecommander.model.IdentifiedItem;
+import com.esri.vehiclecommander.model.IdentifyResultList;
+import com.esri.vehiclecommander.model.Mil2525CMessageParser;
 
 import java.awt.image.BufferedImage;
 import java.io.File;

@@ -100,14 +100,14 @@
     <jar destfile="${dir.dist}/VehicleCommander.jar">
       <fileset dir="${dir.build}" />
       <manifest>
-        <attribute name="Main-Class" value="com.esri.vehiclecommander.VehicleCommanderJFrame" />
+        <attribute name="Main-Class" value="com.esri.vehiclecommander.view.VehicleCommanderJFrame" />
         <attribute name="Class-Path" value="${project.classpath.string}" />
       </manifest>
     </jar>
   </target>
 
   <target name="run" depends="check_properties,jar">
-    <java classname="com.esri.vehiclecommander.VehicleCommanderJFrame" fork="true" failonerror="true">
+    <java classname="com.esri.vehiclecommander.view.VehicleCommanderJFrame" fork="true" failonerror="true">
       <classpath refid="project.classpath"/>
     </java>
   </target>

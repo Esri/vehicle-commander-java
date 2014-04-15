@@ -13,7 +13,7 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  ******************************************************************************/
-package com.esri.vehiclecommander;
+package com.esri.vehiclecommander.view;
 
 import com.esri.core.geometry.AngularUnit;
 import com.esri.core.geometry.Point;
@@ -21,18 +21,27 @@ import com.esri.core.gps.GPSException;
 import com.esri.core.gps.GPSUncheckedException;
 import com.esri.core.gps.SerialPortGPSWatcher;
 import com.esri.core.symbol.advanced.SymbolDictionary.DictionaryType;
-import com.esri.gps.GPSType;
 import com.esri.map.Layer;
 import com.esri.map.MapOverlay;
 import com.esri.runtime.ArcGISRuntime;
-import com.esri.vehiclecommander.analysis.ComponentShowingButton;
-import com.esri.vehiclecommander.analysis.GPAdapter;
-import com.esri.vehiclecommander.analysis.RouteController;
-import com.esri.vehiclecommander.analysis.RouteJPanel;
-import com.esri.vehiclecommander.analysis.ToolbarToggleButton;
-import com.esri.vehiclecommander.analysis.ViewshedController;
-import com.esri.vehiclecommander.analysis.ViewshedJPanel;
-import com.esri.vehiclecommander.messaging.VehicleStatusController;
+import com.esri.vehiclecommander.controller.AdvancedSymbolController;
+import com.esri.vehiclecommander.controller.AppConfigController;
+import com.esri.vehiclecommander.controller.AppConfigListener;
+import com.esri.vehiclecommander.controller.ChemLightController;
+import com.esri.vehiclecommander.controller.GPAdapter;
+import com.esri.vehiclecommander.controller.GPSController;
+import com.esri.vehiclecommander.controller.IdentifyListener;
+import com.esri.vehiclecommander.controller.MapController;
+import com.esri.vehiclecommander.controller.RouteController;
+import com.esri.vehiclecommander.controller.VehicleStatusController;
+import com.esri.vehiclecommander.controller.ViewshedController;
+import com.esri.vehiclecommander.model.GPSNavigationMode;
+import com.esri.vehiclecommander.model.GPSSimulator;
+import com.esri.vehiclecommander.model.GPSType;
+import com.esri.vehiclecommander.model.IdentifiedItem;
+import com.esri.vehiclecommander.model.MapConfig;
+import com.esri.vehiclecommander.model.MapConfigReader;
+import com.esri.vehiclecommander.util.Utilities;
 
 import java.awt.Color;
 import java.awt.Component;
