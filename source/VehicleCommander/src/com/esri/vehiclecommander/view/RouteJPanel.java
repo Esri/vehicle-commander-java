@@ -220,7 +220,7 @@ public class RouteJPanel extends RoundedJPanel {
 
                 @Override
                 public void mouseClicked(MouseEvent event) {
-                    Point point = mapController.toMapPoint(event.getX(), event.getY());
+                    Point point = mapController.toMapPointObject(event.getX(), event.getY());
                     routeController.addWaypoint(point);
                 }
 
@@ -228,7 +228,7 @@ public class RouteJPanel extends RoundedJPanel {
                 public void mouseDragged(MouseEvent event) {
                     synchronized (mouseDownLock) {
                         if (mouseDown) {
-                            routeController.addPointToRouteLine(mapController.toMapPoint(event.getX(), event.getY()));
+                            routeController.addPointToRouteLine(mapController.toMapPointObject(event.getX(), event.getY()));
                         }
                     }
                 }

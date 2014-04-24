@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.esri.vehiclecommander.controller;
 
+import com.esri.militaryapps.controller.MapControllerListener;
+
 /**
  * A convenience class that implements all methods in MapControllerListener with
  * empty method bodies. Extend this class and implement the methods you need.

@@ -20,7 +20,6 @@ import com.esri.client.local.LayerDetails;
 import com.esri.client.local.LocalFeatureService;
 import com.esri.client.local.LocalServiceStartCompleteEvent;
 import com.esri.client.local.LocalServiceStartCompleteListener;
-import com.esri.core.geometry.Point;
 import com.esri.map.ArcGISDynamicMapServiceLayer;
 import com.esri.map.ArcGISFeatureLayer;
 import com.esri.map.ArcGISTiledMapServiceLayer;
@@ -374,7 +373,7 @@ public class MapConfigReader {
         }
 
         if (null != handler.x && null != handler.y && null != handler.scale) {
-            mapController.zoomToScale(handler.scale, new Point(handler.x, handler.y));
+            mapController.zoomToScale(handler.scale, handler.x, handler.y);
         }
 
         if (null != handler.rotation) {

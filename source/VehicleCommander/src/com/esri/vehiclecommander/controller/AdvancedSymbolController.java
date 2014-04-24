@@ -15,192 +15,126 @@
  ******************************************************************************/
 package com.esri.vehiclecommander.controller;
 
+import com.esri.core.geometry.Geometry;
+import com.esri.core.geometry.GeometryEngine;
+import com.esri.core.geometry.Point;
+import com.esri.core.geometry.SpatialReference;
 import com.esri.core.map.Graphic;
+import com.esri.core.symbol.PictureMarkerSymbol;
+import com.esri.core.symbol.Symbol;
 import com.esri.core.symbol.advanced.Message;
 import com.esri.core.symbol.advanced.MessageHelper;
-import com.esri.core.symbol.advanced.MessageProcessor;
 import com.esri.core.symbol.advanced.SymbolDictionary;
 import com.esri.core.symbol.advanced.SymbolDictionary.DictionaryType;
 import com.esri.core.symbol.advanced.SymbolProperties;
 import com.esri.map.GraphicsLayer;
 import com.esri.map.Layer;
 import com.esri.map.MessageGroupLayer;
+import com.esri.militaryapps.controller.MessageControllerListener;
+import com.esri.militaryapps.model.Geomessage;
 import com.esri.militaryapps.util.Utilities;
-import com.esri.runtime.ArcGISRuntime;
 import com.esri.vehiclecommander.model.IdentifiedItem;
 import com.esri.vehiclecommander.model.IdentifyResultList;
-import com.esri.vehiclecommander.model.Mil2525CMessageParser;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.SAXException;
 
 /**
  * A controller to handle the usage of MessageProcessor and SymbolDictionary by
  * the application.
  */
-public class AdvancedSymbolController {
-    
-    private static final Logger logger = Logger.getLogger(AdvancedSymbolController.class.getName());
-	private static final String FSP = System.getProperty("file.separator");
-    
-    /**
-     * Set <unique ID>
-     */
-    private final Set<String> uniqueIds = new HashSet<String>();
-    
-    /**
-     * Map <message type, Map <unique designation, unique ID> >
-     */
-    private final Map<String, String> uniqueDesignationToId = new HashMap<String, String>();
+public class AdvancedSymbolController extends com.esri.militaryapps.controller.AdvancedSymbolController implements MessageControllerListener {
 
-    private final SymbolDictionary symbolDictionary;
-    private MessageProcessor messageProcessor;
-    private MessageGroupLayer symbolLayer;
-	private boolean afmMessagesExist = false;
-    private final String layerName;
-    private final String symbolDictionaryPath;
-    private final DictionaryType dictionaryType;
     private final MapController mapController;
-    private final Mil2525CMessageParser messageParser;
-    private final AppConfigController appConfig;
-    
-    /**
-     * Instantiates a symbol controller.
-     * @param type the type (2525C, etc.).
-     * @param layerName the name of the layer to which this controller will add symbols.
-     * @param appConfig the application configuration object.
-     * @param mapController the MapController.
-     * @throws ParserConfigurationException if SAX parsing won't work.
-     * @throws SAXException if SAX parsing won't work.
-     */
-    public AdvancedSymbolController(
-            DictionaryType type,
-            String layerName,
-            AppConfigController appConfig,
-            MapController mapController) throws ParserConfigurationException, SAXException {
-        this(type, layerName, appConfig, null, mapController);                
-    }
+    private final MessageGroupLayer groupLayer;
+    private final GraphicsLayer spotReportLayer;
+    private final Symbol spotReportSymbol;
+    private final AppConfigController appConfigController;
 
     /**
-     * Instantiates a symbol controller.
-     * @param type the type (2525C, etc.).
-     * @param layerName the name of the layer to which this controller will add symbols.
-     * @param appConfig the application configuration object.
-     * @param symbolDictionaryPath the path where the symbol dictionary file is found.
-     * @param mapController the MapController.
-     * @throws ParserConfigurationException
-     * @throws SAXException
+     * Creates a new AdvancedSymbolController.
+     * @param mapController the application's MapController.
+     * @param spotReportIcon the spot report icon image.
      */
     public AdvancedSymbolController(
-            DictionaryType type,
-            String layerName,
-            AppConfigController appConfig,
-            String symbolDictionaryPath,
-            MapController mapController) throws ParserConfigurationException, SAXException {
-        this.dictionaryType = type;
-        this.layerName = layerName;
-        this.symbolDictionaryPath = symbolDictionaryPath;
-        if (null == symbolDictionaryPath) {
-            symbolDictionary = new SymbolDictionary(type);
-        } else {
-            symbolDictionary = new SymbolDictionary(type, symbolDictionaryPath);
-        }
+            MapController mapController,
+            BufferedImage spotReportIcon,
+            AppConfigController appConfigController) {
+        super(mapController);
         this.mapController = mapController;
-        if (null != mapController) {
-            mapController.setAdvancedSymbolController(this);
-        }
-        messageParser = new Mil2525CMessageParser();
-        this.appConfig = appConfig;
-        initializeMessageProcessor();
-    }
-
-    private String getPathMessageTypes() {
-        String dataPath = null; 
-        String binaryPath = ArcGISRuntime.getRuntimeBinariesDir();
-        if (binaryPath != null) { 
-          if (!(binaryPath.endsWith("/") || binaryPath.endsWith("\\"))){ 
-        	  binaryPath += FSP; 
-          } 
-          dataPath = binaryPath + ".." + FSP + ".." + FSP + "resources" 
-        		  + FSP + "symbols" + FSP + "mil2525c" + FSP + "messagetypes";          
-        } 
-        File dataFile = new File(dataPath);
-        if (!dataFile.exists()) {  
-            System.err.println ("Could not find resources at: " + dataFile); 
-        } 
-        return dataPath;
-      } 
-    
-    private boolean checkAfmMessageTypesExist() {
-    	
-    	String resourcePath = getPathMessageTypes();    	
-    	String requiredResource = resourcePath + FSP + "afmchemlight.json";
-        File dataFile = new File(requiredResource); 
-        if (!dataFile.exists()) {  
-            System.err.println ("Could not find required resource at: " + dataFile);
-            return false;
-        }     	
-    	
-    	return true;
+        this.appConfigController = appConfigController;
+        
+        spotReportLayer = new GraphicsLayer();
+        spotReportLayer.setName("Spot Report");
+        mapController.addLayer(spotReportLayer, false);
+        
+        groupLayer = new MessageGroupLayer(SymbolDictionary.DictionaryType.Mil2525C);
+        mapController.addLayer(groupLayer, false);
+        
+        spotReportSymbol = new PictureMarkerSymbol(spotReportIcon);
     }
     
-    private void initializeMessageProcessor() {
-    	    	
-    	afmMessagesExist = checkAfmMessageTypesExist();
-    	
-        if (null == symbolDictionaryPath) {
-            symbolLayer = new MessageGroupLayer(dictionaryType);
-        } else {
-            symbolLayer = new MessageGroupLayer(dictionaryType, symbolDictionaryPath);
-        }
-        symbolLayer.setName(layerName);
-        if (null == symbolDictionaryPath) {
-            messageProcessor = new MessageProcessor(dictionaryType, symbolLayer);
-        } else {
-            messageProcessor = new MessageProcessor(dictionaryType, symbolLayer, symbolDictionaryPath);
-        }
-        mapController.addLayer(symbolLayer, false);
-    }
-
-    /**
-     * Gets the SIC for the symbol specified by the symbolName parameter.
-     * @param symbolName the name of the symbol,
-     * @return the SIC for the symbol specified by the symbolName parameter.
-     */
-    public String getSic(String symbolName) throws IOException {
-        List<SymbolProperties> symbols = findSymbols(symbolName);
-        for (SymbolProperties sym : symbols) {
-            if (sym.getName().equalsIgnoreCase(symbolName)) {
-                return sym.getValues().get("SymbolID");
+    @Override
+    protected Integer displaySpotReport(double x, double y, final int wkid, Integer graphicId, Geomessage geomessage) {
+        try {
+            Geometry pt = new Point(x, y);
+            if (null != mapController.getSpatialReference() && wkid != mapController.getSpatialReference().getID()) {
+                pt = GeometryEngine.project(pt, SpatialReference.create(wkid), mapController.getSpatialReference());
             }
+            if (null != graphicId) {
+                spotReportLayer.updateGraphic(graphicId, pt);
+                spotReportLayer.updateGraphic(graphicId, geomessage.getProperties());
+            } else {
+                Graphic graphic = new Graphic(pt, spotReportSymbol, geomessage.getProperties());
+                graphicId = spotReportLayer.addGraphic(graphic);
+                
+            }
+            return graphicId;
+        } catch (NumberFormatException nfe) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Could not parse spot report", nfe);
+            return null;
         }
-        return null;
     }
-
+    
+    @Override
+    protected String translateMessageTypeName(String geomessageTypeName) {
+        if ("trackrep".equals(geomessageTypeName)) {
+            geomessageTypeName = "position_report";
+        }
+        return geomessageTypeName;
+    }
+    
+    @Override
+    protected String translateColorString(String geomessageColorString) {
+        if ("1".equals(geomessageColorString)) {
+            geomessageColorString = "red";
+        } else if ("2".equals(geomessageColorString)) {
+            geomessageColorString = "green";
+        } else if ("3".equals(geomessageColorString)) {
+            geomessageColorString = "blue";
+        } else if ("4".equals(geomessageColorString)) {
+            geomessageColorString = "yellow";
+        }
+        return geomessageColorString;
+    }
+    
     /**
      * Gets the symbol image for the specified symbol name or SIC.
      * @param symbolNameOrId a symbol name or SIC.
      * @return the symbol image for the specified symbol name or SIC.
      */
     public BufferedImage getSymbolImage(String symbolNameOrId) {
-        return symbolDictionary.getSymbolImage(symbolNameOrId, 100, 100);
+        return groupLayer.getMessageProcessor().getSymbolDictionary().getSymbolImage(symbolNameOrId, 100, 100);
     }
-
+    
     /**
      * Searches for symbols having a keyword matching (fully or partially) the provided
      * search string.
@@ -213,17 +147,17 @@ public class AdvancedSymbolController {
         while (tok.hasMoreTokens()) {
             keywords.add(tok.nextToken());
         }
-        return symbolDictionary.findSymbols(keywords);
+        return groupLayer.getMessageProcessor().getSymbolDictionary().findSymbols(keywords);
     }
-
+    
     /**
      * Returns a list of symbol categories.
      * @return a list of symbol categories.
      */
     public List<String> getCategories() {
-        return symbolDictionary.getFilters().get("Category");
+        return groupLayer.getMessageProcessor().getSymbolDictionary().getFilters().get("Category");
     }
-
+    
     /**
      * Returns a list of symbols in a category.
      * @param category the category name.
@@ -234,147 +168,86 @@ public class AdvancedSymbolController {
         ArrayList<String> categories = new ArrayList<String>(1);
         categories.add(category);
         filters.put("Category", categories);
-        return symbolDictionary.findSymbols(filters);
+        return groupLayer.getMessageProcessor().getSymbolDictionary().findSymbols(filters);
     }
 
-    /**
-     * Parses the specified XML string and adds any messages to the map if symbols
-     * can be found for them.
-     * @param xmlMessages an XML string containing messages.
-     */
-    public void addMessagesToMap(String xmlMessages) {
-        if (!mapController.hasLayer(symbolLayer)) {
-            initializeMessageProcessor();
+    
+    @Override
+    protected boolean processMessage(Geomessage geomessage) {
+        //Filter out messages that we just sent
+        if (geomessage.getId().equals(appConfigController.getUniqueId())) {
+            return false;
         }
-        //Parse messages and add to map
-        try {
-            final List<Message> messages = Collections.synchronizedList(messageParser.parseMessages(xmlMessages));
-            synchronized (messages) {
-                for (int i = 0; i < messages.size(); i++) {
-                	
-                	// TODO: this could probably use some refactoring
-                	
-                    Message message = messages.get(i);
-                    String messageType = (String) message.getProperty(MessageHelper.MESSAGE_2525C_TYPE_PROPERTY_NAME);
-                    if ("chemlight".equals(messageType)) {
-                        messageType = "afmchemlight";
-                        message.setProperty(MessageHelper.MESSAGE_2525C_TYPE_PROPERTY_NAME, messageType);
-                    } else if ("position_report".equals(messageType)) {
-                        messageType = "trackrep";
-                        message.setProperty(MessageHelper.MESSAGE_2525C_TYPE_PROPERTY_NAME, messageType);
-                    }
-                    if (null != message.getID() && !appConfig.getUniqueId().equals(message.getID())
-                            /**
-                             * If we do something with other report types,
-                             * we can remove this next check.
-                             */
-                            && ("trackrep".equals(messageType) || "spotrep".equals(messageType) || "afmchemlight".equals(messageType))) {
-
-                        String sic = (String) message.getProperty("sic");
-                        if (null == sic || 15 != sic.length()) {
-                            //Try to get the SIC from the equip_cat
-                            String equipCat = (String) message.getProperty("equip_cat");
-                            if (null != equipCat) {
-                                sic = getSic(equipCat);
-                                message.setProperty("sic", sic);
-                            }
-                        }
-                        //Workaround for odd chem light behavior
-                        if ("afmchemlight".equals(messageType) && (null == sic || 0 == sic.length())) {
-                            sic = " ";
-                            message.setProperty("sic", sic);
-                        }
-
-                        /**
-                         * There are up to two different unique IDs to check. One is
-                         * the one in the message. The other is the one pointed to
-                         * by the message's unique designation. If we have mapped
-                         * either of those, we need to remove it.
-                         */
-                        synchronized (uniqueIds) {
-                            if (uniqueIds.contains(message.getID())) {
-                                messageProcessor.processMessage(MessageHelper.createRemoveMessage(dictionaryType, message.getID(), messageType));
-                                uniqueIds.remove(message.getID());
-                            }
-                        }
-                        String uniqueDesignation = (String) message.getProperty("UniqueDesignation");
-                        if (null != uniqueDesignation && "".equals(uniqueDesignation.trim())) {
-                            uniqueDesignation = null;
-                        }
-                        if (!"afmchemlight".equals(messageType) && !"spotrep".equals(messageType)) {
-                            synchronized (uniqueDesignationToId) {
-                                if (null != uniqueDesignation && uniqueDesignationToId.containsKey(uniqueDesignation)) {
-                                    String uniqueId = uniqueDesignationToId.get(uniqueDesignation);
-                                    synchronized (uniqueIds) {
-                                        if (uniqueIds.contains(uniqueId)) {
-                                            messageProcessor.processMessage(MessageHelper.createRemoveMessage(dictionaryType, uniqueId, messageType));
-                                            uniqueIds.remove(uniqueId);
-                                        }
-                                    }
-                                    uniqueDesignationToId.remove(uniqueDesignation);
-                                }
-                            }
-                        }
-
-                        if (!appConfig.isShowMessageLabels()) {
-                            message.setProperty("AdditionalInformation", "");
-                            message.setProperty("UniqueDesignation", "");
-                            message.setProperty("speed", "");
-                        }
-
-                        if (!afmMessagesExist) {
-                        	// substitute to a known, fall-back one
-                        	if (messageType.contains("afm"))
-                        		messageType = messageType.replace("afm", "");
-                        	else if (messageType == "trackrep")
-                        		messageType = "position_report";
-                        		
-                        	// fall back to regular ones
-                        	message.setProperty(MessageHelper.MESSAGE_2525C_TYPE_PROPERTY_NAME, messageType);
-                            System.err.println ("AFM resouce not found, using alternate (may not display as expected)");
-                        }
-                        	                        
-                        try {
-                            boolean processed = messageProcessor.processMessage(message);
-                            if (!processed) {
-                                logger.log(Level.WARNING, "Could not display message: {0}", message);
-                            } else {
-                                synchronized (uniqueIds) {
-                                    uniqueIds.add(message.getID());
-                                }
-                                if (null != uniqueDesignation) {
-                                    synchronized (uniqueDesignationToId) {
-                                        uniqueDesignationToId.put(uniqueDesignation, message.getID());
-                                    }
-                                }
-                            }
-                            if ("trackrep".equals(messageType)) {
-                                boolean status911 = null != message.getProperty("status911") && !"0".equals(message.getProperty("status911"));
-                                message.setProperty(MessageHelper.MESSAGE_ACTION_PROPERTY_NAME, (status911 ? "" : "un-") + "select");
-                                processed = messageProcessor.processMessage(message);
-                                if (!processed) {
-                                    logger.log(Level.WARNING, "Could not display message: {0}", message);
-                                }
-                            }
-                        } catch (Throwable t) {
-                            //Swallow this Throwable so we can continue processing the other messages
-                            Logger.getLogger(AdvancedSymbolController.class.getName()).log(Level.SEVERE, null, t);
-                        }
-                        
-                    }
+        
+        String action = (String) geomessage.getProperty(Geomessage.ACTION_FIELD_NAME);
+        Message message;
+        if ("select".equalsIgnoreCase(action)) {
+            message = MessageHelper.createSelectMessage(DictionaryType.Mil2525C,
+                    geomessage.getId(),
+                    (String) geomessage.getProperty(Geomessage.TYPE_FIELD_NAME),
+                    true);
+        } else if ("un-select".equalsIgnoreCase(action)) {
+            message = MessageHelper.createSelectMessage(DictionaryType.Mil2525C,
+                    geomessage.getId(),
+                    (String) geomessage.getProperty(Geomessage.TYPE_FIELD_NAME),
+                    false);
+        } else if ("remove".equalsIgnoreCase(action)) {
+            message = MessageHelper.createRemoveMessage(DictionaryType.Mil2525C,
+                    geomessage.getId(),
+                    (String) geomessage.getProperty(Geomessage.TYPE_FIELD_NAME));
+        } else {
+            ArrayList<Point> points = new ArrayList<Point>();
+            String pointsString = (String) geomessage.getProperty(Geomessage.CONTROL_POINTS_FIELD_NAME);
+            StringTokenizer tok = new StringTokenizer(pointsString, ";");
+            while (tok.hasMoreTokens()) {
+                StringTokenizer tok2 = new StringTokenizer(tok.nextToken(), ",");
+                try {
+                    points.add(new Point(Double.parseDouble(tok2.nextToken()), Double.parseDouble(tok2.nextToken())));
+                } catch (Throwable t) {
+                    Logger.getLogger(getClass().getName()).warning("Couldn't parse point from '" + pointsString + "'");
                 }
             }
-        } catch (IOException ex) {
-            Logger.getLogger(AdvancedSymbolController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SAXException ex) {
-            Logger.getLogger(AdvancedSymbolController.class.getName()).log(Level.SEVERE, null, ex);
+            message = MessageHelper.createUpdateMessage(DictionaryType.Mil2525C,
+                    geomessage.getId(),
+                    (String) geomessage.getProperty(Geomessage.TYPE_FIELD_NAME),
+                    points);
+            message.setProperties(geomessage.getProperties());
+            message.setID(geomessage.getId());
         }
+        
+        try {
+            return groupLayer.getMessageProcessor().processMessage(message);
+        } catch (RuntimeException re) {
+            //This is probably a message type that the MessageProcessor type doesn't support
+            Logger.getLogger(getClass().getName()).log(Level.INFO, "Couldn't process message: " + re.getMessage() + "\n"
+                    + "\tIt is possible that this MessageProcessor doesn't handle messages of type "
+                    + message.getProperty(MessageHelper.MESSAGE_2525C_TYPE_PROPERTY_NAME) + ".");
+            return false;
+        }
+    }
+    
+    @Override
+    protected boolean processHighlightMessage(String geomessageId, String messageType, boolean highlight) {
+        Message message = MessageHelper.createSelectMessage(DictionaryType.Mil2525C, geomessageId, messageType, highlight);
+        return groupLayer.getMessageProcessor().processMessage(message);
+    }
+
+    @Override
+    public String[] getMessageTypesSupported() {
+        return groupLayer.getMessageProcessor().getMessageTypesSupported();
+    }
+
+    @Override
+    public String getActionPropertyName() {
+        return MessageHelper.MESSAGE_ACTION_PROPERTY_NAME;
     }
 
     public IdentifyResultList identify(float screenX, float screenY, int tolerance) {
         IdentifyResultList results = new IdentifyResultList();
-        Layer[] layers = symbolLayer.getLayers();
-        for (Layer layer : layers) {
+        Layer[] layers = groupLayer.getLayers();
+        List<Layer> layerList = new ArrayList<Layer>(Arrays.asList(layers));
+        layerList.add(spotReportLayer);
+        for (Layer layer : layerList) {
             if (layer instanceof GraphicsLayer) {
                 GraphicsLayer gl = (GraphicsLayer) layer;
                 int[] graphicIds = gl.getGraphicIDs(screenX, screenY, tolerance);
@@ -390,6 +263,20 @@ public class AdvancedSymbolController {
             }
         }
         return results;
+    }
+
+    @Override
+    protected void processRemoveGeomessage(String geomessageId, String messageType) {
+        Message message = MessageHelper.createRemoveMessage(DictionaryType.Mil2525C, geomessageId, messageType);
+        groupLayer.getMessageProcessor().processMessage(message);
+    }
+
+    public void geomessageReceived(Geomessage geomessage) {
+        processGeomessage(geomessage);
+    }
+
+    public void datagramReceived(String contents) {
+        
     }
 
 }

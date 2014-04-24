@@ -321,7 +321,7 @@ public class ViewshedJPanel extends RoundedJPanel {
             @Override
             public void mouseClicked(MouseEvent event) {
                 jPanel_form.setVisible(true);
-                viewshedCenter = mapController.toMapPoint(event.getX(), event.getY());
+                viewshedCenter = mapController.toMapPointObject(event.getX(), event.getY());
                 viewshedController.showViewshedCenterGraphic(viewshedCenter);
                 jLabel_directions.setText("<html>Tap a second point, or enter the viewshed radius:</html>");
                 mapController.trackAsync(new MapOverlayAdapter() {
@@ -329,7 +329,7 @@ public class ViewshedJPanel extends RoundedJPanel {
                     @Override
                     public void mouseClicked(MouseEvent event) {
                         //This is the SECOND point; fill in the radius
-                        Point viewshedOuter = mapController.toMapPoint(event.getX(), event.getY());
+                        Point viewshedOuter = mapController.toMapPointObject(event.getX(), event.getY());
                         double distance = viewshedController.showViewshedBoundsGraphic(viewshedCenter, viewshedOuter);
                         jTextField_radius.setText(Long.toString(Math.round(distance)));
                     }

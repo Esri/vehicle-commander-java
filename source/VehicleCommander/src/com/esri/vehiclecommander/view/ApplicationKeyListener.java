@@ -15,9 +15,9 @@
  ******************************************************************************/
 package com.esri.vehiclecommander.view;
 
-import com.esri.vehiclecommander.controller.GPSController;
+import com.esri.militaryapps.model.NavigationMode;
+import com.esri.vehiclecommander.controller.LocationController;
 import com.esri.vehiclecommander.controller.MapController;
-import com.esri.vehiclecommander.model.GPSNavigationMode;
 import com.esri.vehiclecommander.util.Utilities;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
@@ -34,7 +34,7 @@ public class ApplicationKeyListener extends KeyAdapter {
 
     private final Frame frame;
     private final MapController mapController;
-    private final GPSController gpsController;
+    private final LocationController locationController;
     private Timer rotateTimer = null;
 
     /**
@@ -42,10 +42,10 @@ public class ApplicationKeyListener extends KeyAdapter {
      * @param frame The application frame
      */
     public ApplicationKeyListener(Frame frame, MapController mapController,
-            GPSController gpsController) {
+            LocationController locationController) {
         this.frame = frame;
         this.mapController = mapController;
-        this.gpsController = gpsController;
+        this.locationController = locationController;
     }
 
     /**
@@ -67,7 +67,7 @@ public class ApplicationKeyListener extends KeyAdapter {
             rotateTimer.stop();
         } else if (KeyEvent.VK_N == e.getKeyCode()) {
             mapController.setRotation(0);
-            gpsController.setNavigationMode(GPSNavigationMode.NORTH_UP);
+            locationController.setNavigationMode(NavigationMode.NORTH_UP);
         }
     }
 
@@ -81,7 +81,7 @@ public class ApplicationKeyListener extends KeyAdapter {
     @Override
     public void keyPressed(final KeyEvent e) {
         if (KeyEvent.VK_V == e.getKeyCode() || KeyEvent.VK_B == e.getKeyCode()) {
-            gpsController.setNavigationMode(GPSNavigationMode.NORTH_UP);
+            locationController.setNavigationMode(NavigationMode.NORTH_UP);
             if (null == rotateTimer || !rotateTimer.isRunning()) {
                 //Start rotation
                 rotateTimer = new Timer(1000 / 24, new ActionListener() {

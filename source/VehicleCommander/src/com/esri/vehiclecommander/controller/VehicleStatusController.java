@@ -16,19 +16,16 @@
 package com.esri.vehiclecommander.controller;
 
 import com.esri.core.geometry.Point;
-import com.esri.core.gps.GPSEventListener;
-import com.esri.core.gps.GPSStatus;
-import com.esri.core.gps.GeoPosition;
-import com.esri.core.gps.GpsGeoCoordinate;
-import com.esri.core.gps.Satellite;
 import com.esri.core.symbol.advanced.MessageHelper;
+import com.esri.militaryapps.controller.LocationListener;
+import com.esri.militaryapps.model.Location;
+import com.esri.militaryapps.model.LocationProvider;
 import com.esri.vehiclecommander.util.Utilities;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Date;
-import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,7 +37,7 @@ import javax.xml.stream.XMLStreamWriter;
 /**
  * A controller that manages vehicle status, including sending vehicle status reports.
  */
-public class VehicleStatusController implements GPSEventListener {
+public class VehicleStatusController implements LocationListener {
     
     private final AppConfigController appConfig;
     private final Timer timer;
@@ -57,7 +54,7 @@ public class VehicleStatusController implements GPSEventListener {
     public VehicleStatusController(AppConfigController appConfig) {
         this.appConfig = appConfig;
         messagingPort = appConfig.getPort();
-        appConfig.getGpsController().addGPSEventListener(this);
+        appConfig.getLocationController().addListener(this);
         this.udpBroadcastController = UDPBroadcastController.getInstance(messagingPort);
         timer = new Timer(appConfig.getVehicleStatusMessageInterval(), new ActionListener() {
 
@@ -139,28 +136,21 @@ public class VehicleStatusController implements GPSEventListener {
             try {
                 udpBroadcastController.sendUDPMessage(messageText.getBytes());
             } catch (IOException ex) {
-                Logger.getLogger(ChemLightController.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
 
-    public void onStatusChanged(GPSStatus newStatus) {
-        //Do nothing
-    }
-
-    public void onPositionChanged(GeoPosition newPosition) {
-        GpsGeoCoordinate location = newPosition.getLocation();
-        synchronized (currentPoint) {
-            currentPoint.setXY(location.getLongitude(), location.getLatitude());
+    public void onLocationChanged(Location location) {
+        if (null != location) {
+            synchronized (currentPoint) {
+                currentPoint.setXY(location.getLongitude(), location.getLatitude());
+            }
         }
     }
 
-    public void onNMEASentenceReceived(String newSentence) {
-        //Do nothing
-    }
-
-    public void onSatellitesInViewChanged(Map<Integer, Satellite> sattellitesInView) {
-        //Do nothing
+    public void onStateChanged(LocationProvider.LocationProviderState state) {
+        
     }
     
 }

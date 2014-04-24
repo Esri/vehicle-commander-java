@@ -23,11 +23,6 @@ import com.esri.core.geometry.Point;
 import com.esri.core.geometry.Polygon;
 import com.esri.core.geometry.Polyline;
 import com.esri.core.geometry.Segment;
-import com.esri.core.gps.GPSEventListener;
-import com.esri.core.gps.GPSStatus;
-import com.esri.core.gps.GeoPosition;
-import com.esri.core.gps.GpsGeoCoordinate;
-import com.esri.core.gps.Satellite;
 import com.esri.core.map.AttachmentInfo;
 import com.esri.core.map.CallbackListener;
 import com.esri.core.map.Graphic;
@@ -39,6 +34,9 @@ import com.esri.core.symbol.Symbol;
 import com.esri.map.ArcGISFeatureLayer;
 import com.esri.map.GraphicsLayer;
 import com.esri.map.Layer;
+import com.esri.militaryapps.controller.LocationListener;
+import com.esri.militaryapps.model.Location;
+import com.esri.militaryapps.model.LocationProvider;
 import com.esri.vehiclecommander.controller.MapController;
 import com.esri.vehiclecommander.model.IdentifiedItem;
 import com.esri.vehiclecommander.util.Utilities;
@@ -65,7 +63,7 @@ import javax.swing.JLabel;
 /**
  * A panel for displaying identify results.
  */
-public class IdentifyResultsJPanel extends RoundedJPanel implements GPSEventListener {
+public class IdentifyResultsJPanel extends RoundedJPanel implements LocationListener {
 
     private static final long serialVersionUID = 253026308130677536L;
     private IdentifiedItem[] results = null;
@@ -413,7 +411,7 @@ public class IdentifyResultsJPanel extends RoundedJPanel implements GPSEventList
 
         //Highlight feature on map
         if (!isGraphicsLayerAdded) {
-            mapController.addLayer(graphicsLayer, false);
+            mapController.addLayer(Integer.MAX_VALUE, graphicsLayer, false);
             isGraphicsLayerAdded = true;
         }
         Geometry geom = result.getGeometry();
@@ -442,11 +440,11 @@ public class IdentifyResultsJPanel extends RoundedJPanel implements GPSEventList
         if (null != pt) {
             graphicsLayer.setVisible(true);
             if (!isGraphicsLayerAdded) {
-                mapController.addLayer(graphicsLayer, false);
+                mapController.addLayer(Integer.MAX_VALUE, graphicsLayer, false);
                 isGraphicsLayerAdded = true;
             }
-            String[] mgrsArray = mapController.toMilitaryGrid(new Point[]{pt});
-            jLabel_mgrs.setText(mgrsArray[0]);
+            String mgrs = mapController.pointToMgrs(pt, mapController.getSpatialReference());
+            jLabel_mgrs.setText(mgrs);
 
             if (-1 != identifyPointGraphicUid) {
                 graphicsLayer.updateGraphic(identifyPointGraphicUid, pt);
@@ -501,36 +499,17 @@ public class IdentifyResultsJPanel extends RoundedJPanel implements GPSEventList
     // End of variables declaration//GEN-END:variables
 
     /**
-     * Called when GPS status changes.
-     * @param newStatus the new status.
-     */
-    public void onStatusChanged(GPSStatus newStatus) {
-       //Do nothing for now
-    }
-
-    /**
      * Called when GPS position changes.
      * @param newPosition the new position.
      */
-    public void onPositionChanged(GeoPosition newPosition) {
-        GpsGeoCoordinate location = newPosition.getLocation();
-        handleGPSFix(new Point(location.getLongitude(), location.getLatitude(), location.getAltitude()));
+    public void onLocationChanged(Location location){
+        if (null != location) {
+            handleGPSFix(new Point(location.getLongitude(), location.getLatitude()));
+        }
     }
 
-    /**
-     * Called when a new NMEA sentence is received.
-     * @param newSentence the new NMEA sentence.
-     */
-    public void onNMEASentenceReceived(String newSentence) {
-        //Do nothing for nows
-    }
-
-    /**
-     * Called when the GPS satellites in view change.
-     * @param sattellitesInView the satellites now in view.
-     */
-    public void onSatellitesInViewChanged(Map<Integer, Satellite> sattellitesInView) {
-        //Do nothing for now
+    public void onStateChanged(LocationProvider.LocationProviderState state) {
+        
     }
 
 }

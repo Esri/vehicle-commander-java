@@ -19,22 +19,19 @@ import com.esri.core.geometry.AngularUnit;
 import com.esri.core.geometry.GeometryEngine;
 import com.esri.core.geometry.Point;
 import com.esri.core.geometry.SpatialReference;
-import com.esri.core.gps.GPSEventListener;
-import com.esri.core.gps.GPSStatus;
-import com.esri.core.gps.GeoPosition;
-import com.esri.core.gps.GpsGeoCoordinate;
-import com.esri.core.gps.Satellite;
 import com.esri.core.map.Graphic;
 import com.esri.core.symbol.SimpleMarkerSymbol;
 import com.esri.core.symbol.TextSymbol;
+import com.esri.militaryapps.controller.LocationListener;
+import com.esri.militaryapps.model.Location;
+import com.esri.militaryapps.model.LocationProvider;
 import com.esri.vehiclecommander.util.Utilities;
 import java.awt.Color;
-import java.util.Map;
 
 /**
  * A layer for displaying the MGRS location to which the user navigated.
  */
-public class MgrsLayerController extends GraphicsLayerController implements GPSEventListener {
+public class MgrsLayerController extends GraphicsLayerController implements LocationListener {
     
     private static final int SYMBOL_SIZE = 14;    
     private static final SimpleMarkerSymbol POINT_SYMBOL = new SimpleMarkerSymbol(
@@ -53,7 +50,7 @@ public class MgrsLayerController extends GraphicsLayerController implements GPSE
     
     public MgrsLayerController(
             MapController mapController,
-            GPSController gpsController,
+            LocationController locationController,
             AppConfigController appConfig) {
         super(mapController, "MGRS");
         appConfigController = appConfig;
@@ -64,8 +61,8 @@ public class MgrsLayerController extends GraphicsLayerController implements GPSE
         haloSymbol.setHorizontalAlignment(TextSymbol.HorizontalAlignment.CENTER);
         haloSymbol.setVerticalAlignment(TextSymbol.VerticalAlignment.MIDDLE);
         setOverlayLayer(true);
-        if (null != gpsController) {
-            gpsController.addGPSEventListener(this);
+        if (null != locationController) {
+            locationController.addListener(this);
         }
     }
     
@@ -174,12 +171,7 @@ public class MgrsLayerController extends GraphicsLayerController implements GPSE
         
     }
 
-    public void onStatusChanged(GPSStatus newStatus) {
-        
-    }
-
-    public void onPositionChanged(GeoPosition newPosition) {
-        GpsGeoCoordinate location = newPosition.getLocation();
+    public void onLocationChanged(Location location) {
         synchronized (currentGpsPointLatLon) {
             currentGpsPointLatLon.setXY(location.getLongitude(), location.getLatitude());
             
@@ -191,11 +183,7 @@ public class MgrsLayerController extends GraphicsLayerController implements GPSE
         }
     }
 
-    public void onNMEASentenceReceived(String newSentence) {
-        
-    }
-
-    public void onSatellitesInViewChanged(Map<Integer, Satellite> sattellitesInView) {
+    public void onStateChanged(LocationProvider.LocationProviderState state) {
         
     }
     

@@ -16,28 +16,31 @@
 package com.esri.vehiclecommander.view;
 
 import com.esri.core.geometry.Point;
-import com.esri.core.gps.GPSEventListener;
-import com.esri.core.gps.GPSStatus;
-import com.esri.core.gps.GeoPosition;
 import com.esri.core.gps.Satellite;
 import com.esri.core.map.Graphic;
 import com.esri.core.symbol.advanced.SymbolProperties;
 import com.esri.map.Layer;
 import com.esri.map.LayerInitializeCompleteEvent;
 import com.esri.map.LayerInitializeCompleteListener;
+import com.esri.militaryapps.controller.LocationController.LocationMode;
+import com.esri.militaryapps.controller.LocationListener;
+import com.esri.militaryapps.controller.MessageController;
+import com.esri.militaryapps.controller.PositionReportController;
+import com.esri.militaryapps.controller.SpotReportController;
+import com.esri.militaryapps.model.Location;
+import com.esri.militaryapps.model.LocationProvider;
+import com.esri.militaryapps.model.SpotReport;
+import com.esri.militaryapps.model.SpotReport.Activity;
+import com.esri.militaryapps.model.SpotReport.Size;
 import com.esri.vehiclecommander.controller.AdvancedSymbolController;
 import com.esri.vehiclecommander.controller.AppConfigController;
 import com.esri.vehiclecommander.controller.AppConfigDialog;
-import com.esri.vehiclecommander.controller.GPSController;
+import com.esri.vehiclecommander.controller.LocationController;
 import com.esri.vehiclecommander.controller.MapController;
 import com.esri.vehiclecommander.controller.MapControllerListenerAdapter;
 import com.esri.vehiclecommander.controller.MgrsLayerController;
 import com.esri.vehiclecommander.controller.RouteController;
 import com.esri.vehiclecommander.controller.RouteListener;
-import com.esri.vehiclecommander.controller.SpotReportController;
-import com.esri.vehiclecommander.controller.UDPMessageGraphicsLayerController;
-import com.esri.vehiclecommander.model.GPSType;
-import com.esri.vehiclecommander.model.SpotReport;
 import com.esri.vehiclecommander.util.Utilities;
 import java.awt.CardLayout;
 import java.awt.Dimension;
@@ -62,25 +65,29 @@ import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import org.xml.sax.SAXException;
 
 /**
  * The application's main menu.
  */
-public class MainMenuJPanel extends RoundedJPanel implements GPSEventListener, RouteListener {
+public class MainMenuJPanel extends RoundedJPanel implements LocationListener, RouteListener {
 
     private static final long serialVersionUID = 8752811864834332672L;
     private static final Font BUTTON_FONT = new Font("Arial", Font.BOLD, 18);
 
     private final Frame app;
     private final MapController mapController;
-    private final GPSController gpsController;
+    private final LocationController locationController;
     private final SpotReport spotReport;
     private final SpotReportController spotReportController;
-    private final UDPMessageGraphicsLayerController messageLayerController;
+    private final MessageController messageController;
     private final AppConfigController appConfigController;
     private final AdvancedSymbolController mil2525CSymbolController;
     private final MgrsLayerController mgrsLayerController;
     private final RouteController routeController;
+    private final PositionReportController positionReportController;
     private final Map<JToggleButton, Integer> waypointButtonToGraphicId = new HashMap<JToggleButton, Integer>();
     private final Map<Integer, JToggleButton> graphicIdToWaypointButton = new HashMap<Integer, JToggleButton>();
     
@@ -95,33 +102,33 @@ public class MainMenuJPanel extends RoundedJPanel implements GPSEventListener, R
      * Creates the MainMenuJPanel but does not add it to the application.
      * @param app The application that is opening this MainMenuJPanel
      * @param mapController the application's MapController.
-     * @param gpsController the application's GPSController.
+     * @param locationController the application's LocationController.
      * @param appConfigController the application's AppConfigController.
      * @param mil2525CSymbolController the application's MIL-STD-2525C symbol controller.
      */
-    public MainMenuJPanel(Frame app, final MapController mapController, GPSController gpsController, AppConfigController appConfigController,
-            AdvancedSymbolController mil2525CSymbolController, RouteController routeController) {
-        this.mgrsLayerController = new MgrsLayerController(mapController, gpsController, appConfigController);
+    public MainMenuJPanel(Frame app, final MapController mapController, LocationController locationController, AppConfigController appConfigController,
+            AdvancedSymbolController mil2525CSymbolController, RouteController routeController,
+            PositionReportController positionReportController) {
+        this.mgrsLayerController = new MgrsLayerController(mapController, locationController, appConfigController);
         this.app = app;
         this.mapController = mapController;
-        this.gpsController = gpsController;
-        if (null != gpsController) {
-            gpsController.addGPSEventListener(this);
+        this.locationController = locationController;
+        if (null != locationController) {
+            locationController.addListener(this);
         }
         this.mil2525CSymbolController = mil2525CSymbolController;
-        this.spotReport = new SpotReport(appConfigController, gpsController, mapController,
-                mil2525CSymbolController);
-        this.spotReportController = new SpotReportController(mapController, appConfigController.getPort(),
-                mil2525CSymbolController);
-        this.messageLayerController = new UDPMessageGraphicsLayerController(mapController, mil2525CSymbolController, appConfigController.getPort());
+        this.spotReport = new SpotReport();
+        this.messageController = new MessageController(appConfigController.getPort());
+        this.spotReportController = new SpotReportController(mapController, messageController);
         this.appConfigController = appConfigController;
         this.routeController = routeController;
+        this.positionReportController = positionReportController;
         initComponents();
 
         ActionListener equipmentButtonListener = new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
-                setSpotReportEquipment(e.getActionCommand());
+                setSpotReportEquipment(SpotReport.Equipment.valueOf(e.getActionCommand()));
             }
         };
         ((EquipmentListJPanel) equipmentListJPanel_srEquipmentSearchResults).addButtonListener(equipmentButtonListener);
@@ -188,15 +195,20 @@ public class MainMenuJPanel extends RoundedJPanel implements GPSEventListener, R
         jPanel_srSize = new javax.swing.JPanel();
         jButton_srSizeBack = new javax.swing.JButton();
         jLabel_srSize = new javax.swing.JLabel();
-        jButton_srSize1 = new javax.swing.JButton();
-        jButton_srSize2 = new javax.swing.JButton();
-        jButton_srSize3 = new javax.swing.JButton();
-        jButton_srSize4 = new javax.swing.JButton();
-        jButton_srSize5 = new javax.swing.JButton();
-        jButton_srSize10 = new javax.swing.JButton();
-        jButton_srSize15 = new javax.swing.JButton();
-        jButton_srSize20 = new javax.swing.JButton();
-        jButton_srSizeOther = new javax.swing.JButton();
+        jButton_srSizeTeam = new javax.swing.JButton();
+        jButton_srSizeSquad = new javax.swing.JButton();
+        jButton_srSizeSection = new javax.swing.JButton();
+        jButton_srSizePlatoon = new javax.swing.JButton();
+        jButton_srSizeCompany = new javax.swing.JButton();
+        jButton_srSizeBattalion = new javax.swing.JButton();
+        jButton_srSizeRegiment = new javax.swing.JButton();
+        jButton_srSizeBrigade = new javax.swing.JButton();
+        jButton_srSizeDivision = new javax.swing.JButton();
+        jButton_srSizeCorps = new javax.swing.JButton();
+        jButton_srSizeArmy = new javax.swing.JButton();
+        jButton_srSizeArmyGroup = new javax.swing.JButton();
+        jButton_srSizeRegion = new javax.swing.JButton();
+        jButton_srSizeCommand = new javax.swing.JButton();
         jPanel_srActivity = new javax.swing.JPanel();
         jButton_srActivityBack = new javax.swing.JButton();
         jLabel_srActivity = new javax.swing.JLabel();
@@ -676,111 +688,171 @@ public class MainMenuJPanel extends RoundedJPanel implements GPSEventListener, R
         jLabel_srSize.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
         jLabel_srSize.setText("Size");
 
-        jButton_srSize1.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
-        jButton_srSize1.setText("1");
-        jButton_srSize1.setFocusable(false);
-        jButton_srSize1.setMaximumSize(new java.awt.Dimension(150, 60));
-        jButton_srSize1.setMinimumSize(new java.awt.Dimension(150, 60));
-        jButton_srSize1.setPreferredSize(new java.awt.Dimension(150, 60));
-        jButton_srSize1.addActionListener(new java.awt.event.ActionListener() {
+        jButton_srSizeTeam.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        jButton_srSizeTeam.setText(Size.TEAM.toString());
+        jButton_srSizeTeam.setFocusable(false);
+        jButton_srSizeTeam.setMaximumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeTeam.setMinimumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeTeam.setPreferredSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeTeam.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton_srSize1ActionPerformed(evt);
+                jButton_srSizeTeamActionPerformed(evt);
             }
         });
 
-        jButton_srSize2.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
-        jButton_srSize2.setText("2");
-        jButton_srSize2.setFocusable(false);
-        jButton_srSize2.setMaximumSize(new java.awt.Dimension(150, 60));
-        jButton_srSize2.setMinimumSize(new java.awt.Dimension(150, 60));
-        jButton_srSize2.setPreferredSize(new java.awt.Dimension(150, 60));
-        jButton_srSize2.addActionListener(new java.awt.event.ActionListener() {
+        jButton_srSizeSquad.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        jButton_srSizeSquad.setText(Size.SQUAD.toString());
+        jButton_srSizeSquad.setFocusable(false);
+        jButton_srSizeSquad.setMaximumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeSquad.setMinimumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeSquad.setPreferredSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeSquad.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton_srSize2ActionPerformed(evt);
+                jButton_srSizeSquadActionPerformed(evt);
             }
         });
 
-        jButton_srSize3.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
-        jButton_srSize3.setText("3");
-        jButton_srSize3.setFocusable(false);
-        jButton_srSize3.setMaximumSize(new java.awt.Dimension(150, 60));
-        jButton_srSize3.setMinimumSize(new java.awt.Dimension(150, 60));
-        jButton_srSize3.setPreferredSize(new java.awt.Dimension(150, 60));
-        jButton_srSize3.addActionListener(new java.awt.event.ActionListener() {
+        jButton_srSizeSection.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        jButton_srSizeSection.setText(Size.SECTION.toString());
+        jButton_srSizeSection.setFocusable(false);
+        jButton_srSizeSection.setMaximumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeSection.setMinimumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeSection.setPreferredSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeSection.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton_srSize3ActionPerformed(evt);
+                jButton_srSizeSectionActionPerformed(evt);
             }
         });
 
-        jButton_srSize4.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
-        jButton_srSize4.setText("4");
-        jButton_srSize4.setFocusable(false);
-        jButton_srSize4.setMaximumSize(new java.awt.Dimension(150, 60));
-        jButton_srSize4.setMinimumSize(new java.awt.Dimension(150, 60));
-        jButton_srSize4.setPreferredSize(new java.awt.Dimension(150, 60));
-        jButton_srSize4.addActionListener(new java.awt.event.ActionListener() {
+        jButton_srSizePlatoon.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        jButton_srSizePlatoon.setText(Size.PLATOON.toString());
+        jButton_srSizePlatoon.setFocusable(false);
+        jButton_srSizePlatoon.setMaximumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizePlatoon.setMinimumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizePlatoon.setPreferredSize(new java.awt.Dimension(150, 60));
+        jButton_srSizePlatoon.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton_srSize4ActionPerformed(evt);
+                jButton_srSizePlatoonActionPerformed(evt);
             }
         });
 
-        jButton_srSize5.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
-        jButton_srSize5.setText("5");
-        jButton_srSize5.setFocusable(false);
-        jButton_srSize5.setMaximumSize(new java.awt.Dimension(150, 60));
-        jButton_srSize5.setMinimumSize(new java.awt.Dimension(150, 60));
-        jButton_srSize5.setPreferredSize(new java.awt.Dimension(150, 60));
-        jButton_srSize5.addActionListener(new java.awt.event.ActionListener() {
+        jButton_srSizeCompany.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        jButton_srSizeCompany.setText(Size.COMPANY.toString());
+        jButton_srSizeCompany.setFocusable(false);
+        jButton_srSizeCompany.setMaximumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeCompany.setMinimumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeCompany.setPreferredSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeCompany.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton_srSize5ActionPerformed(evt);
+                jButton_srSizeCompanyActionPerformed(evt);
             }
         });
 
-        jButton_srSize10.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
-        jButton_srSize10.setText("10");
-        jButton_srSize10.setFocusable(false);
-        jButton_srSize10.setMaximumSize(new java.awt.Dimension(150, 60));
-        jButton_srSize10.setMinimumSize(new java.awt.Dimension(150, 60));
-        jButton_srSize10.setPreferredSize(new java.awt.Dimension(150, 60));
-        jButton_srSize10.addActionListener(new java.awt.event.ActionListener() {
+        jButton_srSizeBattalion.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        jButton_srSizeBattalion.setText(Size.BATTALION.toString());
+        jButton_srSizeBattalion.setFocusable(false);
+        jButton_srSizeBattalion.setMaximumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeBattalion.setMinimumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeBattalion.setPreferredSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeBattalion.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton_srSize10ActionPerformed(evt);
+                jButton_srSizeBattalionActionPerformed(evt);
             }
         });
 
-        jButton_srSize15.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
-        jButton_srSize15.setText("15");
-        jButton_srSize15.setFocusable(false);
-        jButton_srSize15.setMaximumSize(new java.awt.Dimension(150, 60));
-        jButton_srSize15.setMinimumSize(new java.awt.Dimension(150, 60));
-        jButton_srSize15.setPreferredSize(new java.awt.Dimension(150, 60));
-        jButton_srSize15.addActionListener(new java.awt.event.ActionListener() {
+        jButton_srSizeRegiment.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        jButton_srSizeRegiment.setText(Size.REGIMENT.toString());
+        jButton_srSizeRegiment.setFocusable(false);
+        jButton_srSizeRegiment.setMaximumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeRegiment.setMinimumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeRegiment.setPreferredSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeRegiment.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton_srSize15ActionPerformed(evt);
+                jButton_srSizeRegimentActionPerformed(evt);
             }
         });
 
-        jButton_srSize20.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
-        jButton_srSize20.setText("20");
-        jButton_srSize20.setFocusable(false);
-        jButton_srSize20.setMaximumSize(new java.awt.Dimension(150, 60));
-        jButton_srSize20.setMinimumSize(new java.awt.Dimension(150, 60));
-        jButton_srSize20.setPreferredSize(new java.awt.Dimension(150, 60));
-        jButton_srSize20.addActionListener(new java.awt.event.ActionListener() {
+        jButton_srSizeBrigade.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        jButton_srSizeBrigade.setText(Size.BRIGADE.toString());
+        jButton_srSizeBrigade.setFocusable(false);
+        jButton_srSizeBrigade.setMaximumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeBrigade.setMinimumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeBrigade.setPreferredSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeBrigade.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton_srSize20ActionPerformed(evt);
+                jButton_srSizeBrigadeActionPerformed(evt);
             }
         });
 
-        jButton_srSizeOther.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
-        jButton_srSizeOther.setText("Other");
-        jButton_srSizeOther.setFocusable(false);
-        jButton_srSizeOther.setMaximumSize(new java.awt.Dimension(150, 60));
-        jButton_srSizeOther.setMinimumSize(new java.awt.Dimension(150, 60));
-        jButton_srSizeOther.setPreferredSize(new java.awt.Dimension(150, 60));
-        jButton_srSizeOther.addActionListener(new java.awt.event.ActionListener() {
+        jButton_srSizeDivision.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        jButton_srSizeDivision.setText(Size.DIVISION.toString());
+        jButton_srSizeDivision.setFocusable(false);
+        jButton_srSizeDivision.setMaximumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeDivision.setMinimumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeDivision.setPreferredSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeDivision.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton_srSizeOtherActionPerformed(evt);
+                jButton_srSizeDivisionActionPerformed(evt);
+            }
+        });
+
+        jButton_srSizeCorps.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        jButton_srSizeCorps.setText(Size.CORPS.toString());
+        jButton_srSizeCorps.setFocusable(false);
+        jButton_srSizeCorps.setMaximumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeCorps.setMinimumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeCorps.setPreferredSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeCorps.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton_srSizeCorpsActionPerformed(evt);
+            }
+        });
+
+        jButton_srSizeArmy.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        jButton_srSizeArmy.setText(Size.ARMY.toString());
+        jButton_srSizeArmy.setFocusable(false);
+        jButton_srSizeArmy.setMaximumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeArmy.setMinimumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeArmy.setPreferredSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeArmy.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton_srSizeArmyActionPerformed(evt);
+            }
+        });
+
+        jButton_srSizeArmyGroup.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        jButton_srSizeArmyGroup.setText(Size.ARMY_GROUP.toString());
+        jButton_srSizeArmyGroup.setFocusable(false);
+        jButton_srSizeArmyGroup.setMaximumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeArmyGroup.setMinimumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeArmyGroup.setPreferredSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeArmyGroup.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton_srSizeArmyGroupActionPerformed(evt);
+            }
+        });
+
+        jButton_srSizeRegion.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        jButton_srSizeRegion.setText(Size.REGION.toString());
+        jButton_srSizeRegion.setFocusable(false);
+        jButton_srSizeRegion.setMaximumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeRegion.setMinimumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeRegion.setPreferredSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeRegion.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton_srSizeRegionActionPerformed(evt);
+            }
+        });
+
+        jButton_srSizeCommand.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
+        jButton_srSizeCommand.setText(Size.COMMAND.toString());
+        jButton_srSizeCommand.setFocusable(false);
+        jButton_srSizeCommand.setMaximumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeCommand.setMinimumSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeCommand.setPreferredSize(new java.awt.Dimension(150, 60));
+        jButton_srSizeCommand.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton_srSizeCommandActionPerformed(evt);
             }
         });
 
@@ -793,15 +865,20 @@ public class MainMenuJPanel extends RoundedJPanel implements GPSEventListener, R
                 .addGroup(jPanel_srSizeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jButton_srSizeBack, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jLabel_srSize, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE)
-                    .addComponent(jButton_srSize1, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE)
-                    .addComponent(jButton_srSize2, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE)
-                    .addComponent(jButton_srSize3, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE)
-                    .addComponent(jButton_srSize4, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE)
-                    .addComponent(jButton_srSize5, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE)
-                    .addComponent(jButton_srSize10, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE)
-                    .addComponent(jButton_srSize15, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE)
-                    .addComponent(jButton_srSize20, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE)
-                    .addComponent(jButton_srSizeOther, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE))
+                    .addComponent(jButton_srSizeTeam, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE)
+                    .addComponent(jButton_srSizeSquad, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE)
+                    .addComponent(jButton_srSizeSection, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE)
+                    .addComponent(jButton_srSizePlatoon, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE)
+                    .addComponent(jButton_srSizeCompany, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE)
+                    .addComponent(jButton_srSizeBattalion, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE)
+                    .addComponent(jButton_srSizeRegiment, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE)
+                    .addComponent(jButton_srSizeBrigade, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE)
+                    .addComponent(jButton_srSizeDivision, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE)
+                    .addComponent(jButton_srSizeCorps, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE)
+                    .addComponent(jButton_srSizeArmy, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE)
+                    .addComponent(jButton_srSizeArmyGroup, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE)
+                    .addComponent(jButton_srSizeRegion, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE)
+                    .addComponent(jButton_srSizeCommand, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel_srSizeLayout.setVerticalGroup(
@@ -812,23 +889,33 @@ public class MainMenuJPanel extends RoundedJPanel implements GPSEventListener, R
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel_srSize)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton_srSize1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jButton_srSizeTeam, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton_srSize2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jButton_srSizeSquad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton_srSize3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jButton_srSizeSection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton_srSize4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jButton_srSizePlatoon, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton_srSize5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jButton_srSizeCompany, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton_srSize10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jButton_srSizeBattalion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton_srSize15, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jButton_srSizeRegiment, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton_srSize20, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jButton_srSizeBrigade, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton_srSizeOther, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jButton_srSizeDivision, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton_srSizeCorps, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton_srSizeArmy, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton_srSizeArmyGroup, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton_srSizeRegion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton_srSizeCommand, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -2011,7 +2098,7 @@ public class MainMenuJPanel extends RoundedJPanel implements GPSEventListener, R
 
         buttonGroup_gpsMode.add(jRadioButton_onboardGPS);
         jRadioButton_onboardGPS.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
-        jRadioButton_onboardGPS.setSelected(GPSType.ONBOARD.equals(appConfigController.getGpsType()));
+        jRadioButton_onboardGPS.setSelected(LocationMode.LOCATION_SERVICE.equals(appConfigController.getLocationMode()));
         jRadioButton_onboardGPS.setText("Onboard GPS");
         jRadioButton_onboardGPS.setFocusable(false);
         jRadioButton_onboardGPS.addActionListener(new java.awt.event.ActionListener() {
@@ -2022,7 +2109,7 @@ public class MainMenuJPanel extends RoundedJPanel implements GPSEventListener, R
 
         buttonGroup_gpsMode.add(jRadioButton_simulatedGPS);
         jRadioButton_simulatedGPS.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
-        jRadioButton_simulatedGPS.setSelected(GPSType.SIMULATED.equals(appConfigController.getGpsType()));
+        jRadioButton_simulatedGPS.setSelected(LocationMode.SIMULATOR.equals(appConfigController.getLocationMode()));
         jRadioButton_simulatedGPS.setText("Simulated GPS");
         jRadioButton_simulatedGPS.setFocusable(false);
         jRadioButton_simulatedGPS.addActionListener(new java.awt.event.ActionListener() {
@@ -2105,35 +2192,35 @@ public class MainMenuJPanel extends RoundedJPanel implements GPSEventListener, R
 }//GEN-LAST:event_jButton_mapPackageActionPerformed
 
     private void jButton_srEquipmentIEDHActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srEquipmentIEDHActionPerformed
-        setSpotReportEquipment("IED H");
+        setSpotReportEquipment(SpotReport.Equipment.IED);
 }//GEN-LAST:event_jButton_srEquipmentIEDHActionPerformed
 
     private void jButton_srEquipmentRifleHActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srEquipmentRifleHActionPerformed
-        setSpotReportEquipment("Rifle H");
+        setSpotReportEquipment(SpotReport.Equipment.RIFLE);
 }//GEN-LAST:event_jButton_srEquipmentRifleHActionPerformed
 
     private void jButton_srEquipmentArmoredTankHActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srEquipmentArmoredTankHActionPerformed
-        setSpotReportEquipment("Armored Tank H");
+        setSpotReportEquipment(SpotReport.Equipment.ARMORED_TANK);
 }//GEN-LAST:event_jButton_srEquipmentArmoredTankHActionPerformed
 
     private void jButton_srEquipmentGroundVehicleHActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srEquipmentGroundVehicleHActionPerformed
-        setSpotReportEquipment("Ground Vehicle H");
+        setSpotReportEquipment(SpotReport.Equipment.GROUND_VEHICLE);
 }//GEN-LAST:event_jButton_srEquipmentGroundVehicleHActionPerformed
 
     private void jButton_srEquipmentArmoredPersonnelCarrierHActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srEquipmentArmoredPersonnelCarrierHActionPerformed
-        setSpotReportEquipment("Armored Personnel Carrier H");
+        setSpotReportEquipment(SpotReport.Equipment.ARMORED_PERSONNEL_CARRIER);
 }//GEN-LAST:event_jButton_srEquipmentArmoredPersonnelCarrierHActionPerformed
 
     private void jButton_srEquipmentHowitzerHActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srEquipmentHowitzerHActionPerformed
-        setSpotReportEquipment("Howitzer H");
+        setSpotReportEquipment(SpotReport.Equipment.HOWITZER);
 }//GEN-LAST:event_jButton_srEquipmentHowitzerHActionPerformed
 
     private void jButton_srEquipmentGrenadeLauncherHActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srEquipmentGrenadeLauncherHActionPerformed
-        setSpotReportEquipment("Grenade Launcher H");
+        setSpotReportEquipment(SpotReport.Equipment.GRENADE_LAUNCHER);
 }//GEN-LAST:event_jButton_srEquipmentGrenadeLauncherHActionPerformed
 
     private void jButton_srEquipmentMissileLauncherHActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srEquipmentMissileLauncherHActionPerformed
-        setSpotReportEquipment("Missile Launcher H");
+        setSpotReportEquipment(SpotReport.Equipment.MISSILE_LAUNCHER);
 }//GEN-LAST:event_jButton_srEquipmentMissileLauncherHActionPerformed
 
     private void jButton_srEquipmentBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srEquipmentBackActionPerformed
@@ -2149,31 +2236,31 @@ public class MainMenuJPanel extends RoundedJPanel implements GPSEventListener, R
 }//GEN-LAST:event_jButton_srTimeBackActionPerformed
 
     private void jButton_srUnitFacilityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srUnitFacilityActionPerformed
-        setSpotReportUnit("Facility");
+        setSpotReportUnit(SpotReport.Unit.FACILITY);
 }//GEN-LAST:event_jButton_srUnitFacilityActionPerformed
 
     private void jButton_srUnitCivilianActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srUnitCivilianActionPerformed
-        setSpotReportUnit("Civilian");
+        setSpotReportUnit(SpotReport.Unit.CIVILIAN);
 }//GEN-LAST:event_jButton_srUnitCivilianActionPerformed
 
     private void jButton_srUnitNGOActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srUnitNGOActionPerformed
-        setSpotReportUnit("NGO");
+        setSpotReportUnit(SpotReport.Unit.NGO);
 }//GEN-LAST:event_jButton_srUnitNGOActionPerformed
 
     private void jButton_srUnitHostNationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srUnitHostNationActionPerformed
-        setSpotReportUnit("Host Nation");
+        setSpotReportUnit(SpotReport.Unit.HOST_NATION);
 }//GEN-LAST:event_jButton_srUnitHostNationActionPerformed
 
     private void jButton_srUnitCoalitionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srUnitCoalitionActionPerformed
-        setSpotReportUnit("Coalition");
+        setSpotReportUnit(SpotReport.Unit.COALITION);
 }//GEN-LAST:event_jButton_srUnitCoalitionActionPerformed
 
     private void jButton_srUnitIrregularActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srUnitIrregularActionPerformed
-        setSpotReportUnit("Irregular");
+        setSpotReportUnit(SpotReport.Unit.IRREGULAR);
 }//GEN-LAST:event_jButton_srUnitIrregularActionPerformed
 
     private void jButton_srUnitConventionalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srUnitConventionalActionPerformed
-        setSpotReportUnit("Conventional");
+        setSpotReportUnit(SpotReport.Unit.CONVENTIONAL);
 }//GEN-LAST:event_jButton_srUnitConventionalActionPerformed
 
     private void jButton_srUnitBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srUnitBackActionPerformed
@@ -2188,8 +2275,11 @@ public class MainMenuJPanel extends RoundedJPanel implements GPSEventListener, R
                 public void mouseClicked(MouseEvent event) {
                     mapController.cancelTrackAsync();
                     jToggleButton_srLocationFromMap.setSelected(false);
-                    spotReport.setLocation(mapController.toMapPoint(event.getX(), event.getY()), mapController.getSpatialReference().getID());
-                    jButton_srLocation.setText("Location: " + mapController.toMilitaryGrid(new Point[]{spotReport.getLocation()})[0]);
+                    Point pt = mapController.toMapPointObject(event.getX(), event.getY());
+                    spotReport.setLocationX(pt.getX());
+                    spotReport.setLocationY(pt.getY());
+                    spotReport.setLocationWkid(mapController.getSpatialReference().getID());
+                    jButton_srLocation.setText("Location: " + mapController.pointToMgrs(pt, mapController.getSpatialReference()));
                     showCard("Spot Report Unit Card");
                 }
 
@@ -2204,72 +2294,72 @@ public class MainMenuJPanel extends RoundedJPanel implements GPSEventListener, R
 }//GEN-LAST:event_jButton_srLocationBackActionPerformed
 
     private void jButton_srActivityPersonnelRecoveryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srActivityPersonnelRecoveryActionPerformed
-        setSpotReportActivity("Personnel Recovery Action");
+        setSpotReportActivity(Activity.PERSONNEL_RECOVERY);
 }//GEN-LAST:event_jButton_srActivityPersonnelRecoveryActionPerformed
 
     private void jButton_srActivityCivilianActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srActivityCivilianActionPerformed
-        setSpotReportActivity("Civilian");
+        setSpotReportActivity(Activity.CIVILIAN);
 }//GEN-LAST:event_jButton_srActivityCivilianActionPerformed
 
     private void jButton_srActivityCacheActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srActivityCacheActionPerformed
-        setSpotReportActivity("Cache");
+        setSpotReportActivity(Activity.CACHE);
 }//GEN-LAST:event_jButton_srActivityCacheActionPerformed
 
     private void jButton_srActivityStationaryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srActivityStationaryActionPerformed
-        setSpotReportActivity("Stationary");
+        setSpotReportActivity(Activity.STATIONARY);
 }//GEN-LAST:event_jButton_srActivityStationaryActionPerformed
 
     private void jButton_srActivityMovingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srActivityMovingActionPerformed
-        setSpotReportActivity("Moving");
+        setSpotReportActivity(Activity.MOVING);
 }//GEN-LAST:event_jButton_srActivityMovingActionPerformed
 
     private void jButton_srActivityDefendingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srActivityDefendingActionPerformed
-        setSpotReportActivity("Defending");
+        setSpotReportActivity(Activity.DEFENDING);
 }//GEN-LAST:event_jButton_srActivityDefendingActionPerformed
 
     private void jButton_srActivityAttackingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srActivityAttackingActionPerformed
-        setSpotReportActivity("Attacking");
+        setSpotReportActivity(Activity.ATTACKING);
 }//GEN-LAST:event_jButton_srActivityAttackingActionPerformed
 
     private void jButton_srActivityBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srActivityBackActionPerformed
         showCard("Spot Report Card");
 }//GEN-LAST:event_jButton_srActivityBackActionPerformed
 
-    private void jButton_srSizeOtherActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srSizeOtherActionPerformed
-        setSpotReportSize(SpotReport.SIZE_OTHER);
-}//GEN-LAST:event_jButton_srSizeOtherActionPerformed
+    private void jButton_srSizeDivisionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srSizeDivisionActionPerformed
+        setSpotReportSize(Size.DIVISION);
+}//GEN-LAST:event_jButton_srSizeDivisionActionPerformed
 
-    private void jButton_srSize20ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srSize20ActionPerformed
-        setSpotReportSize(20);
-}//GEN-LAST:event_jButton_srSize20ActionPerformed
+    private void jButton_srSizeBrigadeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srSizeBrigadeActionPerformed
+        setSpotReportSize(Size.BRIGADE);
+}//GEN-LAST:event_jButton_srSizeBrigadeActionPerformed
 
-    private void jButton_srSize15ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srSize15ActionPerformed
-        setSpotReportSize(15);
-}//GEN-LAST:event_jButton_srSize15ActionPerformed
+    private void jButton_srSizeRegimentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srSizeRegimentActionPerformed
+        setSpotReportSize(Size.REGIMENT);
+}//GEN-LAST:event_jButton_srSizeRegimentActionPerformed
 
-    private void jButton_srSize10ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srSize10ActionPerformed
-        setSpotReportSize(10);
-}//GEN-LAST:event_jButton_srSize10ActionPerformed
+    private void jButton_srSizeBattalionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srSizeBattalionActionPerformed
+        setSpotReportSize(Size.BATTALION);
+}//GEN-LAST:event_jButton_srSizeBattalionActionPerformed
 
-    private void jButton_srSize5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srSize5ActionPerformed
-        setSpotReportSize(5);
-}//GEN-LAST:event_jButton_srSize5ActionPerformed
+    private void jButton_srSizeCompanyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srSizeCompanyActionPerformed
+        setSpotReportSize(Size.COMPANY);
+}//GEN-LAST:event_jButton_srSizeCompanyActionPerformed
 
-    private void jButton_srSize4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srSize4ActionPerformed
-        setSpotReportSize(4);
-}//GEN-LAST:event_jButton_srSize4ActionPerformed
+    private void jButton_srSizePlatoonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srSizePlatoonActionPerformed
+        setSpotReportSize(Size.PLATOON);
+}//GEN-LAST:event_jButton_srSizePlatoonActionPerformed
 
-    private void jButton_srSize3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srSize3ActionPerformed
-        setSpotReportSize(3);
-}//GEN-LAST:event_jButton_srSize3ActionPerformed
+    private void jButton_srSizeSectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srSizeSectionActionPerformed
+        setSpotReportSize(Size.SECTION);
+}//GEN-LAST:event_jButton_srSizeSectionActionPerformed
 
-    private void jButton_srSize2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srSize2ActionPerformed
-        setSpotReportSize(2);
-}//GEN-LAST:event_jButton_srSize2ActionPerformed
+    private void jButton_srSizeSquadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srSizeSquadActionPerformed
+        setSpotReportSize(Size.SQUAD);
+}//GEN-LAST:event_jButton_srSizeSquadActionPerformed
 
-    private void jButton_srSize1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srSize1ActionPerformed
-        setSpotReportSize(1);
-}//GEN-LAST:event_jButton_srSize1ActionPerformed
+    private void jButton_srSizeTeamActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srSizeTeamActionPerformed
+        setSpotReportSize(Size.TEAM);
+}//GEN-LAST:event_jButton_srSizeTeamActionPerformed
 
     private void jButton_srSizeBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srSizeBackActionPerformed
         showCard("Spot Report Card");
@@ -2277,8 +2367,12 @@ public class MainMenuJPanel extends RoundedJPanel implements GPSEventListener, R
 
     private void jButton_srSendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srSendActionPerformed
         try {
-            spotReportController.submitSpotReport(spotReport);
+            spotReportController.sendSpotReport(spotReport, appConfigController.getUsername());
         } catch (IOException ex) {
+            Logger.getLogger(MainMenuJPanel.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ParserConfigurationException ex) {
+            Logger.getLogger(MainMenuJPanel.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (TransformerException ex) {
             Logger.getLogger(MainMenuJPanel.class.getName()).log(Level.SEVERE, null, ex);
         }
 
@@ -2446,16 +2540,24 @@ public class MainMenuJPanel extends RoundedJPanel implements GPSEventListener, R
         appConfigController.setGPXFileChooserCurrentDirectory(gpxFileChooser.getCurrentDirectory().getAbsolutePath());
 
         if (JFileChooser.APPROVE_OPTION == result) {
-            appConfigController.setGpx(gpxFileChooser.getSelectedFile().getAbsolutePath());
+            try {
+                appConfigController.setGpx(gpxFileChooser.getSelectedFile().getAbsolutePath());
+            } catch (ParserConfigurationException ex) {
+                Logger.getLogger(MainMenuJPanel.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (SAXException ex) {
+                Logger.getLogger(MainMenuJPanel.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(MainMenuJPanel.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }//GEN-LAST:event_jButton_chooseGPXFileActionPerformed
 
     private void jRadioButton_onboardGPSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton_onboardGPSActionPerformed
-        changeGpsType(GPSType.ONBOARD);
+        changeLocationMode(LocationMode.LOCATION_SERVICE);
     }//GEN-LAST:event_jRadioButton_onboardGPSActionPerformed
 
     private void jRadioButton_simulatedGPSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton_simulatedGPSActionPerformed
-        changeGpsType(GPSType.SIMULATED);
+        changeLocationMode(LocationMode.SIMULATOR);
     }//GEN-LAST:event_jRadioButton_simulatedGPSActionPerformed
 
     private void jButton_navigationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_navigationActionPerformed
@@ -2473,13 +2575,13 @@ public class MainMenuJPanel extends RoundedJPanel implements GPSEventListener, R
     }//GEN-LAST:event_jButton_resetMapActionPerformed
 
     private void jToggleButton_showMeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton_showMeActionPerformed
-        if (null != gpsController) {
-            gpsController.showGPSLayer(jToggleButton_showMe.isSelected());
+        if (null != locationController) {
+            locationController.showGPSLayer(jToggleButton_showMe.isSelected());
         }
     }//GEN-LAST:event_jToggleButton_showMeActionPerformed
 
     private void jToggleButton_sendMyLocationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton_sendMyLocationActionPerformed
-        gpsController.setSendPositionReports(jToggleButton_sendMyLocation.isSelected());
+        positionReportController.setEnabled(jToggleButton_sendMyLocation.isSelected());
     }//GEN-LAST:event_jToggleButton_sendMyLocationActionPerformed
 
     private void jButton_navigationBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_navigationBackActionPerformed
@@ -2536,31 +2638,59 @@ public class MainMenuJPanel extends RoundedJPanel implements GPSEventListener, R
         showCard("Main Card");
     }//GEN-LAST:event_jButton_waypointsBackActionPerformed
 
-    private void changeGpsType(final GPSType newType) {
+    private void jButton_srSizeCorpsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srSizeCorpsActionPerformed
+        setSpotReportSize(Size.CORPS);
+    }//GEN-LAST:event_jButton_srSizeCorpsActionPerformed
+
+    private void jButton_srSizeArmyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srSizeArmyActionPerformed
+        setSpotReportSize(Size.ARMY);
+    }//GEN-LAST:event_jButton_srSizeArmyActionPerformed
+
+    private void jButton_srSizeArmyGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srSizeArmyGroupActionPerformed
+        setSpotReportSize(Size.ARMY_GROUP);
+    }//GEN-LAST:event_jButton_srSizeArmyGroupActionPerformed
+
+    private void jButton_srSizeRegionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srSizeRegionActionPerformed
+        setSpotReportSize(Size.REGION);
+    }//GEN-LAST:event_jButton_srSizeRegionActionPerformed
+
+    private void jButton_srSizeCommandActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srSizeCommandActionPerformed
+        setSpotReportSize(Size.COMMAND);
+    }//GEN-LAST:event_jButton_srSizeCommandActionPerformed
+
+    private void changeLocationMode(final LocationMode newMode) {
         jLabel_gpsStatus.setText("Starting...");
         new Thread() {
 
             @Override
             public void run() {
-                appConfigController.setGpsType(newType);
+                try {
+                    appConfigController.setLocationMode(newMode);
+                } catch (ParserConfigurationException ex) {
+                    Logger.getLogger(MainMenuJPanel.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (SAXException ex) {
+                    Logger.getLogger(MainMenuJPanel.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IOException ex) {
+                    Logger.getLogger(MainMenuJPanel.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
 
         }.start();
     }
 
-    private void setSpotReportSize(int size) {
+    private void setSpotReportSize(Size size) {
         spotReport.setSize(size);
-        jButton_srSize.setText("Size: " + spotReport.getSizeString());
+        jButton_srSize.setText("Size: " + spotReport.getSize());
         showCard("Spot Report Activity Card");
     }
 
-    private void setSpotReportActivity(String activity) {
+    private void setSpotReportActivity(Activity activity) {
         spotReport.setActivity(activity);
         jButton_srActivity.setText("Activity: " + spotReport.getActivity());
         showCard("Spot Report Location Card");
     }
 
-    private void setSpotReportUnit(String unit) {
+    private void setSpotReportUnit(SpotReport.Unit unit) {
         spotReport.setUnit(unit);
         jButton_srUnit.setText("Unit: " + spotReport.getUnit());
         showCard("Spot Report Time Card");
@@ -2572,7 +2702,7 @@ public class MainMenuJPanel extends RoundedJPanel implements GPSEventListener, R
         showCard("Spot Report Equipment Card");
     }
 
-    private void setSpotReportEquipment(String equipment) {
+    private void setSpotReportEquipment(SpotReport.Equipment equipment) {
         spotReport.setEquipment(equipment);
         jButton_srEquipment.setText("Equipment: " + spotReport.getEquipment());
         showCard("Spot Report Card");
@@ -2628,27 +2758,19 @@ public class MainMenuJPanel extends RoundedJPanel implements GPSEventListener, R
     public void resetMenu() {
         showCard("Main Card");
     }
+    
+    public void onLocationChanged(Location location) {
+        
+    }
 
-    /**
-     * Called when GPS status changes.
-     * @param newStatus the new status.
-     */
-    public void onStatusChanged(final GPSStatus newStatus) {
+    public void onStateChanged(final LocationProvider.LocationProviderState state) {
         SwingUtilities.invokeLater(new Runnable() {
 
             public void run() {
-                jLabel_gpsStatus.setText(newStatus.toString());
+                jLabel_gpsStatus.setText(state.toString());
             }
 
         });
-    }
-
-    /**
-     * Called when GPS position changes.
-     * @param newPosition the new position.
-     */
-    public void onPositionChanged(GeoPosition newPosition) {
-        //Do nothing
     }
 
     /**
@@ -2725,7 +2847,7 @@ public class MainMenuJPanel extends RoundedJPanel implements GPSEventListener, R
      * @param graphic 
      */
     public void waypointSelected(Graphic graphic) {
-        gpsController.setSelectedWaypoint(graphic);
+        locationController.setSelectedWaypoint(graphic);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -2785,16 +2907,21 @@ public class MainMenuJPanel extends RoundedJPanel implements GPSEventListener, R
     private javax.swing.JButton jButton_srLocationOffset;
     private javax.swing.JButton jButton_srSend;
     private javax.swing.JButton jButton_srSize;
-    private javax.swing.JButton jButton_srSize1;
-    private javax.swing.JButton jButton_srSize10;
-    private javax.swing.JButton jButton_srSize15;
-    private javax.swing.JButton jButton_srSize2;
-    private javax.swing.JButton jButton_srSize20;
-    private javax.swing.JButton jButton_srSize3;
-    private javax.swing.JButton jButton_srSize4;
-    private javax.swing.JButton jButton_srSize5;
+    private javax.swing.JButton jButton_srSizeArmy;
+    private javax.swing.JButton jButton_srSizeArmyGroup;
     private javax.swing.JButton jButton_srSizeBack;
-    private javax.swing.JButton jButton_srSizeOther;
+    private javax.swing.JButton jButton_srSizeBattalion;
+    private javax.swing.JButton jButton_srSizeBrigade;
+    private javax.swing.JButton jButton_srSizeCommand;
+    private javax.swing.JButton jButton_srSizeCompany;
+    private javax.swing.JButton jButton_srSizeCorps;
+    private javax.swing.JButton jButton_srSizeDivision;
+    private javax.swing.JButton jButton_srSizePlatoon;
+    private javax.swing.JButton jButton_srSizeRegiment;
+    private javax.swing.JButton jButton_srSizeRegion;
+    private javax.swing.JButton jButton_srSizeSection;
+    private javax.swing.JButton jButton_srSizeSquad;
+    private javax.swing.JButton jButton_srSizeTeam;
     private javax.swing.JButton jButton_srTime;
     private javax.swing.JButton jButton_srTimeBack;
     private javax.swing.JButton jButton_srTimeNow;

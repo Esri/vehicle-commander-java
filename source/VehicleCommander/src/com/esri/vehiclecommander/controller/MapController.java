@@ -24,7 +24,8 @@ import com.esri.client.local.LocalServiceStartCompleteEvent;
 import com.esri.client.local.LocalServiceStartCompleteListener;
 import com.esri.client.local.ServerLifetimeEvent;
 import com.esri.client.local.ServerLifetimeListener;
-import com.esri.core.geometry.MgrsConversionMode;
+import com.esri.core.geometry.CoordinateConversion;
+import com.esri.core.geometry.GeometryEngine;
 import com.esri.core.geometry.Point;
 import com.esri.core.geometry.SpatialReference;
 import com.esri.core.map.CallbackListener;
@@ -41,6 +42,8 @@ import com.esri.map.LayerList;
 import com.esri.map.MapEvent;
 import com.esri.map.MapEventListenerAdapter;
 import com.esri.map.MapOverlay;
+import com.esri.militaryapps.model.Location;
+import com.esri.militaryapps.model.LocationProvider;
 import com.esri.vehiclecommander.model.IdentifiedItem;
 import com.esri.vehiclecommander.model.IdentifyResultList;
 import com.esri.vehiclecommander.util.Utilities;
@@ -61,15 +64,8 @@ import java.util.logging.Logger;
  * A class for interacting with the JMap map control, for convenience and abstraction.
  * UI code should not go in the MapController class.
  */
-public class MapController {
+public class MapController extends com.esri.militaryapps.controller.MapController {
 
-    /**
-     * Directions used when panning with MapController.pan(PanDirection).
-     */
-    public enum PanDirection {
-        UP, DOWN, LEFT, RIGHT
-    }
-    
     /**
      * Constant representing a mouse click event, to be used with the trackAsync
      * method.
@@ -100,7 +96,7 @@ public class MapController {
 
     private final JMap map;
     private final List<Layer> overlayLayers = new ArrayList<Layer>();
-    private final List<MapControllerListener> listeners = new ArrayList<MapControllerListener>();
+//    private final List<MapControllerListener> listeners = new ArrayList<MapControllerListener>();
     private final HashSet<CallbackListener<IdentifyResult[]>> identifyListeners = new HashSet<CallbackListener<IdentifyResult[]>>();
     private final ArrayList<IdentifiedItem> allResults = new ArrayList<IdentifiedItem>();
     /**
@@ -113,9 +109,12 @@ public class MapController {
      */
     private final Map<Layer, Map<Integer, ArcGISFeatureLayer>> layerToFeatureLayer = new HashMap<Layer, Map<Integer, ArcGISFeatureLayer>>();
     private final IdentifyListener identifyListener;
+    private final Object lastLocationLock = new Object(); 
     
     private AdvancedSymbolController symbolController;
     private MapOverlay trackOverlay = null;
+    private boolean autoPan = false;
+    private Point lastLocation = null;
 
     /**
      * Constructs a MapController with a JMap
@@ -135,70 +134,185 @@ public class MapController {
 
         });
         this.map = map;
+        
+        setAutoPan(autoPan);
         setGridVisible(appConfig.isShowMgrsGrid());
-        setGridType(Grid.GridType.MGRS);
+        map.getGrid().setType(Grid.GridType.MGRS);
         this.identifyListener = identifyListener;
         activateIdentify();
     }
 
-    /**
-     * Adds a MapControllerListener to this MapController.
-     * @param listener the listener to add.
-     */
-    public void addListener(MapControllerListener listener) {
-        listeners.add(listener);
-    }
-
-    /**
-     * Removes a MapControllerListener from this MapController. This method has
-     * no effect if this MapController does not have a reference to the specified
-     * listener.
-     * @param listener the listener to remove.
-     */
-    public void removeListener(MapControllerListener listener) {
-        listeners.remove(listener);
-    }
-
-    private void fireLayersChanged(final boolean isOverlay) {
-        for (final MapControllerListener listener : listeners) {
-            listener.layersChanged(isOverlay);
+    @Override
+    protected LocationController createLocationController() {
+        try {
+            return new LocationController(this, LocationController.LocationMode.SIMULATOR, autoPan);
+        } catch (Exception ex) {
+            Logger.getLogger(MapController.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
         }
     }
 
-    private void fireMapReady() {
-        for (MapControllerListener listener : listeners) {
-            listener.mapReady();
+    @Override
+    public void zoom(double factor) {
+        map.zoom(factor);
+    }
+
+    @Override
+    protected void _zoomToScale(double scale, double centerPointX, double centerPointY) {
+        map.zoomToScale(scale, new Point(centerPointX, centerPointY));
+    }
+
+    @Override
+    public int getWidth() {
+        return map.getWidth();
+    }
+
+    @Override
+    public int getHeight() {
+        return map.getHeight();
+    }
+
+    @Override
+    public void panTo(double centerX, double centerY) {
+        map.panTo(new Point(centerX, centerY));
+    }
+    
+    /**
+     * Pans the map to a new center point, if a valid MGRS string is provided.
+     * @param newCenterMgrs the map's new center point, as an MGRS string.
+     * @return if the string was valid, the point to which the map was panned; null otherwise
+     */
+    public Point panTo(String newCenterMgrs) {
+        newCenterMgrs = Utilities.convertToValidMgrs(newCenterMgrs,
+                pointToMgrs(map.getExtent().getCenter(), map.getSpatialReference()));
+        if (null != newCenterMgrs) {
+            Point pt = mgrsToPoint(newCenterMgrs);
+            if (null != pt) {
+                map.panTo(pt);
+                return pt;
+            } else {
+                Logger.getLogger(getClass().getName()).warning("MGRS string " + newCenterMgrs + " could not be converted to a point");
+                return null;
+            }
+        } else {
+            return null;
         }
     }
 
+    @Override
+    public double[] toMapPoint(int screenX, int screenY) {
+        Point pt = toMapPointObject(screenX, screenY);
+        if (null == pt) {
+            return null;
+        } else {
+            return new double[] { pt.getX(), pt.getY() };
+        }
+    }
+    
     /**
-     * Zooms the map in on the current center point.
+     * Returns a Point object for the specified screen coordinates.
+     * @param screenX the screen X-coordinate.
+     * @param screenY the screen Y-coordinate.
+     * @return a Point object for the specified screen coordinates.
      */
-    public void zoomIn() {
-        map.zoom(0.5);
+    public Point toMapPointObject(int screenX, int screenY) {
+        return map.toMapPoint(screenX, screenY);
     }
 
-    /**
-     * Zooms the map out, focused on the current center point.
-     */
-    public void zoomOut() {
-        map.zoom(2);
+    @Override
+    public void setGridVisible(boolean visible) {
+        map.getGrid().setVisibility(visible);
     }
 
+    @Override
+    public boolean isGridVisible() {
+        return map.getGrid().getVisibility();
+    }
+
+    @Override
+    public void setAutoPan(boolean autoPan) {
+        if (autoPan) {
+            synchronized (lastLocationLock) {
+                if (null != lastLocation) {
+                    map.panTo(lastLocation);
+                }
+            }
+        }
+        this.autoPan = autoPan;
+        if (null != getLocationController() && getLocationController() instanceof LocationController) {
+            ((LocationController) getLocationController()).setFollowLocation(autoPan);
+        }
+    }
+
+    @Override
+    public boolean isAutoPan() {
+        return autoPan;
+    }
+
+    @Override
+    public String pointToMgrs(double x, double y, int wkid) {
+        Point pt = new Point(x, y);
+        try {
+            SpatialReference sr = SpatialReference.create(wkid);
+            return pointToMgrs(pt, sr);
+        } catch (Throwable t) {
+            Logger.getLogger(MapController.class.getName()).log(Level.SEVERE, null, t);
+            return null;
+        }
+    }
+    
     /**
-     * Adds a number of degrees to the map's current rotation.
-     * @param degrees the number of degrees to add to the map's current rotation.
+     * Converts a point to an MGRS string.
+     * @param pt the point to be converted to an MGRS string.
+     * @param sr the point's spatial reference.
+     * @return the MGRS representation of the point.
      */
-    public void rotate(double degrees) {
-        double rotation = map.getRotation() + degrees;
-        rotation = Utilities.fixAngleDegrees(rotation, -180, 180);
-        map.setRotation(rotation);
+    public String pointToMgrs(Point pt, SpatialReference sr) {
+        return CoordinateConversion.pointToMgrs(pt, sr, CoordinateConversion.MGRSConversionMode.AUTO, 5, false, false);
+    }
+    
+    /**
+     * Converts an MGRS string to a map point.
+     * @param mgrsString the MGRS string to convert to a map point.
+     * @return a map point in the coordinate system of the map.
+     */
+    public Point mgrsToPoint(String mgrsString) {
+        SpatialReference sr = map.getSpatialReference();
+        if (null == sr) {
+            //Assume Web Mercator (3857)
+            sr = SpatialReference.create(3857);
+        }
+        return CoordinateConversion.mgrsToPoint(mgrsString, sr, CoordinateConversion.MGRSConversionMode.AUTO);
+    }
+
+    @Override
+    public double[] projectPoint(double x, double y, int fromWkid, int toWkid) {
+        Point pt = (Point) GeometryEngine.project(new Point(x, y), SpatialReference.create(fromWkid), SpatialReference.create(toWkid));
+        return new double[] { pt.getX(), pt.getY() };
+    }
+
+    public void onLocationChanged(Location location) {
+        if (null != location) {
+            final Point mapPoint = GeometryEngine.project(location.getLongitude(), location.getLatitude(), getSpatialReference());
+            new Thread() {
+                public void run() {
+                    synchronized (lastLocationLock) {
+                        lastLocation = mapPoint;
+                    }
+                };
+            }.start();
+        }
+    }
+
+    public void onStateChanged(LocationProvider.LocationProviderState state) {
+        
     }
 
     /**
      * Sets the map's rotation, in degrees.
      * @param degrees the new map rotation.
      */
+    @Override
     public void setRotation(double degrees) {
         map.setRotation(Utilities.fixAngleDegrees(degrees, -180, 180));
     }
@@ -206,6 +320,7 @@ public class MapController {
     /**
      * Gets the map's rotation, in degrees.
      */
+    @Override
     public double getRotation() {
         return map.getRotation();
     }
@@ -235,12 +350,17 @@ public class MapController {
 
     /**
      * Adds a layer to the map at a certain index in the layer list.
-     * @param layerIndex the index in the layer list.
+     * @param layerIndex the index in the layer list. If greater than the current
+     *                   length, the layer will be added to the end of
+     *                   the list.
      * @param layer the layer to add.
      * @param isOverlay true if the layer is an overlay that can be turned on and
      *                  off, and false otherwise.
      */
-    public void addLayer(final int layerIndex, Layer layer, boolean isOverlay) {
+    public void addLayer(int layerIndex, Layer layer, boolean isOverlay) {
+        if (layerIndex > map.getLayers().size()) {
+            layerIndex = map.getLayers().size();
+        }
         map.getLayers().add(layerIndex, layer);
         if (isOverlay) {
             for (int mapIndex = 0, listIndex = 0; mapIndex < map.getLayers().size(); mapIndex++) {
@@ -345,106 +465,6 @@ public class MapController {
     }
 
     /**
-     * Zooms the map to the given center point and scale.
-     * @param scale the new map scale, expressed as the denominator of the actual scale.
-     *              For example, if you pass 250000 as the scale, the new map scale
-     *              will be 1:250,000.
-     * @param centerPoint The new center point of the map, in the map's spatial reference
-     */
-    public void zoomToScale(final double scale, final Point centerPoint) {
-        if (map.isReady()) {
-            map.zoomToScale(scale, centerPoint);
-        } else {
-            map.addMapEventListener(new MapEventListenerAdapter() {
-
-                @Override
-                public void mapReady(MapEvent event) {
-                    map.zoomToScale(scale, centerPoint);
-                    map.removeMapEventListener(this);
-                }
-
-            });
-        }
-    }
-
-    /**
-     * Pans the map in the specified direction.
-     * @param direction the direction in which to pan the map.
-     */
-    public void pan(PanDirection direction) {
-        double diff;
-        int newScreenX = map.getWidth() / 2;
-        int newScreenY = map.getHeight() / 2;
-        switch (direction) {
-            case UP:
-            case DOWN: {
-                diff = .25 * map.getHeight();
-                switch (direction) {
-                    case UP: {
-                        newScreenY -= diff;
-                        break;
-                    }
-
-                    case DOWN: {
-                        newScreenY += diff;
-                        break;
-                    }
-                }
-                break;
-            }
-
-            case LEFT:
-            case RIGHT: {
-                diff = .25 * map.getWidth();
-                switch (direction) {
-                    case LEFT: {
-                        newScreenX -= diff;
-                        break;
-                    }
-
-                    case RIGHT: {
-                        newScreenX += diff;
-                        break;
-                    }
-                }
-                break;
-            }
-        }
-        map.panTo(map.toMapPoint(newScreenX, newScreenY));
-    }
-
-    /**
-     * Pans the map to a new center point.
-     * @param newCenter the map's new center point.
-     */
-    public void panTo(Point newCenter) {
-        map.panTo(newCenter);
-    }
-    
-    /**
-     * Pans the map to a new center point, if a valid MGRS string is provided.
-     * @param newCenterMgrs the map's new center point, as an MGRS string.
-     * @return if the string was valid, the point to which the map was panned; null otherwise
-     */
-    public Point panTo(String newCenterMgrs) {
-        newCenterMgrs = Utilities.convertToValidMgrs(newCenterMgrs, map.getExtent().getCenter(),
-                map.getSpatialReference());
-        if (null != newCenterMgrs) {
-            Point pt = fromMilitaryGrid(new String[] {newCenterMgrs})[0];
-            if (null != pt) {
-                panTo(pt);
-                return pt;
-            } else {
-                Logger.getLogger(getClass().getName()).log(Level.WARNING,
-                        "MGRS string ''{0}'' could not be converted to a point", newCenterMgrs);
-                return null;
-            }
-        } else {
-            return null;
-        }
-    }
-
-    /**
      * Track MapOverlay events, most often used to allow the user to interact with
      * the map control and get the user's mouse events. The provided MapOverlayListener
      * receives an event for each MapOverlay event specified in the mask. To stop
@@ -528,7 +548,7 @@ public class MapController {
                     allResults.clear();
                     resultToLayer.clear();
                 }
-                final Point mapPoint = toMapPoint(event.getX(), event.getY());
+                final Point mapPoint = map.toMapPoint(event.getX(), event.getY());
                 IdentifyResultList results = symbolController.identify(event.getX(), event.getY(), 5);
                 for (int i = 0; i < results.size(); i++) {
                     IdentifiedItem result = results.get(i);
@@ -617,47 +637,6 @@ public class MapController {
                 allResults.toArray(new IdentifiedItem[allResults.size()]),
                 resultToLayer
                 );
-    }
-
-    /**
-     * Converts the screen coordinates to map coordinates.
-     * @param screenX the screen X coordinate in pixels. The upper left corner of
-     *                the JMap component is 0,0.
-     * @param screenY the screen Y coordinate in pixels. The upper left corner of
-     *                the JMap component is 0,0.
-     * @return the point in map coordinates.
-     */
-    public Point toMapPoint(int screenX, int screenY) {
-        return map.toMapPoint(screenX, screenY);
-    }
-
-    /**
-     * Converts an array of map points to MGRS strings.
-     * @param points the points to convert to MGRS strings.
-     * @return an array of MGRS strings corresponding to the input points.
-     */
-    public String[] toMilitaryGrid(Point[] points) {
-        SpatialReference sr = map.getSpatialReference();
-        if (null == sr) {
-            //Assume Web Mercator (3857)
-            sr = SpatialReference.create(3857);
-        }
-
-        return sr.toMilitaryGrid(MgrsConversionMode.mgrsAutomatic, 5, false, true, points);
-    }
-    
-    /**
-     * Converts an array of MGRS points to map points.
-     * @param mgrsStrings the MGRS strings to convert to map points.
-     * @return an array of map points in the coordinate system of the map.
-     */
-    public Point[] fromMilitaryGrid(String[] mgrsStrings) {
-        SpatialReference sr = map.getSpatialReference();
-        if (null == sr) {
-            //Assume Web Mercator (3857)
-            sr = SpatialReference.create(3857);
-        }
-        return sr.fromMilitaryGrid(mgrsStrings, MgrsConversionMode.mgrsAutomatic);
     }
 
     /**
@@ -772,56 +751,6 @@ public class MapController {
     }
 
     /**
-     * Sets the map's animation duration in seconds.
-     * @param seconds the map's animation duration in seconds.
-     */
-    public void setAnimationDuration(float seconds) {
-        map.setAnimationDuration(seconds);
-    }
-
-    /**
-     * Returns the map's animation duration in seconds.
-     * @return the map's animation duration in seconds.
-     */
-    public float getAnimationDuration() {
-        return map.getAnimationDuration();
-    }
-    
-    /**
-     * Sets the type of grid to display on the map.
-     * @param gridType the type of grid to display on the map.
-     */
-    public final void setGridType(Grid.GridType gridType) {
-        map.getGrid().setType(gridType);
-    }
-    
-    /**
-     * Gets the type of grid to display on the map.
-     * @return the type of grid to display on the map.
-     */
-    public Grid.GridType getGridType() {
-        return map.getGrid().getType();
-    }
-    
-    /**
-     * Sets the map's grid to be visible or invisible. Note that you must also call setGridType
-     * with a value other than None in order to make the grid visible.
-     * @param visible true to make the grid visible and false to make the grid invisible.
-     */
-    public final void setGridVisible(boolean visible) {
-        map.getGrid().setVisibility(visible);
-    }
-    
-    /**
-     * Gets the visibility of the map's grid. The grid will not actually display
-     * if getGridType returns None.
-     * @return the visibility of the map's grid.
-     */
-    public boolean isGridVisible() {
-        return map.getGrid().getVisibility();
-    }
-    
-    /**
      * Enables or disables keyboard navigation on the map. Keyboard navigation includes
      * using the keyboard's arrow keys to pan the map.
      * @param enabled true to enable keyboard navigation, and false to disable it.
@@ -834,8 +763,4 @@ public class MapController {
         this.symbolController = symbolController;
     }
     
-    public JMap getMap() {
-        return map;
-    }
-
 }

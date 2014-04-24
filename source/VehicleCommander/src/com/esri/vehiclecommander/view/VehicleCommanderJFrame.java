@@ -16,28 +16,28 @@
 package com.esri.vehiclecommander.view;
 
 import com.esri.core.geometry.AngularUnit;
+import com.esri.core.geometry.GeometryEngine;
 import com.esri.core.geometry.Point;
-import com.esri.core.gps.GPSException;
-import com.esri.core.gps.GPSUncheckedException;
-import com.esri.core.gps.SerialPortGPSWatcher;
-import com.esri.core.symbol.advanced.SymbolDictionary.DictionaryType;
 import com.esri.map.Layer;
 import com.esri.map.MapOverlay;
+import com.esri.militaryapps.controller.ChemLightController;
+import com.esri.militaryapps.controller.LocationListener;
+import com.esri.militaryapps.controller.MessageController;
+import com.esri.militaryapps.controller.PositionReportController;
+import com.esri.militaryapps.model.Location;
+import com.esri.militaryapps.model.LocationProvider;
+import com.esri.militaryapps.model.NavigationMode;
 import com.esri.runtime.ArcGISRuntime;
 import com.esri.vehiclecommander.controller.AdvancedSymbolController;
 import com.esri.vehiclecommander.controller.AppConfigController;
 import com.esri.vehiclecommander.controller.AppConfigListener;
-import com.esri.vehiclecommander.controller.ChemLightController;
 import com.esri.vehiclecommander.controller.GPAdapter;
-import com.esri.vehiclecommander.controller.GPSController;
 import com.esri.vehiclecommander.controller.IdentifyListener;
+import com.esri.vehiclecommander.controller.LocationController;
 import com.esri.vehiclecommander.controller.MapController;
 import com.esri.vehiclecommander.controller.RouteController;
 import com.esri.vehiclecommander.controller.VehicleStatusController;
 import com.esri.vehiclecommander.controller.ViewshedController;
-import com.esri.vehiclecommander.model.GPSNavigationMode;
-import com.esri.vehiclecommander.model.GPSSimulator;
-import com.esri.vehiclecommander.model.GPSType;
 import com.esri.vehiclecommander.model.IdentifiedItem;
 import com.esri.vehiclecommander.model.MapConfig;
 import com.esri.vehiclecommander.model.MapConfigReader;
@@ -53,8 +53,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -70,6 +68,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 
 import javax.swing.JButton;
 import javax.swing.JLayeredPane;
@@ -77,7 +76,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JToggleButton;
 import javax.swing.Timer;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.stream.XMLStreamException;
 
 import org.xml.sax.SAXException;
 
@@ -125,14 +123,8 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
 
                             @Override
                             public void mouseClicked(MouseEvent event) {
-                                try {
-                                    chemLightController.addChemLight(
-                                            mapController.toMapPoint(event.getX(), event.getY()),
-                                            mapController.getSpatialReference().getID(),
-                                            color);
-                                } catch (XMLStreamException ex) {
-                                    Logger.getLogger(VehicleCommanderJFrame.class.getName()).log(Level.SEVERE, null, ex);
-                                }
+                                Point pt = mapController.toMapPointObject(event.getX(), event.getY());
+                                chemLightController.sendChemLight(pt.getX(), pt.getY(), mapController.getSpatialReference().getID(), color.getRGB());
                             }
 
                         }, MapController.EVENT_MOUSE_CLICKED);
@@ -156,9 +148,11 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
     private final RouteJPanel routePanel;
     private final MapController mapController;
     private final ChemLightController chemLightController;
-    private final GPSController gpsController;
+    private final LocationController locationController;
     private final AppConfigController appConfigController;
+    private final MessageController messageController;
     private final VehicleStatusController vehicleStatusController;
+    private final PositionReportController positionReportController;
     private final ViewshedController viewshedController;
     private final RouteController routeController;
     private final String mapConfigFilename;
@@ -244,8 +238,6 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
         identifyPanel.setVisible(false);
         getLayeredPane().add(identifyPanel, JLayeredPane.MODAL_LAYER);
 
-        chemLightController = new ChemLightController(mapController, appConfigController);
-
         viewshedController = new ViewshedController(mapController);
         viewshedController.addGPListener(new GPAdapter() {
 
@@ -328,64 +320,62 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
                 continue;
             }
         }
-
-        //Set up GPS controller
-        GPSController theGPSController = null;
-        if (GPSType.SIMULATED.equals(appConfigController.getGpsType())) {
-            try {
-                GPSSimulator gpsSimulator = null == appConfigController.getGpx()
-                        ? new GPSSimulator()
-                        : new GPSSimulator(new File(appConfigController.getGpx()));
-                double speedMultiplier = appConfigController.getSpeedMultiplier();
-                if (0 < speedMultiplier) {
-                    gpsSimulator.setSpeedMultiplier(speedMultiplier);
-                }
-                theGPSController = new GPSController(gpsSimulator, mapController, appConfigController, this);
-                gpsSimulator.addListener(identifyPanel);
-            } catch (ParserConfigurationException ex) {
-                Logger.getLogger(VehicleCommanderJFrame.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (SAXException ex) {
-                Logger.getLogger(VehicleCommanderJFrame.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException ex) {
-                Logger.getLogger(VehicleCommanderJFrame.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        } else {
-            try {
-                SerialPortGPSWatcher watcher = new SerialPortGPSWatcher();
-                theGPSController = new GPSController(watcher, mapController, appConfigController, this);
-                watcher.addListener(identifyPanel);
-            } catch (IOException ex) {
-                Logger.getLogger(VehicleCommanderJFrame.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (GPSException ex) {
-                Logger.getLogger(VehicleCommanderJFrame.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (GPSUncheckedException gpsue) {
-                Utilities.showGPSErrorMessage(gpsue.getMessage());
-            }
-        }
-        if (null == theGPSController) {
-            try {
-                theGPSController = new GPSController(null, mapController, appConfigController, this);
-            } catch (IOException ex) {
-                Logger.getLogger(VehicleCommanderJFrame.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        gpsController = theGPSController;
-        appConfigController.setGpsController(gpsController);
+ 
+        LocationController theLocationController = null;
         try {
-            gpsController.start();
-        } catch (GPSException gpsue) {
-            Utilities.showGPSErrorMessage(gpsue.getMessage());
+            //Set up GPS controller
+            theLocationController = new LocationController(mapController, appConfigController.getLocationMode(), false);
+            double speedMultiplier = appConfigController.getSpeedMultiplier();
+            if (0 < speedMultiplier) {
+                theLocationController.setSpeedMultiplier(speedMultiplier);
+            }
+            theLocationController.addListener(identifyPanel);
+            appConfigController.setLocationController(theLocationController);
+            theLocationController.start();
+        } catch (Throwable t) {
+            Logger.getLogger(VehicleCommanderJFrame.class.getName()).log(Level.SEVERE, null, t);
+            Utilities.showGPSErrorMessage(t.getMessage());
         }
+        locationController = theLocationController;
+        locationController.addListener(new LocationListener() {
+
+            public void onLocationChanged(Location location) {
+                if (null != location) {
+                    updatePosition(GeometryEngine.project(location.getLongitude(), location.getLatitude(), mapController.getSpatialReference()), location.getHeading());
+                }
+            }
+
+            public void onStateChanged(LocationProvider.LocationProviderState state) {
+                
+            }
+        });
+        
+        messageController = new MessageController(appConfigController.getPort());
+        appConfigController.setMessageController(messageController);
+        messageController.addListener(symbolController);
+        messageController.startReceiving();
+        
+        chemLightController = new ChemLightController(messageController);
+
+        positionReportController = new PositionReportController(
+                locationController,
+                messageController,
+                appConfigController.getUsername(),
+                appConfigController.getVehicleType(),
+                appConfigController.getUniqueId(),
+                appConfigController.getSic());
+        positionReportController.setPeriod(appConfigController.getPositionMessageInterval());
+        positionReportController.setEnabled(true);
         
         vehicleStatusController = new VehicleStatusController(appConfigController);
 
         //Key listener for application-wide key events
-        ApplicationKeyListener keyListener = new ApplicationKeyListener(this, mapController, gpsController);
+        ApplicationKeyListener keyListener = new ApplicationKeyListener(this, mapController, locationController);
         addKeyListener(keyListener);
         map.addKeyListener(keyListener);
 
-        mainMenu = new MainMenuJPanel(this, mapController, gpsController, appConfigController,
-                symbolController, routeController);
+        mainMenu = new MainMenuJPanel(this, mapController, locationController, appConfigController,
+                symbolController, routeController, positionReportController);
         routeController.addRouteListener(mainMenu);
         mainMenu.setVisible(false);
         getLayeredPane().add(mainMenu, JLayeredPane.MODAL_LAYER);
@@ -455,7 +445,10 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
         }
 
         try {
-            symbolController = new AdvancedSymbolController(DictionaryType.Mil2525C, "Messages", appConfigController, mapController);
+            symbolController = new AdvancedSymbolController(mapController,
+                    ImageIO.read(getClass().getResourceAsStream("/com/esri/vehiclecommander/resources/spot_report.png")),
+                    appConfigController);
+            mapController.setAdvancedSymbolController(symbolController);
             //First search is sometimes slow, so fire off the first search right here
             new Thread() {
 
@@ -469,19 +462,17 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
                 }
 
             }.start();
-        } catch (ParserConfigurationException ex) {
-            Logger.getLogger(VehicleCommanderJFrame.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SAXException ex) {
+        } catch (IOException ex) {
             Logger.getLogger(VehicleCommanderJFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        if (null != gpsController) {
-            gpsController.checkAndAddGPSLayer();
+        if (null != locationController) {
+            locationController.checkAndAddGPSLayer();
         }
     }
 
     private void cancelFollowMe() {
-        gpsController.setFollowGps(false);
+        locationController.setFollowLocation(false);
         jToggleButton_followMe.setSelected(false);
     }
 
@@ -558,10 +549,11 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
         jPanel_position = new javax.swing.JPanel();
         jLabel_locationLabel = new javax.swing.JLabel();
         jLabel_location = new javax.swing.JLabel();
-        jLabel_headingLabel = new javax.swing.JLabel();
-        jLabel_heading = new javax.swing.JLabel();
         jLabel_timeLabel = new javax.swing.JLabel();
         jLabel_time = new javax.swing.JLabel();
+        filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 0), new java.awt.Dimension(10, 0), new java.awt.Dimension(10, 0));
+        jLabel_headingLabel = new javax.swing.JLabel();
+        jLabel_heading = new javax.swing.JLabel();
         jPanel_mainToolbar = new javax.swing.JPanel();
         jPanel_subToolbar = new javax.swing.JPanel();
         jPanel_subToolbar.setVisible(false);
@@ -1008,8 +1000,10 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
         jPanel_position.setLayout(new java.awt.GridBagLayout());
 
         jLabel_locationLabel.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jLabel_locationLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel_locationLabel.setText("Location: ");
         gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 0);
         jPanel_position.add(jLabel_locationLabel, gridBagConstraints);
@@ -1018,15 +1012,31 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
         jLabel_location.setText("N/A");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 2);
         jPanel_position.add(jLabel_location, gridBagConstraints);
 
-        jLabel_headingLabel.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        jLabel_headingLabel.setText("Heading: ");
+        jLabel_timeLabel.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jLabel_timeLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jLabel_timeLabel.setText("Time: ");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        jPanel_position.add(jLabel_timeLabel, gridBagConstraints);
+
+        jLabel_time.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jLabel_time.setText("N/A");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        jPanel_position.add(jLabel_time, gridBagConstraints);
+        jPanel_position.add(filler1, new java.awt.GridBagConstraints());
+
+        jLabel_headingLabel.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jLabel_headingLabel.setText("Heading: ");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 0);
         jPanel_position.add(jLabel_headingLabel, gridBagConstraints);
@@ -1034,21 +1044,11 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
         jLabel_heading.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         jLabel_heading.setText("N/A");
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 2);
         jPanel_position.add(jLabel_heading, gridBagConstraints);
-
-        jLabel_timeLabel.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        jLabel_timeLabel.setText("Time: ");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
-        jPanel_position.add(jLabel_timeLabel, gridBagConstraints);
-
-        jLabel_time.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        jLabel_time.setText("N/A");
-        jPanel_position.add(jLabel_time, new java.awt.GridBagConstraints());
 
         jPanel_footer.add(jPanel_position);
 
@@ -1125,19 +1125,13 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
         );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        
-        // WORKAROUND: at 10.2 map.dispose needs called on exit or map may hang on Linux
-        this.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent windowEvent) {
-                super.windowClosing(windowEvent);
-                map.dispose();
+        setTitle("Vehicle Commander");
+        setUndecorated(!appConfigController.isDecorated());
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
             }
         });
-        
-        setTitle("Vehicle Commander");
-        
-        setUndecorated(!appConfigController.isDecorated());
 
         map.addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentResized(java.awt.event.ComponentEvent evt) {
@@ -1214,21 +1208,11 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
     }//GEN-LAST:event_jToggleButton_mainMenuActionPerformed
 
     private void jToggleButton_911ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton_911ActionPerformed
-        try {
-            if (jToggleButton_911.isSelected()) {
-                gpsController.sendHighlightReport();
-            } else {
-                gpsController.sendUnHighlightReport();
-            }
-        } catch (XMLStreamException ex) {
-            Logger.getLogger(VehicleCommanderJFrame.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(VehicleCommanderJFrame.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        positionReportController.setStatus911(jToggleButton_911.isSelected());
     }//GEN-LAST:event_jToggleButton_911ActionPerformed
 
     private void jToggleButton_followMeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton_followMeActionPerformed
-        gpsController.setFollowGps(jToggleButton_followMe.isSelected());
+        locationController.setFollowLocation(jToggleButton_followMe.isSelected());
     }//GEN-LAST:event_jToggleButton_followMeActionPerformed
 
     private void jToggleButton_gridActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton_gridActionPerformed
@@ -1266,21 +1250,25 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
     }//GEN-LAST:event_jToggleButton_openBasemapPanelActionPerformed
 
     private void jToggleButton_trackUpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton_trackUpActionPerformed
-        gpsController.setNavigationMode(GPSNavigationMode.TRACK_UP);
+        locationController.setNavigationMode(NavigationMode.TRACK_UP);
     }//GEN-LAST:event_jToggleButton_trackUpActionPerformed
 
     private void jToggleButton_northUpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton_northUpActionPerformed
-        gpsController.setNavigationMode(GPSNavigationMode.NORTH_UP);
+        locationController.setNavigationMode(NavigationMode.NORTH_UP);
         mapController.setRotation(0);
     }//GEN-LAST:event_jToggleButton_northUpActionPerformed
 
     private void jToggleButton_waypointUpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton_waypointUpActionPerformed
-        gpsController.setNavigationMode(GPSNavigationMode.WAYPOINT_UP);
+        locationController.setNavigationMode(NavigationMode.WAYPOINT_UP);
     }//GEN-LAST:event_jToggleButton_waypointUpActionPerformed
 
     private void mapComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_mapComponentResized
         floatingPanel.setSize(map.getSize());
     }//GEN-LAST:event_mapComponentResized
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        map.dispose();
+    }//GEN-LAST:event_formWindowClosing
 
     /**
      * Updates the position panel with the specified location and heading.
@@ -1289,8 +1277,8 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
      */
     public void updatePosition(Point mapLocation, Double headingDegrees) {
         if (null != mapLocation) {
-            String[] mgrsArray = mapController.toMilitaryGrid(new Point[]{mapLocation});
-            jLabel_location.setText(mgrsArray[0]);
+            String mgrs = mapController.pointToMgrs(mapLocation, mapController.getSpatialReference());
+            jLabel_location.setText(mgrs);
         } else {
             jLabel_location.setText("N/A");
         }
@@ -1415,6 +1403,7 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup_navigationModes;
     private javax.swing.ButtonGroup buttonGroup_tools;
+    private javax.swing.Box.Filler filler1;
     private javax.swing.JPanel floatingPanel;
     private javax.swing.JButton jButton_panDown;
     private javax.swing.JButton jButton_panLeft;

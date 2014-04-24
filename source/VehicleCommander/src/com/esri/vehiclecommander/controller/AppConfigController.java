@@ -16,13 +16,8 @@
 package com.esri.vehiclecommander.controller;
 
 import com.esri.core.geometry.AngularUnit;
-import com.esri.core.gps.GPSException;
-import com.esri.core.gps.GPSUncheckedException;
-import com.esri.core.gps.IGPSWatcher;
-import com.esri.core.gps.SerialPortGPSWatcher;
-import com.esri.vehiclecommander.model.GPSSimulator;
-import com.esri.vehiclecommander.model.GPSType;
-import com.esri.vehiclecommander.util.Utilities;
+import com.esri.militaryapps.controller.LocationController.LocationMode;
+import com.esri.militaryapps.controller.MessageController;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -67,6 +62,13 @@ public class AppConfigController {
 
     private boolean gpsTypeDirty = false;
 
+    /**
+     * @param messageController the messageController to set
+     */
+    public void setMessageController(MessageController messageController) {
+        this.messageController = messageController;
+    }
+
     private class AppConfigHandler extends DefaultHandler {
 
         private String username = null;
@@ -76,7 +78,7 @@ public class AppConfigController {
         private int port = -1;
         private int positionMessageInterval = -1;
         private int vehicleStatusMessageInterval = -1;
-        private GPSType gpsType = GPSType.SIMULATED;
+        private LocationMode gpsType = LocationMode.SIMULATOR;
         private String gpx = null;
         private double speedMultiplier = -1;
         private int headingUnits = AngularUnit.Code.DEGREE;
@@ -115,7 +117,7 @@ public class AppConfigController {
             } else if ("gps".equalsIgnoreCase(qName)) {
                 readingGps = true;
                 gpsType = "onboard".equalsIgnoreCase(attributes.getValue("type"))
-                        ? GPSType.ONBOARD : GPSType.SIMULATED;
+                        ? LocationMode.LOCATION_SERVICE : LocationMode.SIMULATOR;
                 gpx = attributes.getValue("gpx");
                 String speedMultiplierString = attributes.getValue("speedMultiplier");
                 if (null != speedMultiplierString) {
@@ -172,7 +174,8 @@ public class AppConfigController {
     private final Preferences preferences;
     private final Set<AppConfigListener> listeners = new HashSet<AppConfigListener>();
 
-    private GPSController gpsController;
+    private LocationController locationController;
+    private MessageController messageController;
 
     /**
      * Creates a new AppConfigController. This constructor first reads the user's
@@ -253,7 +256,7 @@ public class AppConfigController {
                 setVehicleStatusMessageInterval(handler.vehicleStatusMessageInterval);
             }
             if (overwriteExistingSettings || null == getGpsType()) {
-                setGpsType(handler.gpsType, false);
+                setLocationMode(handler.gpsType, false);
             }
             if (overwriteExistingSettings || null == getGpx()) {
                 setGpx(handler.gpx, false);
@@ -264,7 +267,7 @@ public class AppConfigController {
             if (overwriteExistingSettings || null == getGeomessageVersion()) {
                 setGeomessageVersion(handler.geomessageVersion);
             }
-            resetGps();
+            resetLocationController();
         }
     }
 
@@ -371,6 +374,7 @@ public class AppConfigController {
      */
     public void setPort(int port) {
         setPreference(KEY_PORT, port);
+        messageController.setPort(port);
     }
 
     /**
@@ -415,72 +419,61 @@ public class AppConfigController {
 
     /**
      * Saves the GPS type to the application configuration settings.
-     * @param gpsType the GPS type.
+     * @deprecated use setLocationMode instead.
+     * @param locationMode the location mode.
      */
-    public void setGpsType(GPSType gpsType) {
-        setGpsType(gpsType, true);
+    public void setGpsType(LocationMode locationMode) throws ParserConfigurationException, SAXException, IOException {
+        setLocationMode(locationMode);
     }
 
-    private void setGpsType(GPSType gpsType, boolean resetNow) {
-        GPSType oldType = getGpsType();
-        setPreference(KEY_GPS_TYPE, gpsType.toString());
+    /**
+     * Saves the location mode to the application configuration settings.
+     * @param locationMode the location mode.
+     */
+    public void setLocationMode(LocationMode locationMode) throws ParserConfigurationException, SAXException, IOException {
+        setLocationMode(locationMode, true);
+    }
+    
+    private void setLocationMode(LocationMode locationMode, boolean resetNow) throws ParserConfigurationException, SAXException, IOException {
+        LocationMode oldMode = getLocationMode();
+        setPreference(KEY_GPS_TYPE, locationMode.toString());
 
-        if (null == oldType || !oldType.equals(gpsType)) {
+        if (null == oldMode || !oldMode.equals(locationMode)) {
             gpsTypeDirty = true;
             if (resetNow) {
-                resetGps();
+                resetLocationController();
             }
         }
     }
 
-    private void resetGps() {
-        if (null != gpsController) {
-            try {
-                gpsController.stop();
-            } catch (GPSException ex) {
-                Logger.getLogger(AppConfigController.class.getName()).log(Level.SEVERE, null, ex);
+    private void resetLocationController() throws ParserConfigurationException, SAXException, IOException {
+        if (null != locationController) {
+            locationController.pause();
+            if (getLocationMode().equals(LocationMode.SIMULATOR)) {
+                locationController.setGpxFile(null == getGpx() ? null : new File(getGpx()));
             }
-            switch (getGpsType()) {
-                case ONBOARD: {
-                    try {
-                        gpsController.setGpsWatcher(new SerialPortGPSWatcher());
-                    } catch (GPSUncheckedException gpsue) {
-                        gpsController.setGpsWatcher(null);
-                        Utilities.showGPSErrorMessage(gpsue.getMessage());
-                    }
-                    break;
-                }
-
-                case SIMULATED:
-                default: {
-                    try {
-                        gpsController.setGpsWatcher(new GPSSimulator(null == getGpx() ? null : new File(getGpx())));
-                    } catch (Exception ex) {
-                        gpsController.setGpsWatcher(null);
-                        Logger.getLogger(AppConfigController.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            }
+            locationController.setMode(getLocationMode(), false);
             gpsTypeDirty = false;
-            try {
-                gpsController.start();
-            } catch (GPSException ex) {
-                Logger.getLogger(AppConfigController.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            locationController.start();
         }
     }
 
     /**
      * Returns the GPS type.
      * @return the GPS type.
+     * @deprecated use getLocationMode() instead.
      */
-    public GPSType getGpsType() {
+    public LocationMode getGpsType() {
+        return getLocationMode();
+    }
+    
+    public LocationMode getLocationMode() {
         String name = preferences.get(KEY_GPS_TYPE, null);
         if (null == name) {
             return null;
         } else {
             try {
-                return GPSType.valueOf(name);
+                return LocationMode.valueOf(name);
             } catch (Throwable t) {
                 return null;
             }
@@ -491,22 +484,22 @@ public class AppConfigController {
      * Saves the GPX file to be used for simulated GPS to the application configuration settings.
      * @param gpx the GPX file to be used for simulated GPS.
      */
-    public void setGpx(String gpx) {
+    public void setGpx(String gpx) throws ParserConfigurationException, SAXException, IOException {
         setGpx(gpx, true);
     }
 
-    private void setGpx(String gpx, boolean resetNow) {
+    private void setGpx(String gpx, boolean resetNow) throws ParserConfigurationException, SAXException, IOException {
         String oldGpx = getGpx();
         setPreference(KEY_GPX, gpx);
         if (resetNow) {
             if (gpsTypeDirty) {
-                resetGps();
+                resetLocationController();
             } else if (null == oldGpx) {
                 if (null != gpx) {
-                    resetGps();
+                    resetLocationController();
                 }
             } else if (!oldGpx.equals(gpx)) {
-                resetGps();
+                resetLocationController();
             }
         }
     }
@@ -525,11 +518,8 @@ public class AppConfigController {
      */
     public void setSpeedMultiplier(double multiplier) {
         setPreference(KEY_SPEED_MULTIPLIER, multiplier);
-        if (null != gpsController) {
-            IGPSWatcher gpsWatcher = gpsController.getGpsWatcher();
-            if (gpsWatcher instanceof GPSSimulator) {
-                ((GPSSimulator) gpsWatcher).setSpeedMultiplier(multiplier);
-            }
+        if (null != locationController) {
+            locationController.setSpeedMultiplier(multiplier);
         }
     }
 
@@ -582,17 +572,27 @@ public class AppConfigController {
     /**
      * Gets the application's GPSController.
      * @return the gpsController
+     * @deprecated use getLocationController() instead.
      */
-    public GPSController getGpsController() {
-        return gpsController;
+    public LocationController getGpsController() {
+        return getLocationController();
+    }
+    
+    public LocationController getLocationController() {
+        return locationController;
     }
 
     /**
      * Gives this AppConfigController a reference to the application's GPSController.
      * @param gpsController the gpsController to set
+     * @deprecated use setLocationController(LocationController) instead.
      */
-    public void setGpsController(GPSController gpsController) {
-        this.gpsController = gpsController;
+    public void setGpsController(LocationController locationController) {
+        setLocationController(locationController);
+    }
+    
+    public void setLocationController(LocationController locationController) {
+        this.locationController = locationController;
     }
 
     /**

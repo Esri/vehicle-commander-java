@@ -83,6 +83,7 @@
     </javac>
     <copy todir="${dir.build}">
       <fileset dir="${dir.src}/src" excludes="**/*.java,**/*.form" />
+      <fileset dir="${dir.src}/../military-apps-library-java/source/MilitaryAppsLibrary/src" excludes="**/*.java" />
     </copy>
   </target>
 
