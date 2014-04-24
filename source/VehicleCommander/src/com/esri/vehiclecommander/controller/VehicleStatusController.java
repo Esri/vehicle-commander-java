@@ -18,6 +18,7 @@ package com.esri.vehiclecommander.controller;
 import com.esri.core.geometry.Point;
 import com.esri.core.symbol.advanced.MessageHelper;
 import com.esri.militaryapps.controller.LocationListener;
+import com.esri.militaryapps.controller.MessageController;
 import com.esri.militaryapps.model.Location;
 import com.esri.militaryapps.model.LocationProvider;
 import com.esri.vehiclecommander.util.Utilities;
@@ -42,31 +43,28 @@ public class VehicleStatusController implements LocationListener {
     private final AppConfigController appConfig;
     private final Timer timer;
 
-    private UDPBroadcastController udpBroadcastController;
-    private int messagingPort;
+    private MessageController messageController;
     private final Point currentPoint = new Point();
     
     /**
      * Instantiates the controller and starts sending vehicle status updates, assuming
      * the app config's GPSController is providing location information.
      * @param appConfig the application configuration.
+     * @param messageController the MessageController.
      */
-    public VehicleStatusController(AppConfigController appConfig) {
+    public VehicleStatusController(AppConfigController appConfig, MessageController messageController) {
         this.appConfig = appConfig;
-        messagingPort = appConfig.getPort();
+        this.messageController = messageController;
         appConfig.getLocationController().addListener(this);
-        this.udpBroadcastController = UDPBroadcastController.getInstance(messagingPort);
         timer = new Timer(appConfig.getVehicleStatusMessageInterval(), new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
                 timer.setDelay(VehicleStatusController.this.appConfig.getVehicleStatusMessageInterval());
-                if (VehicleStatusController.this.appConfig.getPort() != messagingPort) {
-                    messagingPort = VehicleStatusController.this.appConfig.getPort();
-                    udpBroadcastController = UDPBroadcastController.getInstance(messagingPort);
-                }
                 try {
                     sendVehicleStatusReport();
                 } catch (XMLStreamException ex) {
+                    Logger.getLogger(VehicleStatusController.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IOException ex) {
                     Logger.getLogger(VehicleStatusController.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
@@ -79,7 +77,7 @@ public class VehicleStatusController implements LocationListener {
         timer.stop();
     }
     
-    private void sendVehicleStatusReport() throws XMLStreamException {
+    private void sendVehicleStatusReport() throws XMLStreamException, IOException {
         boolean sendMessage = false;
         double x = 0;
         double y = 0;
@@ -133,11 +131,7 @@ public class VehicleStatusController implements LocationListener {
             xmlStreamWriter.writeEndDocument();
             xmlStreamWriter.flush();
             String messageText = xmlStringWriter.toString();
-            try {
-                udpBroadcastController.sendUDPMessage(messageText.getBytes());
-            } catch (IOException ex) {
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-            }
+            messageController.sendMessage(messageText.getBytes());
         }
     }
 

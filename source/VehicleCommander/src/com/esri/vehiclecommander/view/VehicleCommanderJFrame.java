@@ -367,7 +367,7 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
         positionReportController.setPeriod(appConfigController.getPositionMessageInterval());
         positionReportController.setEnabled(true);
         
-        vehicleStatusController = new VehicleStatusController(appConfigController);
+        vehicleStatusController = new VehicleStatusController(appConfigController, messageController);
 
         //Key listener for application-wide key events
         ApplicationKeyListener keyListener = new ApplicationKeyListener(this, mapController, locationController);
