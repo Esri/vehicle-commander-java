@@ -29,6 +29,7 @@ import com.esri.core.geometry.GeometryEngine;
 import com.esri.core.geometry.Point;
 import com.esri.core.geometry.SpatialReference;
 import com.esri.core.map.CallbackListener;
+import com.esri.core.map.Graphic;
 import com.esri.core.tasks.ags.identify.IdentifyParameters;
 import com.esri.core.tasks.ags.identify.IdentifyResult;
 import com.esri.core.tasks.ags.identify.IdentifyTask;
@@ -239,9 +240,6 @@ public class MapController extends com.esri.militaryapps.controller.MapControlle
             }
         }
         this.autoPan = autoPan;
-        if (null != getLocationController() && getLocationController() instanceof LocationController) {
-            ((LocationController) getLocationController()).setFollowLocation(autoPan);
-        }
     }
 
     @Override
@@ -301,6 +299,30 @@ public class MapController extends com.esri.militaryapps.controller.MapControlle
                     }
                 };
             }.start();
+            
+            if (isAutoPan()) {
+                map.panTo(mapPoint);
+                
+                switch (getLocationController().getNavigationMode()) {
+                    case NORTH_UP:
+                        setRotation(0);
+                        break;
+
+                    case TRACK_UP:
+                        setRotation(location.getHeading());
+                        break;
+                        
+                    case WAYPOINT_UP:
+                        Graphic waypoint = ((LocationController) getLocationController()).getSelectedWaypoint();
+                        if (null != waypoint) {
+                            Point waypointLonLat = (Point) GeometryEngine.project(
+                                    waypoint.getGeometry(),
+                                    null == waypoint.getSpatialReference() ? getSpatialReference() : waypoint.getSpatialReference(),
+                                    Utilities.WGS84);
+                            setRotation(Utilities.calculateBearingDegrees(location.getLongitude(), location.getLatitude(), waypointLonLat.getX(), waypointLonLat.getY()));
+                        }
+                }
+            }
         }
     }
 
@@ -461,7 +483,11 @@ public class MapController extends com.esri.militaryapps.controller.MapControlle
      * @return true if the map contains the specified layer and false otherwise.
      */
     public boolean hasLayer(Layer layer) {
-        return map.getLayers().contains(layer);
+        if (null != map) {
+            return map.getLayers().contains(layer);
+        } else {
+            return false;
+        }
     }
 
     /**

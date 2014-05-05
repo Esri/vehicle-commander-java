@@ -50,7 +50,6 @@ public class MgrsLayerController extends GraphicsLayerController implements Loca
     
     public MgrsLayerController(
             MapController mapController,
-            LocationController locationController,
             AppConfigController appConfig) {
         super(mapController, "MGRS");
         appConfigController = appConfig;
@@ -61,8 +60,8 @@ public class MgrsLayerController extends GraphicsLayerController implements Loca
         haloSymbol.setHorizontalAlignment(TextSymbol.HorizontalAlignment.CENTER);
         haloSymbol.setVerticalAlignment(TextSymbol.VerticalAlignment.MIDDLE);
         setOverlayLayer(true);
-        if (null != locationController) {
-            locationController.addListener(this);
+        if (null != mapController.getLocationController()) {
+            mapController.getLocationController().addListener(this);
         }
     }
     

@@ -15,25 +15,28 @@
  ******************************************************************************/
 package com.esri.vehiclecommander.controller;
 
+import com.esri.core.gps.GPSException;
+import com.esri.core.gps.IGPSWatcher;
 import com.esri.core.map.Graphic;
 import com.esri.map.GPSLayer;
 import com.esri.militaryapps.model.LocationProvider;
+import com.esri.militaryapps.model.LocationSimulator;
 import com.esri.vehiclecommander.model.GpsLocationProvider;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 /**
- * A GPSEventListener for the Vehicle Commander application.
+ * A location controller for the Vehicle Commander application.
  */
 public class LocationController extends com.esri.militaryapps.controller.LocationController {
 
     private final MapController mapController;
-    private final Object followLocationLock = new Object();
     private final Object selectedWaypointLock = new Object();
 
     private GPSLayer gpsLayer;
-    private boolean followLocation = false;
     private Graphic selectedWaypoint = null;
 
     /**
@@ -73,35 +76,48 @@ public class LocationController extends com.esri.militaryapps.controller.Locatio
         gpsLayer.setVisible(show);
     }
 
+    @Override
+    public void start() throws ParserConfigurationException, SAXException, IOException {
+        super.start();
+        checkAndAddGPSLayer();
+        IGPSWatcher gpsWatcher = getGpsWatcher();
+        if (null != gpsWatcher) {
+            try {
+                gpsWatcher.start();
+            } catch (GPSException ex) {
+                Logger.getLogger(LocationController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+    
+    private IGPSWatcher getGpsWatcher() {
+        IGPSWatcher gpsWatcher = null;
+        if (getLocationProvider() instanceof GpsLocationProvider) {
+            GpsLocationProvider gpsLocationProvider = (GpsLocationProvider) getLocationProvider();
+            gpsWatcher = gpsLocationProvider.getGpsWatcher();
+        } else if (getLocationProvider() instanceof IGPSWatcher) {
+            gpsWatcher = (IGPSWatcher) getLocationProvider();
+        }
+        return gpsWatcher;
+    }
+
     /**
      * Checks to see if the GPS layer is in the map. If not, this method adds the
      * GPS layer to the map. The intent of this method is for resetting the map.
      */
-    public final void checkAndAddGPSLayer() {
-        if (getLocationProvider() instanceof GpsLocationProvider) {
-            GpsLocationProvider gpsLocationProvider = (GpsLocationProvider) getLocationProvider();
-            if (null != gpsLocationProvider.getGpsWatcher()
-                && !mapController.hasLayer(gpsLayer)) {
-                gpsLayer = new GPSLayer(gpsLocationProvider.getGpsWatcher());
-                gpsLayer.setShowTrail(false);
-                gpsLayer.setShowTrackPoints(false);
-                /**
-                 * TODO leverage new GPSLayer.setMode instead of doing GPS navigation
-                 * ourselves. For now, just set it to OFF.
-                 */
-                gpsLayer.setMode(GPSLayer.Mode.OFF);
-                mapController.addLayer(gpsLayer, false);
-            }
-        }
-    }
-
-    /**
-     * Sets whether the map should follow the current location.
-     * @param followLocation true if the map should follow the current location.
-     */
-    public void setFollowLocation(boolean followLocation) {
-        synchronized (followLocationLock) {
-            this.followLocation = followLocation;
+    private void checkAndAddGPSLayer() {
+        IGPSWatcher gpsWatcher = getGpsWatcher();
+        if (null != gpsWatcher
+            && !mapController.hasLayer(gpsLayer)) {
+            gpsLayer = new GPSLayer(gpsWatcher);
+            gpsLayer.setShowTrail(false);
+            gpsLayer.setShowTrackPoints(false);
+            /**
+             * TODO leverage new GPSLayer.setMode instead of doing GPS navigation
+             * ourselves. For now, just set it to OFF.
+             */
+            gpsLayer.setMode(GPSLayer.Mode.OFF);
+            mapController.addLayer(gpsLayer, false);
         }
     }
 
@@ -112,6 +128,21 @@ public class LocationController extends com.esri.militaryapps.controller.Locatio
     public void setSelectedWaypoint(Graphic selectedWaypoint) {
         synchronized (selectedWaypointLock) {
             this.selectedWaypoint = selectedWaypoint;
+        }
+    }
+    
+    public Graphic getSelectedWaypoint() {
+        synchronized (selectedWaypointLock) {
+            return selectedWaypoint;
+        }
+    }
+
+    @Override
+    protected LocationSimulator createLocationSimulator() throws ParserConfigurationException, SAXException, IOException {
+        if (null == getGpxFile()) {
+            return new com.esri.vehiclecommander.model.LocationSimulator();
+        } else {
+            return new com.esri.vehiclecommander.model.LocationSimulator(getGpxFile());
         }
     }
 

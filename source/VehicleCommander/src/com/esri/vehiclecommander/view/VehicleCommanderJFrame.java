@@ -21,6 +21,7 @@ import com.esri.core.geometry.Point;
 import com.esri.map.Layer;
 import com.esri.map.MapOverlay;
 import com.esri.militaryapps.controller.ChemLightController;
+import com.esri.militaryapps.controller.LocationController;
 import com.esri.militaryapps.controller.LocationListener;
 import com.esri.militaryapps.controller.MessageController;
 import com.esri.militaryapps.controller.PositionReportController;
@@ -33,7 +34,6 @@ import com.esri.vehiclecommander.controller.AppConfigController;
 import com.esri.vehiclecommander.controller.AppConfigListener;
 import com.esri.vehiclecommander.controller.GPAdapter;
 import com.esri.vehiclecommander.controller.IdentifyListener;
-import com.esri.vehiclecommander.controller.LocationController;
 import com.esri.vehiclecommander.controller.MapController;
 import com.esri.vehiclecommander.controller.RouteController;
 import com.esri.vehiclecommander.controller.VehicleStatusController;
@@ -148,7 +148,6 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
     private final RouteJPanel routePanel;
     private final MapController mapController;
     private final ChemLightController chemLightController;
-    private final LocationController locationController;
     private final AppConfigController appConfigController;
     private final MessageController messageController;
     private final VehicleStatusController vehicleStatusController;
@@ -321,34 +320,36 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
             }
         }
  
-        LocationController theLocationController = null;
+        LocationController locationController = null;
         try {
-            //Set up GPS controller
-            theLocationController = new LocationController(mapController, appConfigController.getLocationMode(), false);
+            locationController = mapController.getLocationController();
+            locationController.setMode(appConfigController.getLocationMode(), false);
             double speedMultiplier = appConfigController.getSpeedMultiplier();
             if (0 < speedMultiplier) {
-                theLocationController.setSpeedMultiplier(speedMultiplier);
+                locationController.setSpeedMultiplier(speedMultiplier);
             }
-            theLocationController.addListener(identifyPanel);
-            appConfigController.setLocationController(theLocationController);
-            theLocationController.start();
+            locationController.addListener(identifyPanel);
+            if (locationController instanceof com.esri.vehiclecommander.controller.LocationController) {
+                appConfigController.setLocationController((com.esri.vehiclecommander.controller.LocationController) locationController);
+            }
+            locationController.addListener(new LocationListener() {
+
+                public void onLocationChanged(Location location) {
+                    if (null != location) {
+                        updatePosition(GeometryEngine.project(location.getLongitude(), location.getLatitude(), mapController.getSpatialReference()), location.getHeading());
+                    }
+                }
+
+                public void onStateChanged(LocationProvider.LocationProviderState state) {
+
+                }
+            });
+            locationController.start();
         } catch (Throwable t) {
             Logger.getLogger(VehicleCommanderJFrame.class.getName()).log(Level.SEVERE, null, t);
             Utilities.showGPSErrorMessage(t.getMessage());
         }
-        locationController = theLocationController;
-        locationController.addListener(new LocationListener() {
-
-            public void onLocationChanged(Location location) {
-                if (null != location) {
-                    updatePosition(GeometryEngine.project(location.getLongitude(), location.getLatitude(), mapController.getSpatialReference()), location.getHeading());
-                }
-            }
-
-            public void onStateChanged(LocationProvider.LocationProviderState state) {
-                
-            }
-        });
+        
         
         messageController = new MessageController(appConfigController.getPort());
         appConfigController.setMessageController(messageController);
@@ -358,7 +359,7 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
         chemLightController = new ChemLightController(messageController);
 
         positionReportController = new PositionReportController(
-                locationController,
+                mapController.getLocationController(),
                 messageController,
                 appConfigController.getUsername(),
                 appConfigController.getVehicleType(),
@@ -370,11 +371,11 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
         vehicleStatusController = new VehicleStatusController(appConfigController, messageController);
 
         //Key listener for application-wide key events
-        ApplicationKeyListener keyListener = new ApplicationKeyListener(this, mapController, locationController);
+        ApplicationKeyListener keyListener = new ApplicationKeyListener(this, mapController);
         addKeyListener(keyListener);
         map.addKeyListener(keyListener);
 
-        mainMenu = new MainMenuJPanel(this, mapController, locationController, appConfigController,
+        mainMenu = new MainMenuJPanel(this, mapController, appConfigController,
                 symbolController, routeController, positionReportController);
         routeController.addRouteListener(mainMenu);
         mainMenu.setVisible(false);
@@ -465,14 +466,10 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
         } catch (IOException ex) {
             Logger.getLogger(VehicleCommanderJFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-        if (null != locationController) {
-            locationController.checkAndAddGPSLayer();
-        }
     }
 
     private void cancelFollowMe() {
-        locationController.setFollowLocation(false);
+        mapController.setAutoPan(false);
         jToggleButton_followMe.setSelected(false);
     }
 
@@ -1212,7 +1209,7 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
     }//GEN-LAST:event_jToggleButton_911ActionPerformed
 
     private void jToggleButton_followMeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton_followMeActionPerformed
-        locationController.setFollowLocation(jToggleButton_followMe.isSelected());
+        mapController.setAutoPan(jToggleButton_followMe.isSelected());
     }//GEN-LAST:event_jToggleButton_followMeActionPerformed
 
     private void jToggleButton_gridActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton_gridActionPerformed
@@ -1250,16 +1247,16 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
     }//GEN-LAST:event_jToggleButton_openBasemapPanelActionPerformed
 
     private void jToggleButton_trackUpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton_trackUpActionPerformed
-        locationController.setNavigationMode(NavigationMode.TRACK_UP);
+        mapController.getLocationController().setNavigationMode(NavigationMode.TRACK_UP);
     }//GEN-LAST:event_jToggleButton_trackUpActionPerformed
 
     private void jToggleButton_northUpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton_northUpActionPerformed
-        locationController.setNavigationMode(NavigationMode.NORTH_UP);
+        mapController.getLocationController().setNavigationMode(NavigationMode.NORTH_UP);
         mapController.setRotation(0);
     }//GEN-LAST:event_jToggleButton_northUpActionPerformed
 
     private void jToggleButton_waypointUpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton_waypointUpActionPerformed
-        locationController.setNavigationMode(NavigationMode.WAYPOINT_UP);
+        mapController.getLocationController().setNavigationMode(NavigationMode.WAYPOINT_UP);
     }//GEN-LAST:event_jToggleButton_waypointUpActionPerformed
 
     private void mapComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_mapComponentResized

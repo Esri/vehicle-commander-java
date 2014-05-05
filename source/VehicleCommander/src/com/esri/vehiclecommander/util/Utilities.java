@@ -200,21 +200,7 @@ public class Utilities extends com.esri.militaryapps.util.Utilities {
      * @return the compass bearing from one point to another, in degrees.
      */
     public static double calculateBearingDegrees(Point fromLocationLatLon, Point toLocationLatLon) {
-        /***********************************************************************
-         * Code lifted verbatim from Squad Leader
-         */
-        double currentLatRad = fromLocationLatLon.getY() * Math.PI / 180;
-        double destinationLatRad = toLocationLatLon.getY() * Math.PI / 180;
-        double currentLonRad = fromLocationLatLon.getX() * Math.PI / 180;
-        double destinationLonRad = toLocationLatLon.getX() * Math.PI / 180;
-        double deltaLonRad = (destinationLonRad - currentLonRad);
-
-        double y = Math.sin(deltaLonRad) * Math.cos(destinationLatRad);
-        double x = Math.cos(currentLatRad) * Math.sin(destinationLatRad) - Math.sin(currentLatRad) * Math.cos(destinationLatRad) * Math.cos(deltaLonRad);
-        double bearing = Math.atan2(y, x) / Math.PI * 180;
-
-        return (bearing + 360) % 360;
-        /***********************************************************************/
+        return Utilities.calculateBearingDegrees(fromLocationLatLon.getX(), fromLocationLatLon.getY(), toLocationLatLon.getX(), toLocationLatLon.getY());
     }
 
     /**

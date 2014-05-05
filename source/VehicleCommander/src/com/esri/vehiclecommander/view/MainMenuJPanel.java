@@ -22,6 +22,7 @@ import com.esri.core.symbol.advanced.SymbolProperties;
 import com.esri.map.Layer;
 import com.esri.map.LayerInitializeCompleteEvent;
 import com.esri.map.LayerInitializeCompleteListener;
+import com.esri.militaryapps.controller.LocationController;
 import com.esri.militaryapps.controller.LocationController.LocationMode;
 import com.esri.militaryapps.controller.LocationListener;
 import com.esri.militaryapps.controller.MessageController;
@@ -35,7 +36,6 @@ import com.esri.militaryapps.model.SpotReport.Size;
 import com.esri.vehiclecommander.controller.AdvancedSymbolController;
 import com.esri.vehiclecommander.controller.AppConfigController;
 import com.esri.vehiclecommander.controller.AppConfigDialog;
-import com.esri.vehiclecommander.controller.LocationController;
 import com.esri.vehiclecommander.controller.MapController;
 import com.esri.vehiclecommander.controller.MapControllerListenerAdapter;
 import com.esri.vehiclecommander.controller.MgrsLayerController;
@@ -79,7 +79,6 @@ public class MainMenuJPanel extends RoundedJPanel implements LocationListener, R
 
     private final Frame app;
     private final MapController mapController;
-    private final LocationController locationController;
     private final SpotReport spotReport;
     private final SpotReportController spotReportController;
     private final MessageController messageController;
@@ -106,15 +105,14 @@ public class MainMenuJPanel extends RoundedJPanel implements LocationListener, R
      * @param appConfigController the application's AppConfigController.
      * @param mil2525CSymbolController the application's MIL-STD-2525C symbol controller.
      */
-    public MainMenuJPanel(Frame app, final MapController mapController, LocationController locationController, AppConfigController appConfigController,
+    public MainMenuJPanel(Frame app, final MapController mapController, AppConfigController appConfigController,
             AdvancedSymbolController mil2525CSymbolController, RouteController routeController,
             PositionReportController positionReportController) {
-        this.mgrsLayerController = new MgrsLayerController(mapController, locationController, appConfigController);
+        this.mgrsLayerController = new MgrsLayerController(mapController, appConfigController);
         this.app = app;
         this.mapController = mapController;
-        this.locationController = locationController;
-        if (null != locationController) {
-            locationController.addListener(this);
+        if (null != mapController.getLocationController()) {
+            mapController.getLocationController().addListener(this);
         }
         this.mil2525CSymbolController = mil2525CSymbolController;
         this.spotReport = new SpotReport();
@@ -2575,8 +2573,9 @@ public class MainMenuJPanel extends RoundedJPanel implements LocationListener, R
     }//GEN-LAST:event_jButton_resetMapActionPerformed
 
     private void jToggleButton_showMeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton_showMeActionPerformed
-        if (null != locationController) {
-            locationController.showGPSLayer(jToggleButton_showMe.isSelected());
+        LocationController locationController = mapController.getLocationController();
+        if (locationController instanceof com.esri.vehiclecommander.controller.LocationController) {
+            ((com.esri.vehiclecommander.controller.LocationController) locationController).showGPSLayer(jToggleButton_showMe.isSelected());
         }
     }//GEN-LAST:event_jToggleButton_showMeActionPerformed
 
@@ -2847,7 +2846,10 @@ public class MainMenuJPanel extends RoundedJPanel implements LocationListener, R
      * @param graphic 
      */
     public void waypointSelected(Graphic graphic) {
-        locationController.setSelectedWaypoint(graphic);
+        LocationController locationController = mapController.getLocationController();
+        if (locationController instanceof com.esri.vehiclecommander.controller.LocationController) {
+            ((com.esri.vehiclecommander.controller.LocationController) locationController).setSelectedWaypoint(graphic);
+        }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

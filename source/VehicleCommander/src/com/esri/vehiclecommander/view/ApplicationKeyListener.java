@@ -16,7 +16,6 @@
 package com.esri.vehiclecommander.view;
 
 import com.esri.militaryapps.model.NavigationMode;
-import com.esri.vehiclecommander.controller.LocationController;
 import com.esri.vehiclecommander.controller.MapController;
 import com.esri.vehiclecommander.util.Utilities;
 import java.awt.Frame;
@@ -34,18 +33,15 @@ public class ApplicationKeyListener extends KeyAdapter {
 
     private final Frame frame;
     private final MapController mapController;
-    private final LocationController locationController;
     private Timer rotateTimer = null;
 
     /**
      * Constructor that takes the application frame as a parameter.
      * @param frame The application frame
      */
-    public ApplicationKeyListener(Frame frame, MapController mapController,
-            LocationController locationController) {
+    public ApplicationKeyListener(Frame frame, MapController mapController) {
         this.frame = frame;
         this.mapController = mapController;
-        this.locationController = locationController;
     }
 
     /**
@@ -67,7 +63,7 @@ public class ApplicationKeyListener extends KeyAdapter {
             rotateTimer.stop();
         } else if (KeyEvent.VK_N == e.getKeyCode()) {
             mapController.setRotation(0);
-            locationController.setNavigationMode(NavigationMode.NORTH_UP);
+            mapController.getLocationController().setNavigationMode(NavigationMode.NORTH_UP);
         }
     }
 
@@ -81,7 +77,7 @@ public class ApplicationKeyListener extends KeyAdapter {
     @Override
     public void keyPressed(final KeyEvent e) {
         if (KeyEvent.VK_V == e.getKeyCode() || KeyEvent.VK_B == e.getKeyCode()) {
-            locationController.setNavigationMode(NavigationMode.NORTH_UP);
+            mapController.getLocationController().setNavigationMode(NavigationMode.NORTH_UP);
             if (null == rotateTimer || !rotateTimer.isRunning()) {
                 //Start rotation
                 rotateTimer = new Timer(1000 / 24, new ActionListener() {

@@ -175,7 +175,7 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
     @Override
     protected boolean processMessage(Geomessage geomessage) {
         //Filter out messages that we just sent
-        if (geomessage.getId().equals(appConfigController.getUniqueId())) {
+        if (null != geomessage.getId() && geomessage.getId().equals(appConfigController.getUniqueId())) {
             return false;
         }
         
@@ -198,13 +198,15 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
         } else {
             ArrayList<Point> points = new ArrayList<Point>();
             String pointsString = (String) geomessage.getProperty(Geomessage.CONTROL_POINTS_FIELD_NAME);
-            StringTokenizer tok = new StringTokenizer(pointsString, ";");
-            while (tok.hasMoreTokens()) {
-                StringTokenizer tok2 = new StringTokenizer(tok.nextToken(), ",");
-                try {
-                    points.add(new Point(Double.parseDouble(tok2.nextToken()), Double.parseDouble(tok2.nextToken())));
-                } catch (Throwable t) {
-                    Logger.getLogger(getClass().getName()).warning("Couldn't parse point from '" + pointsString + "'");
+            if (null != pointsString) {
+                StringTokenizer tok = new StringTokenizer(pointsString, ";");
+                while (tok.hasMoreTokens()) {
+                    StringTokenizer tok2 = new StringTokenizer(tok.nextToken(), ",");
+                    try {
+                        points.add(new Point(Double.parseDouble(tok2.nextToken()), Double.parseDouble(tok2.nextToken())));
+                    } catch (Throwable t) {
+                        Logger.getLogger(getClass().getName()).warning("Couldn't parse point from '" + pointsString + "'");
+                    }
                 }
             }
             message = MessageHelper.createUpdateMessage(DictionaryType.Mil2525C,
@@ -219,7 +221,7 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
             return groupLayer.getMessageProcessor().processMessage(message);
         } catch (RuntimeException re) {
             //This is probably a message type that the MessageProcessor type doesn't support
-            Logger.getLogger(getClass().getName()).log(Level.INFO, "Couldn't process message: " + re.getMessage() + "\n"
+            Logger.getLogger(getClass().getName()).log(Level.FINER, "Couldn't process message: " + re.getMessage() + "\n"
                     + "\tIt is possible that this MessageProcessor doesn't handle messages of type "
                     + message.getProperty(MessageHelper.MESSAGE_2525C_TYPE_PROPERTY_NAME) + ".");
             return false;
