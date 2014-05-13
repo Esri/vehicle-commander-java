@@ -136,10 +136,8 @@ Vehicle Commander leverages the following as a submodule of the vehicle-commande
  
 If you should want to update to the latest commit instead of the commit used by the vehicle-commander commit you're using, you can open a GitHub shell in vehicle-commander and run the following:
 
-<code>
-$ cd .\source\military-apps-library-java  
-$ git pull origin master
-</code>
+  <code>$ cd .\source\military-apps-library-java</code>  
+  <code>$ git pull origin master</code>
 
 ### Deploying the Application
 
