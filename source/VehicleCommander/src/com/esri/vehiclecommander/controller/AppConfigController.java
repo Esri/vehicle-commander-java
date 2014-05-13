@@ -67,6 +67,9 @@ public class AppConfigController {
      */
     public void setMessageController(MessageController messageController) {
         this.messageController = messageController;
+        if (null != messageController && -1 != getPort()) {
+            messageController.setPort(getPort());
+        }
     }
 
     private class AppConfigHandler extends DefaultHandler {
@@ -374,7 +377,9 @@ public class AppConfigController {
      */
     public void setPort(int port) {
         setPreference(KEY_PORT, port);
-        messageController.setPort(port);
+        if (null != messageController) {
+            messageController.setPort(port);
+        }
     }
 
     /**
