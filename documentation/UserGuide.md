@@ -1,8 +1,8 @@
 User Guide - vehicle-commander
 ====================
 
-[Running](#running)
-[Usage](#usage)
+* [Running](#running) 
+* [Usage](#usage)
 
 ## Running
 
