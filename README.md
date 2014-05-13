@@ -111,7 +111,8 @@ This section is for developers who just need to quickly build and run the applic
 
 This section contains more detailed instructions that will help you learn more about the Vehicle Commander application. This part is divided into the following sections:
 
-* [Configuring the  the Vehicle Commander Build](#configuring-the-build)
+* [Configuring the Vehicle Commander Build](#configuring-the-build)
+* [Notes on Submodules Used by the Repo](#notes-on-submodules-used-by-the-repo)
 * [Deploying the Vehicle Commander application](#deploying-the-application)
 * [Using the Vehicle Commander application](#using-the-application)
 
@@ -126,6 +127,19 @@ This section contains more detailed instructions that will help you learn more a
 If you wish to use an IDE, configure it to use the included Ant build.xml script for best results. For Eclipse, you may wish to follow the documentation on [installing the ArcGIS Runtime SDK Eclipse plugin](http://resources.arcgis.com/en/help/runtime-java/concepts/index.html#/Installing_the_Eclipse_Plugin/01qv00000007000000/). For NetBeans, you must mount all the JARs in <RuntimeSDKJava>/SDK/jars, using a NetBeans Ant library or adding JARs directly to your project.
 
 Note: if you wish to run the application from your IDE on Linux, you must run the initialization shell script found in <RuntimeSDKJava>, and then run your IDE from the same shell. If desired, you can automate running this script using /etc/profile or ~/.bash_profile.
+
+### Notes on Submodules Used by the Repo
+
+Vehicle Commander leverages the following as a submodule of the vehicle-commander repository. 
+
+* [military-apps-library-java](https://github.com/Esri/military-apps-library-java)
+ 
+If you should want to update to the latest commit instead of the commit used by the vehicle-commander commit you're using, you can open a GitHub shell in vehicle-commander and run the following:
+
+<code>
+$ cd .\source\military-apps-library-java  
+$ git pull origin master
+</code>
 
 ### Deploying the Application
 
