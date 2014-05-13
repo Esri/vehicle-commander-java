@@ -78,7 +78,9 @@ This section is for developers who just need to quickly build and run the applic
     * To Run: `> ant run`
     * Verify “Build Succeeded” 
 * To run the application
-    * From a Command Prompt> `> java -jar VehicleCommander.jar`
+    * Open Command Prompt>
+    * `> cd vehicle-commander\source\VehicleCommander`
+    * `> java -jar dist\VehicleCommander.jar`
     * See the [user guide](documentation/UserGuide.md) for more detailed command line options
 
 ## Release Notes / Known Issues
