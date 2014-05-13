@@ -48,7 +48,7 @@ This section assumes that you have deployed the Vehicle Commander application [u
    * -exts <extension license strings or file>: use a set of extension license strings other than the ones compiled into the application. This can be either a semicolon-separated list of extension license strings or the name of a file containing only a semicolon-separated list of extension license strings. 
    * -version: print the application version and exit.
 
-The application opens as shown in [Using the Application.](#using-the-application)
+The application opens as shown in [Usage](#usage).
 
 * If the application crashes, it is possible the machine does not have the proper OpenGL capabilities. Refer to [Hardware Requirements](../README.md#hardware-requirements) to learn how to verify OpenGL.
 *  If the map opens blank, verify the paths in mapconfig.xml.
