@@ -1,12 +1,10 @@
 User Guide - vehicle-commander
 ====================
 
-[Usage](#usage)  
-[Setup](#setup)  
+[Running](#running)
+[Usage](#usage)
 
-## Usage
-
-### Running
+## Running
 
 This section assumes that you have deployed the Vehicle Commander application [using the developer instructions](../README.md), or you are running it from the application/VehicleCommander directory.
 
@@ -56,13 +54,13 @@ The application opens as shown in [Using the Application.](#using-the-applicatio
 *  If the map opens blank, verify the paths in mapconfig.xml.
 5.If you want to change user settings, click the Main Menu button and go to Options > About Me. A dialog box lets you change the user settings described in [Deploying the Application.](../README.md#deploying-the-application)
 
-### Using the Application
+## Usage
 
 ![Image of Vehicle Commander](../ScreenShotLabels.png "vehicle-commander")
 
 Vehicle Commander provides high performance mapping, situational awareness, and reporting for mounted units. It is intended for touchscreen use, though it also works properly with a mouse; in that sense, the words “click” and “tap” are interchangeable in this section.
 
-#### Mapping
+### Mapping
 
 To pan the map, press the mouse and drag, or use the navigation buttons. To zoom in or out, use the mouse wheel or the navigation buttons. To navigate to an MGRS coordinate, go to Main Menu > Navigation and type a valid MGRS string, then type Enter or tap the Go button.
 
@@ -88,7 +86,7 @@ A panel at the bottom of the application displays the current position, heading,
 
 To close the Main Menu, click the back arrow button at the top of the menu.
 
-#### Situational awareness and reporting
+### Situational awareness and reporting
 
 The map displays moving locations of friendly forces if you run the Vehicle Commander on multiple machines that are connected to the same network router. These machines must have the messaging port (default 45678; see [Deploying the Application](../README.md#deploying-the-application) ) open for UDP sending and receiving in the machine’s firewall settings. They must also have unique IDs set under Main Menu > Options > About Me > Unique ID.
 
@@ -108,7 +106,7 @@ To create a spot report:
 * After completing the final field, Equipment, you can click any field to change its value before sending.
 * When you are satisfied with your spot report values, click Send. The spot report displays on your map, as well as the maps in vehicles that receive your position reports.
 
-#### Analysis
+### Analysis
 
 When properly configured, the application provides advanced geospatial analysis. Tap the Tools button to open the toolbar.
 To calculate a viewshed, tap the Viewshed button and follow the dialog’s instructions:
@@ -133,6 +131,3 @@ You can use the Route panel to create a route with waypoints. To create a route,
 * Tap the Clear button to delete all routes and waypoints. The Clear operation cannot be undone.
 
 To hide the route, go to Main Menu > Overlays and turn off the Route overlay.
-
-## Setup
-
