@@ -1274,8 +1274,16 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
      */
     public void updatePosition(Point mapLocation, Double headingDegrees) {
         if (null != mapLocation) {
-            String mgrs = mapController.pointToMgrs(mapLocation, mapController.getSpatialReference());
-            jLabel_location.setText(mgrs);
+            try {
+                String mgrs = mapController.pointToMgrs(mapLocation, mapController.getSpatialReference());
+                jLabel_location.setText(mgrs);
+            } catch (RuntimeException re) {
+                /**
+                 * This probably means the map is not yet initialized, so we don't
+                 * yet have a valid spatial reference.
+                 */
+                Logger.getLogger(getClass().getName()).log(Level.FINE, "Couldn't update position text (probably the map is not yet initialized)", re);
+            }
         } else {
             jLabel_location.setText("N/A");
         }
