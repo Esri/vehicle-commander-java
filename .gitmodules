@@ -1,0 +1,3 @@
+[submodule "source/military-apps-library-java"]
+	path = source/military-apps-library-java
+	url = https://github.com/Esri/military-apps-library-java.git

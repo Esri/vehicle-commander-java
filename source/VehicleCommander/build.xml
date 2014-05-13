@@ -31,15 +31,14 @@
       <pathelement location="${dir.arcgis.jars}/apache-mime4j.jar"/>
       <pathelement location="${dir.arcgis.jars}/commons-codec.jar"/>
       <pathelement location="${dir.arcgis.jars}/commons-logging.jar"/>
-      <pathelement location="${dir.arcgis.jars}/gluegen-rt.jar"/>
-      <pathelement location="${dir.arcgis.jars}/gluegen-rt-natives-windows-i586.jar"/>
       <pathelement location="${dir.arcgis.jars}/httpclient.jar"/>
       <pathelement location="${dir.arcgis.jars}/httpcore.jar"/>
       <pathelement location="${dir.arcgis.jars}/httpmime.jar"/>
       <pathelement location="${dir.arcgis.jars}/jackson-core-lgpl.jar"/>
       <pathelement location="${dir.arcgis.jars}/jackson-mapper-lgpl.jar"/>
-      <pathelement location="${dir.arcgis.jars}/jogl.all.jar"/>
-      <pathelement location="${dir.arcgis.jars}/jogl-all-natives-windows-i586.jar"/>
+      <pathelement location="${dir.arcgis.jars}/jcifs.jar"/>
+      <pathelement location="${dir.arcgis.jars}/jcommon.jar"/>
+      <pathelement location="${dir.arcgis.jars}/jfreechart.jar"/>
       <pathelement location="${dir.arcgis.jars}/json.jar"/>
     </path>
     <echo message="Running from: ${dir.src}"/>	
@@ -78,9 +77,13 @@
   </target>
   
   <target name="compile" depends="create">
-    <javac srcdir="${dir.src}" classpathref="project.classpath" destdir="${dir.build}" includeantruntime="true" debug="${debug}" />
+    <javac classpathref="project.classpath" destdir="${dir.build}" includeantruntime="true" debug="${debug}">
+        <src path="${dir.src}" />
+        <src path="${dir.src}/../military-apps-library-java/source/MilitaryAppsLibrary/src" />
+    </javac>
     <copy todir="${dir.build}">
       <fileset dir="${dir.src}/src" excludes="**/*.java,**/*.form" />
+      <fileset dir="${dir.src}/../military-apps-library-java/source/MilitaryAppsLibrary/src" excludes="**/*.java" />
     </copy>
   </target>
 
@@ -98,14 +101,14 @@
     <jar destfile="${dir.dist}/VehicleCommander.jar">
       <fileset dir="${dir.build}" />
       <manifest>
-        <attribute name="Main-Class" value="com.esri.vehiclecommander.VehicleCommanderJFrame" />
+        <attribute name="Main-Class" value="com.esri.vehiclecommander.view.VehicleCommanderJFrame" />
         <attribute name="Class-Path" value="${project.classpath.string}" />
       </manifest>
     </jar>
   </target>
 
   <target name="run" depends="check_properties,jar">
-    <java classname="com.esri.vehiclecommander.VehicleCommanderJFrame" fork="true" failonerror="true">
+    <java classname="com.esri.vehiclecommander.view.VehicleCommanderJFrame" fork="true" failonerror="true">
       <classpath refid="project.classpath"/>
     </java>
   </target>
