@@ -27,5 +27,11 @@ public interface AppConfigListener {
      *                    if the preference was changed to undecorated.
      */
     public void decoratedChanged(boolean isDecorated);
+    
+    /**
+     * Called when the "showMessageLabels" preference changes. This preference
+     * indicates whether labels will appear with military symbols.
+     */
+    public void showMessageLabelsChanged(boolean showMessageLabels);
 
 }

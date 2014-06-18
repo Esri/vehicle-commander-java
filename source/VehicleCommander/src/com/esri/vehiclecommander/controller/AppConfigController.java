@@ -612,8 +612,23 @@ public class AppConfigController {
      * Tells the application whether it should show labels for new message features.
      * @param showMessageLabels true if the application should show labels for new message features.
      */
-    public void setShowMessageLabels(boolean showMessageLabels) {
+    public void setShowMessageLabels(final boolean showMessageLabels) {
+        final boolean oldValue = isShowMessageLabels();
         setPreference(KEY_SHOW_MESSAGE_LABELS, showMessageLabels);
+        if (oldValue != showMessageLabels) {
+            synchronized (listeners) {
+                for (final AppConfigListener listener : listeners) {
+                    new Thread() {
+
+                        @Override
+                        public void run() {
+                            listener.showMessageLabelsChanged(showMessageLabels);
+                        }
+                        
+                    }.start();                    
+                }
+            }
+        }
     }
 
     /**
