@@ -390,7 +390,7 @@ public class IdentifyResultsJPanel extends RoundedJPanel implements LocationList
                 public void actionPerformed(ActionEvent e) {
                     BrowserLauncher.openURL(featureLayer.getAttachmentURL(
                             Integer.parseInt((String) result.getAttributes().get(featureLayer.getObjectIdField())),
-                            attInfo.getId()));
+                            (int) attInfo.getId()));
                 }
             });
             jPanel_results.add(button, c);
