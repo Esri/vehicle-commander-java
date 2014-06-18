@@ -15,11 +15,15 @@
  ******************************************************************************/
 package com.esri.vehiclecommander.model;
 
+import com.esri.core.renderer.DictionaryRenderer;
 import com.esri.core.symbol.advanced.Message;
 import com.esri.core.symbol.advanced.MessageProcessor;
 import com.esri.core.symbol.advanced.SymbolDictionary.DictionaryType;
+import com.esri.map.GraphicsLayer;
+import com.esri.map.Layer;
 import com.esri.map.MessageGroupLayer;
 import com.esri.vehiclecommander.controller.AppConfigController;
+import com.esri.vehiclecommander.controller.AppConfigListener;
 import com.esri.vehiclecommander.controller.MapController;
 import com.esri.vehiclecommander.controller.MapControllerListenerAdapter;
 import java.io.File;
@@ -44,7 +48,7 @@ public class Mil2525CMessageLayer extends MessageGroupLayer {
      * @param xmlMessageFilename the XML file on which this layer is based.
      * @param name the layer name.
      * @param mapController the MapController.
-     * @param appConfig the application configuration's controller.
+     * @param appConfig the application configuration's controller (cannot be null).
      * @throws IOException
      * @throws ParserConfigurationException
      * @throws SAXException
@@ -76,9 +80,20 @@ public class Mil2525CMessageLayer extends MessageGroupLayer {
     }
 
     private void init(String xmlMessageFilename, String name, MapController mapController, String symbolDictionaryPath) throws ParserConfigurationException, SAXException, IOException {
+        appConfig.addListener(new AppConfigListener() {
+
+            public void decoratedChanged(boolean isDecorated) {
+                //Do nothing
+            }
+
+            public void showMessageLabelsChanged(boolean showMessageLabels) {
+                toggleLabels(showMessageLabels);
+            }
+        });
+        
         this.setName(name);
         final MessageProcessor processor = null == symbolDictionaryPath ?
-            new MessageProcessor(DictionaryType.Mil2525C, this) :
+            new MessageProcessor(DictionaryType.Mil2525C, this, 1.0) :
             new MessageProcessor(DictionaryType.Mil2525C, this, symbolDictionaryPath);
         Mil2525CMessageParser parser = new Mil2525CMessageParser();
         final ArrayList<Message> messages = parser.parseMessages(new File(xmlMessageFilename));
@@ -88,10 +103,6 @@ public class Mil2525CMessageLayer extends MessageGroupLayer {
             public void mapReady() {
                 synchronized (messages) {
                     for (Message message : messages) {
-                        if (!appConfig.isShowMessageLabels()) {
-                            message.setProperty("AdditionalInformation", "");
-                            message.setProperty("UniqueDesignation", "");
-                        }
                         try {
                             //Any other problem simply throws a RuntimeException, but a missing
                             //message ID crashes the JVM. Therefore, we test for that case and
@@ -105,9 +116,22 @@ public class Mil2525CMessageLayer extends MessageGroupLayer {
                             Logger.getLogger(getClass().getName()).log(Level.WARNING, "Bad message in layer\n\tMessage: " + message + "\n\tError: " + re.getMessage());
                         }
                     }
+                    //Now that all the sublayers are created, turn labels on or off.
+                    toggleLabels(appConfig.isShowMessageLabels());
                 }
             }
         });
+    }
+    
+    private void toggleLabels(boolean showLabels) {
+        for (Layer layer : getLayers()) {
+            GraphicsLayer graphicsLayer = (GraphicsLayer) layer;
+            if (graphicsLayer.getRenderer() instanceof DictionaryRenderer) {
+                DictionaryRenderer dictionaryRenderer = (DictionaryRenderer) graphicsLayer.getRenderer();
+                dictionaryRenderer.setLabelsVisible(showLabels);
+                graphicsLayer.setRenderer(dictionaryRenderer);
+            }
+        }
     }
 
 }

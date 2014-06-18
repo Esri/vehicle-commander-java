@@ -20,6 +20,7 @@ import com.esri.core.geometry.GeometryEngine;
 import com.esri.core.geometry.Point;
 import com.esri.core.geometry.SpatialReference;
 import com.esri.core.map.Graphic;
+import com.esri.core.renderer.DictionaryRenderer;
 import com.esri.core.symbol.PictureMarkerSymbol;
 import com.esri.core.symbol.Symbol;
 import com.esri.core.symbol.advanced.Message;
@@ -80,6 +81,20 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
         mapController.addLayer(groupLayer, false);
         
         spotReportSymbol = new PictureMarkerSymbol(spotReportIcon);
+        
+        setShowLabels(appConfigController.isShowMessageLabels());
+    }
+
+    @Override
+    protected void toggleLabels() {
+        for (Layer layer : groupLayer.getLayers()) {
+            GraphicsLayer graphicsLayer = (GraphicsLayer) layer;
+            if (graphicsLayer.getRenderer() instanceof DictionaryRenderer) {
+                DictionaryRenderer dictionaryRenderer = (DictionaryRenderer) graphicsLayer.getRenderer();
+                dictionaryRenderer.setLabelsVisible(isShowLabels());
+                graphicsLayer.setRenderer(dictionaryRenderer);
+            }
+        }
     }
     
     @Override
@@ -170,7 +185,6 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
         filters.put("Category", categories);
         return groupLayer.getMessageProcessor().getSymbolDictionary().findSymbols(filters);
     }
-
     
     @Override
     protected boolean processMessage(Geomessage geomessage) {
@@ -218,7 +232,7 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
         }
         
         try {
-            return groupLayer.getMessageProcessor().processMessage(message);
+            return _processMessage(message);
         } catch (RuntimeException re) {
             //This is probably a message type that the MessageProcessor type doesn't support
             Logger.getLogger(getClass().getName()).log(Level.FINER, "Couldn't process message: " + re.getMessage() + "\n"
@@ -228,10 +242,19 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
         }
     }
     
+    private boolean _processMessage(Message message) {
+        final int layerCount = groupLayer.getLayers().length;
+        boolean success = groupLayer.getMessageProcessor().processMessage(message);
+        if (layerCount < groupLayer.getLayers().length) {
+            toggleLabels();
+        }
+        return success;
+    }
+    
     @Override
     protected boolean processHighlightMessage(String geomessageId, String messageType, boolean highlight) {
         Message message = MessageHelper.createSelectMessage(DictionaryType.Mil2525C, geomessageId, messageType, highlight);
-        return groupLayer.getMessageProcessor().processMessage(message);
+        return _processMessage(message);
     }
 
     @Override
@@ -270,7 +293,7 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
     @Override
     protected void processRemoveGeomessage(String geomessageId, String messageType) {
         Message message = MessageHelper.createRemoveMessage(DictionaryType.Mil2525C, geomessageId, messageType);
-        groupLayer.getMessageProcessor().processMessage(message);
+        _processMessage(message);
     }
 
     public void geomessageReceived(Geomessage geomessage) {

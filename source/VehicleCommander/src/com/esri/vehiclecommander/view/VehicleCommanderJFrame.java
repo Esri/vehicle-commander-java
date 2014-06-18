@@ -1483,6 +1483,12 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
                     + (isDecorated ? "add" : "remove") + " the title bar.");
         }
     }
+
+    public void showMessageLabelsChanged(boolean showMessageLabels) {
+        if (null != symbolController) {
+            symbolController.setShowLabels(showMessageLabels);
+        }
+    }
     
     /**
      * Adds an action button to the main toolbar.
