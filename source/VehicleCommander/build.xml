@@ -63,6 +63,13 @@
   </target>
 
   <target name="build" depends="create,compile,jar,dist-files">
+    <echo message="*********************************************************************" />
+    <echo message="*** IMPORTANT:                                                    ***" />
+    <echo message="*** Did you remember to pull latest military-apps-library-java?   ***" />
+    <echo message="*** $ git pull https://github.com/Esri/military-apps-library-java ***" />
+    <echo message="*** - or -                                                        ***" />
+    <echo message="*** $ git submodule foreach git pull                              ***" />
+    <echo message="*********************************************************************" />  
   </target>
 
   <target name="dist-files" depends="jar">

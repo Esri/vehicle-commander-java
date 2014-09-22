@@ -212,5 +212,5 @@ Note: Portions of this code use Beans Binding (JSR-295) which is licensed under
 GNU Lesser General Public License 2.1. See [license-ThirdParty.txt](license-ThirdParty.txt) for the details 
 of this license or visit the [Beans Binding](http://java.net/projects/beansbinding/) project for more details 
 
-[](Esri Tags: ArcGIS Defense and Intelligence Situational Awareness ArcGIS Runtime JavaSE Military)
+[](Esri Tags: ArcGIS Defense and Intelligence Situational Awareness ArcGIS Runtime JavaSE Military ArcGISSolutions)
 [](Esri Language: Java)
