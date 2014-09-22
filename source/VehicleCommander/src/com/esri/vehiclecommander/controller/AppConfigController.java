@@ -460,6 +460,7 @@ public class AppConfigController {
     private void resetLocationController() throws ParserConfigurationException, SAXException, IOException {
         if (null != locationController) {
             locationController.pause();
+            locationController.reset();
             if (getLocationMode().equals(LocationMode.SIMULATOR)) {
                 locationController.setGpxFile(null == getGpx() ? null : new File(getGpx()));
             }
