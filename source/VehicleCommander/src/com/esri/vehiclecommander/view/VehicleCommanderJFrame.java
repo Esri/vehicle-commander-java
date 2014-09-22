@@ -140,7 +140,8 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
     private static final long serialVersionUID = -4694556823082813076L;
     public static final String LICENSE_NOT_SET = "NOT SET (insert license string here)";
     public static final String BUILT_IN_LICENSE_STRING = LICENSE_NOT_SET; // TODO: (insert license string here)
-    public static final String BUILT_IN_EXTS_STRING = LICENSE_NOT_SET;    // TODO: (insert extension license string(s) here)    
+    public static final String BUILT_IN_EXTS_STRING = LICENSE_NOT_SET;    // TODO: (insert extension license string(s) here)
+    public static final String BUILT_IN_CLIENT_ID = LICENSE_NOT_SET;      // TODO: (insert client ID here)
     private final MainMenuJPanel mainMenu;
     private final BasemapsJPanel basemapsPanel;
     private final IdentifyResultsJPanel identifyPanel;
@@ -158,6 +159,7 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
     private MapConfig mapConfig;
     private String licenseString;
     private String[] extsStrings;
+    private String clientId;
     private AdvancedSymbolController symbolController;
     private final MapOverlay stopFollowMeOverlay;
     private final Timer updateTimeDisplayTimer;
@@ -168,7 +170,7 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
      * file called mapconfig.xml is found in the working directory.
      */
     public VehicleCommanderJFrame() {
-        this("./mapconfig.xml", null, null);
+        this("./mapconfig.xml", null, null, null);
     }
 
     /**
@@ -181,12 +183,14 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
      * @param extsString the ArcGIS Runtime extension license strings, separated
      *                   by semicolons, or the name of a file that contains the
      *                   ArcGIS Runtime extension license strings separated by semicolons.
+     * @param clientId the ArcGIS client ID for this app, or the name of a file that
+     *                 contains the ArcGIS client ID for this app.
      * @throws IOException
      * @throws ParserConfigurationException
      * @throws SAXException
      */
     @SuppressWarnings("LeakingThisInConstructor")
-    public VehicleCommanderJFrame(String mapConfigFilename, String licenseString, String extsString) {
+    public VehicleCommanderJFrame(String mapConfigFilename, String licenseString, String extsString, String clientId) {
         if (null == mapConfigFilename || !new File(mapConfigFilename).exists()) {
             mapConfigFilename = "./mapconfig.xml";
         }
@@ -194,12 +198,15 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
 
         setLicenseString((null != licenseString) ? licenseString : BUILT_IN_LICENSE_STRING);
         setExtensionLicensesString((null != extsString) ? extsString : BUILT_IN_EXTS_STRING);
+        setClientId((null != clientId) ? clientId : BUILT_IN_CLIENT_ID);
         
-        if ((this.licenseString == LICENSE_NOT_SET) || (this.extsStrings[0] == LICENSE_NOT_SET))
-        	System.out.println("Warning: LICENSE NOT SET - this must be run on a Development License machine");
-        else
-           	ArcGISRuntime.setLicense(this.licenseString, this.extsStrings);
-      
+        if (LICENSE_NOT_SET.equals(this.clientId) || LICENSE_NOT_SET.equals(this.licenseString) || LICENSE_NOT_SET.equals(this.extsStrings[0])) {
+            System.out.println("Warning: LICENSE NOT SET - this must be run on a Development License machine");
+        } else {
+            ArcGISRuntime.setClientID(this.clientId);
+            ArcGISRuntime.License.setLicense(this.licenseString, this.extsStrings);
+        }
+        
         try {
             ArcGISRuntime.initialize();
         } catch (Throwable t) {
@@ -494,6 +501,12 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
             for (int i = 0; i < extsStrings.length; i++) {
                 extsStrings[i] = tok.nextToken();
             }
+        }
+    }
+    
+    private void setClientId(String clientId) {
+        if (null != clientId) {
+            this.clientId = readFileIntoStringOrReturnString(clientId);
         }
     }
 
@@ -1346,6 +1359,7 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
      *     <li>-mapconfig &lt;map configuration XML filename&gt;</li>
      *     <li>-license &lt;license string or file&gt;</li>
      *     <li>-exts <extensions license filename> OR <extension license string 1>;<ext license 2>;...;<ext license n></li>
+     *     <li>-clientid &lt;client ID or file&gt;</li>
      * </ul>
      * To simply print the version and exit, use -version.
      */
@@ -1353,6 +1367,7 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
         String mapConfig = null;
         String license = null;
         String exts = null;
+        String clientId = null;
         boolean isPrintVersion = false;
         for (int i = 0; i < args.length; i++) {
             if ("-version".equals(args[i])) {
@@ -1364,11 +1379,14 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
                 license = readFileIntoStringOrReturnString(args[++i]);
             } else if ("-exts".equals(args[i]) && i < (args.length - 1)) {
                 exts = readFileIntoStringOrReturnString(args[++i]);                
+            } else if ("-clientid".equalsIgnoreCase(args[i]) && i < (args.length - 1)) {
+                clientId = readFileIntoStringOrReturnString(args[++i]);
             }
         }
         final String finalMapConfig = mapConfig;
         final String finalLicense = license;
         final String finalExts = exts;
+        final String finalClientId = clientId;
 
         String jarName = "<JAR file name>";
         try {
@@ -1387,8 +1405,7 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
         if (isPrintVersion) {
             // Not sure why, but was throwing license error on deploy machine with only " -version" option 
             // so adding setLicense as a workaround
-            ArcGISRuntime.setLicense((null != finalLicense) ? finalLicense : BUILT_IN_LICENSE_STRING, 
-                (null != finalExts) ? finalExts : BUILT_IN_EXTS_STRING);
+            ArcGISRuntime.License.setLicense((null != finalLicense) ? finalLicense : BUILT_IN_LICENSE_STRING);
             System.out.println("Vehicle Commander Build " + Utilities.getBuildId());
             System.exit(0);
         } else {
@@ -1400,7 +1417,7 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
             java.awt.EventQueue.invokeLater(new Runnable() {
 
                 public void run() {
-                    new VehicleCommanderJFrame(finalMapConfig, finalLicense, finalExts).setVisible(true);
+                    new VehicleCommanderJFrame(finalMapConfig, finalLicense, finalExts, finalClientId).setVisible(true);
                 }
             });
         }
