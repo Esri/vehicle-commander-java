@@ -95,7 +95,6 @@
   </target>
 
   <target name="jar" depends="compile">
-    <copy overwrite="true" file="${dir.src}/src/version.properties" todir="${dir.build}" />
     <pathconvert pathsep=" " property="project.classpath.string" refid="project.classpath">
       <chainedmapper>
         <flattenmapper/>

@@ -143,17 +143,6 @@ public class Utilities extends com.esri.militaryapps.util.Utilities {
     private static final HashMap<Integer, AngularUnit> ANGULAR_UNITS =
             new HashMap<Integer, AngularUnit>();
 
-    private static final ResourceBundle versionProperties;
-    static {
-        ResourceBundle theVersionProperties = null;
-        try {
-            theVersionProperties = ResourceBundle.getBundle("version");
-        } catch (Throwable t) {
-            
-        }
-        versionProperties = theVersionProperties;
-    }
-
     /**
      * Private constructor because Utilities is not meant to be instantiated.
      */
@@ -251,15 +240,6 @@ public class Utilities extends com.esri.militaryapps.util.Utilities {
         JOptionPane.showMessageDialog(null, errorMessage, "Problem Connecting to GPS", JOptionPane.ERROR_MESSAGE);
     }
 
-    /**
-     * Returns the build ID for this build of the application, or an empty string.
-     * @return the build ID for this build of the application, or an empty string.
-     */
-    public static String getBuildId() {
-        String build = null == versionProperties ? null : versionProperties.getString("BUILD");
-        return (null == build) ? "" : build;
-    }
-    
     /**
      * Returns an instance of an AngularUnit object for the specified WKID. This
      * method means you don't have to recreate equivalent AngularUnit objects. Note
