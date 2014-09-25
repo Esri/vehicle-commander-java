@@ -1,4 +1,4 @@
-package com.esri.vehiclecommander;
+package com.esri.vehiclecommander.view.test;
 
 import com.esri.runtime.ArcGISRuntime;
 import com.esri.client.local.LocalServer;
