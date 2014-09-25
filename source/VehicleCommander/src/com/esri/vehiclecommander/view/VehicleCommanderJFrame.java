@@ -46,7 +46,11 @@ import com.esri.vehiclecommander.util.Utilities;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.Image;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -68,6 +72,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 import javax.imageio.ImageIO;
 
 import javax.swing.JButton;
@@ -138,6 +143,11 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
     }
 
     private static final long serialVersionUID = -4694556823082813076L;
+    private static final String KEY_FRAME_EXTENDED_STATE = VehicleCommanderJFrame.class.getSimpleName() + "frameExtendedState";
+    private static final String KEY_FRAME_WIDTH = VehicleCommanderJFrame.class.getSimpleName() + "frameWidth";
+    private static final String KEY_FRAME_HEIGHT = VehicleCommanderJFrame.class.getSimpleName() + "frameHeight";
+    private static final String KEY_FRAME_LOCATION_X = VehicleCommanderJFrame.class.getSimpleName() + "frameLocationX";
+    private static final String KEY_FRAME_LOCATION_Y = VehicleCommanderJFrame.class.getSimpleName() + "frameLocationY";
     public static final String LICENSE_NOT_SET = "NOT SET (insert license string here)";
     public static final String BUILT_IN_LICENSE_STRING = LICENSE_NOT_SET; // TODO: (insert license string here)
     public static final String BUILT_IN_EXTS_STRING = LICENSE_NOT_SET;    // TODO: (insert extension license string(s) here)
@@ -236,9 +246,40 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
             }
         }).start();
 
-        //Full screen
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds(0, 0, screenSize.width, screenSize.height);
+        //Window location and size
+        Preferences prefs = Preferences.userNodeForPackage(getClass());
+        int windowState = prefs.getInt(KEY_FRAME_EXTENDED_STATE, -1) ^ Frame.ICONIFIED;
+        System.out.println("windowState is " + windowState);
+        if (-1 < windowState) {
+            int width = prefs.getInt(KEY_FRAME_WIDTH, getWidth());
+            int height = prefs.getInt(KEY_FRAME_HEIGHT, getHeight());
+            int locationX = prefs.getInt(KEY_FRAME_LOCATION_X, 0);
+            int locationY = prefs.getInt(KEY_FRAME_LOCATION_Y, 0);
+            java.awt.Point location = new java.awt.Point(locationX, locationY);
+            Rectangle bounds = new Rectangle(locationX, locationY, width, height);
+            
+            //Verify that the location is on a valid screen
+            boolean onValidScreen = false;
+            GraphicsEnvironment genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            GraphicsDevice[] screenDevices = genv.getScreenDevices();
+            for (GraphicsDevice dev : screenDevices) {
+                if (dev.getDefaultConfiguration().getBounds().intersects(bounds)) {
+                    onValidScreen = true;
+                    break;
+                }
+            }
+            if (!onValidScreen) {
+                location = screenDevices[0].getDefaultConfiguration().getBounds().getLocation();
+            }
+            
+            //Only set the size if not maximized
+            if (0 == (windowState & Frame.MAXIMIZED_BOTH)) {
+                setSize(width, height);
+            }
+            
+            setLocation(location);
+            setExtendedState(windowState);
+        }
 
         identifyPanel = new IdentifyResultsJPanel(mapController);
         identifyPanel.setVisible(false);
@@ -1136,6 +1177,7 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Vehicle Commander");
+        setPreferredSize(new java.awt.Dimension(1024, 708));
         setUndecorated(!appConfigController.isDecorated());
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
@@ -1278,6 +1320,16 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         map.dispose();
+        
+        //Store window location and size
+        Preferences prefs = Preferences.userNodeForPackage(getClass());
+        prefs.putInt(KEY_FRAME_EXTENDED_STATE, getExtendedState());
+        Dimension size = getSize();
+        prefs.putInt(KEY_FRAME_WIDTH, size.width);
+        prefs.putInt(KEY_FRAME_HEIGHT, size.height);
+        java.awt.Point location = getLocation();
+        prefs.putInt(KEY_FRAME_LOCATION_X, (int) Math.round(location.getX()));
+        prefs.putInt(KEY_FRAME_LOCATION_Y, (int) Math.round(location.getY()));
     }//GEN-LAST:event_formWindowClosing
 
     /**
@@ -1361,19 +1413,14 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
      *     <li>-exts <extensions license filename> OR <extension license string 1>;<ext license 2>;...;<ext license n></li>
      *     <li>-clientid &lt;client ID or file&gt;</li>
      * </ul>
-     * To simply print the version and exit, use -version.
      */
     public static void main(String args[]) {
         String mapConfig = null;
         String license = null;
         String exts = null;
         String clientId = null;
-        boolean isPrintVersion = false;
         for (int i = 0; i < args.length; i++) {
-            if ("-version".equals(args[i])) {
-                isPrintVersion = true;
-                break;
-            } else if ("-mapconfig".equals(args[i]) && i < (args.length - 1)) {
+            if ("-mapconfig".equals(args[i]) && i < (args.length - 1)) {
                 mapConfig = args[++i];
             } else if ("-license".equals(args[i]) && i < (args.length - 1)) {
                 license = readFileIntoStringOrReturnString(args[++i]);
@@ -1401,26 +1448,17 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
                 + "\t-mapconfig \"<map config XML filename>\" (optional)\n"
                 + "\t-license \"<ArcGIS Runtime license string or filename>\" (optional)\n"
                 + "\t-exts \"<extensions license filename>\" OR \"<extension license string 1>;<ext license 2>;...;<ext license n>\" (optional)");
-        System.out.println("(To print version number and exit, simply type java -jar " + jarName + " -version)");
-        if (isPrintVersion) {
-            // Not sure why, but was throwing license error on deploy machine with only " -version" option 
-            // so adding setLicense as a workaround
-            ArcGISRuntime.License.setLicense((null != finalLicense) ? finalLicense : BUILT_IN_LICENSE_STRING);
-            System.out.println("Vehicle Commander Build " + Utilities.getBuildId());
-            System.exit(0);
-        } else {
-            System.out.println("Starting Vehicle Commander with these parameters:");
-            System.out.println("\tMap configuration XML file: " + (null == finalMapConfig ? "<default>" : finalMapConfig));
-            System.out.println("\tArcGIS license string or file: " + (null == finalLicense ? "<default>" : finalLicense));
-            System.out.println("\tArcGIS extension license string or file: " + (null == finalExts ? "<default>" : finalExts));
+        System.out.println("Starting Vehicle Commander with these parameters:");
+        System.out.println("\tMap configuration XML file: " + (null == finalMapConfig ? "<default>" : finalMapConfig));
+        System.out.println("\tArcGIS license string or file: " + (null == finalLicense ? "<default>" : finalLicense));
+        System.out.println("\tArcGIS extension license string or file: " + (null == finalExts ? "<default>" : finalExts));
 
-            java.awt.EventQueue.invokeLater(new Runnable() {
+        java.awt.EventQueue.invokeLater(new Runnable() {
 
-                public void run() {
-                    new VehicleCommanderJFrame(finalMapConfig, finalLicense, finalExts, finalClientId).setVisible(true);
-                }
-            });
-        }
+            public void run() {
+                new VehicleCommanderJFrame(finalMapConfig, finalLicense, finalExts, finalClientId).setVisible(true);
+            }
+        });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup_navigationModes;
