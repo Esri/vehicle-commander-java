@@ -26,13 +26,13 @@
                     <location>${project.dir}/source/military-apps-library-java/source/MilitaryAppsLibrary/src</location>
                 </source-folder>
                 <source-folder>
-                    <label>source\VehicleCommander\src</label>
+                    <label>src</label>
                     <type>java</type>
                     <location>${project.dir}/source/VehicleCommander/src</location>
                     <encoding>UTF-8</encoding>
                 </source-folder>
                 <source-folder>
-                    <label>source\military-apps-library-java\source\MilitaryAppsLibrary\src</label>
+                    <label>military-apps-library-java</label>
                     <type>java</type>
                     <location>${project.dir}/source/military-apps-library-java/source/MilitaryAppsLibrary/src</location>
                     <encoding>UTF-8</encoding>
@@ -65,11 +65,11 @@
             <view>
                 <items>
                     <source-folder style="packages">
-                        <label>source\VehicleCommander\src</label>
+                        <label>src</label>
                         <location>${project.dir}/source/VehicleCommander/src</location>
                     </source-folder>
                     <source-folder style="packages">
-                        <label>source\military-apps-library-java\source\MilitaryAppsLibrary\src</label>
+                        <label>military-apps-library-java</label>
                         <location>${project.dir}/source/military-apps-library-java/source/MilitaryAppsLibrary/src</location>
                     </source-folder>
                     <source-file>
