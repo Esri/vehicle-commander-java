@@ -26,6 +26,10 @@
                     <location>${project.dir}/source/military-apps-library-java/source/MilitaryAppsLibrary/src</location>
                 </source-folder>
                 <source-folder>
+                    <label>source\VehicleCommander\test</label>
+                    <location>${project.dir}/source/VehicleCommander/test</location>
+                </source-folder>
+                <source-folder>
                     <label>src</label>
                     <type>java</type>
                     <location>${project.dir}/source/VehicleCommander/src</location>
@@ -35,6 +39,12 @@
                     <label>military-apps-library-java</label>
                     <type>java</type>
                     <location>${project.dir}/source/military-apps-library-java/source/MilitaryAppsLibrary/src</location>
+                    <encoding>UTF-8</encoding>
+                </source-folder>
+                <source-folder>
+                    <label>test</label>
+                    <type>java</type>
+                    <location>${project.dir}/source/VehicleCommander/test</location>
                     <encoding>UTF-8</encoding>
                 </source-folder>
             </folders>
@@ -77,6 +87,10 @@
                         <label>military-apps-library-java</label>
                         <location>${project.dir}/source/military-apps-library-java/source/MilitaryAppsLibrary/src</location>
                     </source-folder>
+                    <source-folder style="packages">
+                        <label>test</label>
+                        <location>${project.dir}/source/VehicleCommander/test</location>
+                    </source-folder>
                     <source-file>
                         <location>build.xml</location>
                     </source-file>
@@ -106,6 +120,12 @@
                 <package-root>${project.dir}/source/military-apps-library-java/source/MilitaryAppsLibrary/src</package-root>
                 <classpath mode="compile">${project.dir}/source/military-apps-library-java/source/MilitaryAppsLibrary/lib/json.jar</classpath>
                 <built-to>${project.dir}/source/VehicleCommander/dist/VehicleCommander.jar</built-to>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>${project.dir}/source/VehicleCommander/test</package-root>
+                <unit-tests/>
+                <classpath mode="compile">C:\Program Files (x86)\ArcGIS SDKs\java10.2.3\sdk\jars\ArcGIS_Runtime_Java.jar;${project.dir}/source/VehicleCommander/lib/junit-4.10.jar;${project.dir}/source/VehicleCommander/src</classpath>
                 <source-level>1.5</source-level>
             </compilation-unit>
         </java-data>
