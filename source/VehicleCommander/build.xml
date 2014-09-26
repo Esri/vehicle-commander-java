@@ -118,7 +118,7 @@
     </jar>
   </target>
 
-  <target name="run" depends="check_properties,jar">
+  <target name="run" depends="check_properties,jar" description="Runs the application">
     <java classname="com.esri.vehiclecommander.view.VehicleCommanderJFrame" fork="true" failonerror="true">
       <classpath refid="project.classpath"/>
     </java>
