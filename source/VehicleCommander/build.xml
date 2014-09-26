@@ -41,6 +41,11 @@
       <pathelement location="${dir.arcgis.jars}/jfreechart.jar"/>
       <pathelement location="${dir.arcgis.jars}/json.jar"/>
     </path>
+    <path id="test.classpath">
+      <path refid="project.classpath"/>
+      <pathelement location="${dir.dist}/${jar.name}"/>
+      <pathelement location="${dir.lib3rdParty}/junit-4.10.jar"/>
+    </path>
     <echo message="Running from: ${dir.src}"/>	
   </target>
 
@@ -140,12 +145,59 @@
   </target>
 
   <target name="create" depends="check_properties">
-    <mkdir dir="${dir.build}"/>
+    <mkdir dir="${dir.build}/classes"/>
+    <mkdir dir="${dir.build}/test/classes"/>
     <mkdir dir="${dir.dist}"/>
     <mkdir dir="${dir.deploy}"/>
     <echo message="Creating: ${dir.build}" />
     <echo message="Creating: ${dir.dist}" />
     <echo message="Creating: ${dir.deploy}" />
+  </target>
+  
+  <target name="run-tests" depends="jar" description="Run Ant tests">
+      <property name="debug" value="false" />
+      <javac srcdir="${dir.src}/test" classpathref="test.classpath" destdir="${dir.build}/test/classes" includeantruntime="true" debug="${debug}" />
+      <copy todir="${dir.build}/test/classes">
+          <fileset file="${dir.src}/test/*" />
+      </copy>
+      <junit printsummary="no"  fork="yes" forkmode="once">
+          <classpath>
+              <path refid="test.classpath" />
+              <path location="${dir.build}/test/classes" />
+          </classpath>
+          <formatter type="plain" usefile="false" />
+          <batchtest>
+              <fileset dir="${dir.src}/test" />
+          </batchtest>
+      </junit>
+  </target>
+  
+  <target name="debug-tests" depends="create" description="Run Ant tests in debug mode">
+      <property name="debug" value="true" />
+      <antcall target="clean" />
+      <antcall target="jar" />
+      <javac srcdir="${dir.src}/test" classpathref="test.classpath" destdir="${dir.build}/test/classes" includeantruntime="true" debug="true" />
+      <copy todir="${dir.build}/test/classes">
+          <fileset file="${dir.src}/test/*" />
+      </copy>
+      <nbjpdastart addressproperty="jpda.address" name="VehicleCommander" transport="dt_socket">
+          <classpath>
+              <path refid="test.classpath" />
+              <path location="${dir.build}/test/classes" />
+          </classpath>
+      </nbjpdastart>
+      <junit printsummary="no" fork="yes" forkmode="once">
+          <jvmarg value="-Xdebug"/>
+          <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address}"/>
+          <classpath>
+              <path refid="test.classpath" />
+              <path location="${dir.build}/test/classes" />
+          </classpath>
+          <formatter type="plain" usefile="false" />
+          <batchtest>
+              <fileset dir="${dir.src}/test" />
+          </batchtest>
+      </junit>
   </target>
 
 </project>
