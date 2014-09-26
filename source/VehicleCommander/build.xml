@@ -21,9 +21,10 @@
     <property name="dir.dist" value="dist"/>
     <property name="dir.lib3rdParty" value="lib"/>
     <property name="dir.deploy" value="../../application/VehicleCommander"/>
+    <property name="jar.name" value="VehicleCommander.jar" />
 
     <path id="project.classpath">
-      <pathelement location="${dir.dist}/VehicleCommander.jar"/>
+      <pathelement location="${dir.dist}/${jar.name}"/>
       <pathelement location="${dir.lib3rdParty}/beansbinding-1.2.1.jar"/>
       <pathelement location="${dir.arcgis.jars}/ArcGIS_Runtime_Java.jar"/>
       <pathelement location="${dir.arcgis.jars}/ArcGIS_Runtime_Java_Toolkit.jar"/>
@@ -84,7 +85,7 @@
   
   <target name="compile" depends="create">
     <javac classpathref="project.classpath" destdir="${dir.build}" includeantruntime="true" debug="${debug}">
-        <src path="${dir.src}" />
+        <src path="${dir.src}/src" />
         <src path="${dir.src}/../military-apps-library-java/source/MilitaryAppsLibrary/src" />
     </javac>
     <copy todir="${dir.build}">
@@ -103,7 +104,7 @@
         <globmapper from="*" to="lib/*"/>
       </chainedmapper>
     </pathconvert>
-    <jar destfile="${dir.dist}/VehicleCommander.jar">
+    <jar destfile="${dir.dist}/${jar.name}">
       <fileset dir="${dir.build}" />
       <manifest>
         <attribute name="Main-Class" value="com.esri.vehiclecommander.view.VehicleCommanderJFrame" />
