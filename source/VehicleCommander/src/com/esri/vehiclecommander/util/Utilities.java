@@ -16,7 +16,7 @@
 package com.esri.vehiclecommander.util;
 
 import com.esri.core.geometry.AngularUnit;
-import com.esri.core.geometry.MgrsConversionMode;
+import com.esri.core.geometry.CoordinateConversion;
 import com.esri.core.geometry.Point;
 import com.esri.core.geometry.SpatialReference;
 import java.awt.Color;
@@ -35,7 +35,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
-import java.util.ResourceBundle;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -312,7 +311,9 @@ public class Utilities extends com.esri.militaryapps.util.Utilities {
         //Check for MGRS without grid zone identifier and add it if necessary
         Matcher gzlessMatcher = Pattern.compile("[A-Z]{2}[0-9]*").matcher(mgrs);
         if (null != referenceLocation && null != referenceSR && gzlessMatcher.matches()) {
-            String referenceMgrs = referenceSR.toMilitaryGrid(MgrsConversionMode.mgrsAutomatic, 5, false, false, new Point[] { referenceLocation })[0];
+            String referenceMgrs = CoordinateConversion.pointToMgrs(referenceLocation,
+                    referenceSR, CoordinateConversion.MGRSConversionMode.AUTO, 5,
+                    false, false);
             if (null != referenceMgrs) {
                 Matcher gzMatcher = Pattern.compile("[0-9]{0,2}[A-Z]").matcher(referenceMgrs);
                 if (gzMatcher.find() && 0 == gzMatcher.start()) {
