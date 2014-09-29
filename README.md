@@ -89,8 +89,13 @@ This section is for developers who just need to quickly build and run the applic
 
 #### What's New in Vehicle Commander 10.2.3
 * Uses ArcGIS Runtime 10.2.3.
+    * Uses new ArcGIS Runtime 10.2.3 licensing with a client ID and license string.
+    * Replaced ArcGIS Runtime class references and method calls that were deprecated from 10.2 to 10.2.3.
 * Improved window sizing and positioning.
 * Removed Vehicle Commander version/build number (no longer relevant since Vehicle Commander went open source).
+* Uses online and local data by default.
+* Updated built-in GPX file.
+* Refactored all classes into `model`, `view`, `controller`, and `util` packages.
 * Bug fixes and performance improvements.
 
 ### 10.2
