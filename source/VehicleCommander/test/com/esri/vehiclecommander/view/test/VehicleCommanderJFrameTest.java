@@ -24,7 +24,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.Assert;
 
 /**
  * VehicleCommanderJFrame unit tests.
@@ -61,7 +61,7 @@ public class VehicleCommanderJFrameTest {
         ArcGISRuntime.setClientID(fakeClientId);
         LicenseResult licenseResult = ArcGISRuntime.License.setLicense(VehicleCommanderJFrame.BUILT_IN_LICENSE_STRING);
         if (!LicenseResult.INVALID.equals(licenseResult)) {
-            fail("Warning: your code contains a license string that is " + licenseResult + "! It should be " + LicenseResult.INVALID + " instead.");
+            Assert.fail("Warning: your code contains a license string that is " + licenseResult + "! It should be " + LicenseResult.INVALID + " instead.");
         }
     }
 
