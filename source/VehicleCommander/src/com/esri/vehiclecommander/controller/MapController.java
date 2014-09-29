@@ -382,7 +382,7 @@ public class MapController extends com.esri.militaryapps.controller.MapControlle
      * @param isOverlay true if the layer is an overlay that can be turned on and
      *                  off, and false otherwise.
      */
-    public synchronized void addLayer(int layerIndex, Layer layer, boolean isOverlay) {
+    public void addLayer(int layerIndex, Layer layer, boolean isOverlay) {
         addLayer(layerIndex, layer, isOverlay, true);
     }
 
