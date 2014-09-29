@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.esri.vehiclecommander.view;
 
-import com.esri.client.toolkit.utilities.BrowserLauncher;
+import com.esri.toolkit.utilities.BrowserLauncher;
 import com.esri.core.geometry.Envelope;
 import com.esri.core.geometry.Geometry;
 import com.esri.core.geometry.GeometryEngine;

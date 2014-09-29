@@ -30,9 +30,9 @@ import com.esri.core.geometry.Point;
 import com.esri.core.geometry.SpatialReference;
 import com.esri.core.map.CallbackListener;
 import com.esri.core.map.Graphic;
-import com.esri.core.tasks.ags.identify.IdentifyParameters;
-import com.esri.core.tasks.ags.identify.IdentifyResult;
-import com.esri.core.tasks.ags.identify.IdentifyTask;
+import com.esri.core.tasks.identify.IdentifyParameters;
+import com.esri.core.tasks.identify.IdentifyResult;
+import com.esri.core.tasks.identify.IdentifyTask;
 import com.esri.map.ArcGISDynamicMapServiceLayer;
 import com.esri.map.ArcGISFeatureLayer;
 import com.esri.map.GraphicsLayer;
@@ -643,7 +643,7 @@ public class MapController extends com.esri.militaryapps.controller.MapControlle
                         };
                         synchronized (identifyListeners) {
                             identifyListeners.add(identifyListener);
-                            task.executeAsync(params, identifyListener);
+                            task.execute(params, identifyListener);
                         }
                     }
                 }

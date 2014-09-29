@@ -217,15 +217,7 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
             ArcGISRuntime.License.setLicense(this.licenseString, this.extsStrings);
         }
         
-        try {
-            ArcGISRuntime.initialize();
-        } catch (Throwable t) {
-            
-        } finally {
-            if (!ArcGISRuntime.isLicensed()) {
-                ArcGISRuntime.setLicense(null);
-            }
-        }
+        ArcGISRuntime.initialize();
 
         appConfigController = new AppConfigController();
         appConfigController.addListener(this);
