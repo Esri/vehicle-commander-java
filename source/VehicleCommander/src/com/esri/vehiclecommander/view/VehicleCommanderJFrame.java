@@ -241,7 +241,6 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
         //Window location and size
         Preferences prefs = Preferences.userNodeForPackage(getClass());
         int windowState = prefs.getInt(KEY_FRAME_EXTENDED_STATE, -1) & (Frame.ICONIFIED ^ 0xffffffff);
-        System.out.println("windowState is " + windowState);
         if (-1 < windowState) {
             int width = prefs.getInt(KEY_FRAME_WIDTH, getWidth());
             int height = prefs.getInt(KEY_FRAME_HEIGHT, getHeight());
