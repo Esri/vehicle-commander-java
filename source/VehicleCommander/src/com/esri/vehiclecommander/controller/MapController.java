@@ -35,6 +35,7 @@ import com.esri.core.tasks.identify.IdentifyResult;
 import com.esri.core.tasks.identify.IdentifyTask;
 import com.esri.map.ArcGISDynamicMapServiceLayer;
 import com.esri.map.ArcGISFeatureLayer;
+import com.esri.map.GPSLayer;
 import com.esri.map.GraphicsLayer;
 import com.esri.map.Grid;
 import com.esri.map.JMap;
@@ -358,9 +359,10 @@ public class MapController extends com.esri.militaryapps.controller.MapControlle
             if (0 == map.getLayers().size()) {
                 addLayer(0, layer, isOverlay);
             } else {
-                //Don't add it on top of graphics layers at the top
+                //Don't add it on top of graphics layers or GPSLayer at the top
                 for (int i = map.getLayers().size() - 1; i >= 0; i--) {
-                    if (!(map.getLayers().get(i) instanceof GraphicsLayer)) {
+                    if (!(map.getLayers().get(i) instanceof GraphicsLayer)
+                            && !(map.getLayers().get(i) instanceof GPSLayer)) {
                         addLayer(i + 1, layer, isOverlay);
                         i = 0;
                     }
@@ -371,7 +373,8 @@ public class MapController extends com.esri.militaryapps.controller.MapControlle
     }
 
     /**
-     * Adds a layer to the map at a certain index in the layer list.
+     * Adds a layer to the map at a certain index in the layer list, adjusting the
+     * index to place the layer below (i.e. lesser index than) all GPSLayer instances.
      * @param layerIndex the index in the layer list. If greater than the current
      *                   length, the layer will be added to the end of
      *                   the list.
@@ -380,8 +383,31 @@ public class MapController extends com.esri.militaryapps.controller.MapControlle
      *                  off, and false otherwise.
      */
     public synchronized void addLayer(int layerIndex, Layer layer, boolean isOverlay) {
+        addLayer(layerIndex, layer, isOverlay, true);
+    }
+
+    /**
+     * Adds a layer to the map at a certain index in the layer list.
+     * @param layerIndex the index in the layer list. If greater than the current
+     *                   length, the layer will be added to the end of
+     *                   the list.
+     * @param layer the layer to add.
+     * @param isOverlay true if the layer is an overlay that can be turned on and
+     *                  off, and false otherwise.
+     * @param placeBelowGps true if the layer should go below any instance of GPSLayer;
+     *                  false if instances of GPSLayer should be ignored and this
+     *                  layer should just be placed at layerIndex.
+     */
+    public synchronized void addLayer(int layerIndex, Layer layer, boolean isOverlay, boolean placeBelowGps) {
         if (layerIndex > map.getLayers().size()) {
             layerIndex = map.getLayers().size();
+        }
+        if (placeBelowGps) {
+            for (int index = 0; index < layerIndex; index++) {
+                if (map.getLayers().get(index) instanceof GPSLayer) {
+                    layerIndex = index;//This 1) changes layerIndex and 2) breaks out of the for loop
+                }
+            }
         }
         map.getLayers().add(layerIndex, layer);
         if (isOverlay) {
