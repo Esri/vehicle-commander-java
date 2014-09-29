@@ -46,7 +46,6 @@ This section assumes that you have deployed the Vehicle Commander application [u
    * -mapconfig `<XML file>`: use a map configuration file other than the mapconfig.xml file located in the application directory.
    * -license `<license string or file>`: use a license other than the one compiled into the application. This can be either the license string itself or the name of a file containing only the license string. 
    * -exts <extension license strings or file>: use a set of extension license strings other than the ones compiled into the application. This can be either a semicolon-separated list of extension license strings or the name of a file containing only a semicolon-separated list of extension license strings. 
-   * -version: print the application version and exit.
 
 The application opens as shown in [Usage](#usage).
 

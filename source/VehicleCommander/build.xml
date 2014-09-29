@@ -15,16 +15,16 @@
     <!-- NOTE: these are set in versions.xml -->
     <!-- ${dir.agsruntimejavasdk} and ${version.runtime}"  -->
 
-    <property name="version" value="10.2"/>   <!-- Question: is this used somewhere? -->
     <property name="dir.arcgis.jars" value="${dir.agsruntimejavasdk}/sdk/jars"/>
     <property name="dir.src" value="."/>
     <property name="dir.build" value="bin"/>
     <property name="dir.dist" value="dist"/>
     <property name="dir.lib3rdParty" value="lib"/>
     <property name="dir.deploy" value="../../application/VehicleCommander"/>
+    <property name="jar.name" value="VehicleCommander.jar" />
 
     <path id="project.classpath">
-      <pathelement location="${dir.dist}/VehicleCommander.jar"/>
+      <pathelement location="${dir.dist}/${jar.name}"/>
       <pathelement location="${dir.lib3rdParty}/beansbinding-1.2.1.jar"/>
       <pathelement location="${dir.arcgis.jars}/ArcGIS_Runtime_Java.jar"/>
       <pathelement location="${dir.arcgis.jars}/ArcGIS_Runtime_Java_Toolkit.jar"/>
@@ -40,6 +40,11 @@
       <pathelement location="${dir.arcgis.jars}/jcommon.jar"/>
       <pathelement location="${dir.arcgis.jars}/jfreechart.jar"/>
       <pathelement location="${dir.arcgis.jars}/json.jar"/>
+    </path>
+    <path id="test.classpath">
+      <path refid="project.classpath"/>
+      <pathelement location="${dir.dist}/${jar.name}"/>
+      <pathelement location="${dir.lib3rdParty}/junit-4.10.jar"/>
     </path>
     <echo message="Running from: ${dir.src}"/>	
   </target>
@@ -85,7 +90,7 @@
   
   <target name="compile" depends="create">
     <javac classpathref="project.classpath" destdir="${dir.build}" includeantruntime="true" debug="${debug}">
-        <src path="${dir.src}" />
+        <src path="${dir.src}/src" />
         <src path="${dir.src}/../military-apps-library-java/source/MilitaryAppsLibrary/src" />
     </javac>
     <copy todir="${dir.build}">
@@ -95,7 +100,6 @@
   </target>
 
   <target name="jar" depends="compile">
-    <copy overwrite="true" file="${dir.src}/src/version.properties" todir="${dir.build}" />
     <pathconvert pathsep=" " property="project.classpath.string" refid="project.classpath">
       <chainedmapper>
         <flattenmapper/>
@@ -105,7 +109,7 @@
         <globmapper from="*" to="lib/*"/>
       </chainedmapper>
     </pathconvert>
-    <jar destfile="${dir.dist}/VehicleCommander.jar">
+    <jar destfile="${dir.dist}/${jar.name}">
       <fileset dir="${dir.build}" />
       <manifest>
         <attribute name="Main-Class" value="com.esri.vehiclecommander.view.VehicleCommanderJFrame" />
@@ -114,19 +118,13 @@
     </jar>
   </target>
 
-  <target name="run" depends="check_properties,jar">
+  <target name="run" depends="check_properties,jar" description="Runs the application">
     <java classname="com.esri.vehiclecommander.view.VehicleCommanderJFrame" fork="true" failonerror="true">
       <classpath refid="project.classpath"/>
     </java>
   </target>
 
-  <target name="increment-build">
-    <propertyfile file="${dir.src}/src/version.properties">
-      <entry key="BUILD" value="1" type="int" operation="+"/>
-    </propertyfile>
-  </target>
-
-  <target name="deploy" depends="check_properties,increment-build,dist-files">
+  <target name="deploy" depends="check_properties,dist-files">
   <!-- copy from dist folder to {github root}/vehicle-commander/application -->
     <delete dir="${dir.deploy}" >
         <exclude name="ArcGISRuntime*/**" />
@@ -147,12 +145,59 @@
   </target>
 
   <target name="create" depends="check_properties">
-    <mkdir dir="${dir.build}"/>
+    <mkdir dir="${dir.build}/classes"/>
+    <mkdir dir="${dir.build}/test/classes"/>
     <mkdir dir="${dir.dist}"/>
     <mkdir dir="${dir.deploy}"/>
     <echo message="Creating: ${dir.build}" />
     <echo message="Creating: ${dir.dist}" />
     <echo message="Creating: ${dir.deploy}" />
+  </target>
+  
+  <target name="run-tests" depends="jar" description="Run Ant tests">
+      <property name="debug" value="false" />
+      <javac srcdir="${dir.src}/test" classpathref="test.classpath" destdir="${dir.build}/test/classes" includeantruntime="true" debug="${debug}" />
+      <copy todir="${dir.build}/test/classes">
+          <fileset file="${dir.src}/test/*" />
+      </copy>
+      <junit printsummary="no"  fork="yes" forkmode="once">
+          <classpath>
+              <path refid="test.classpath" />
+              <path location="${dir.build}/test/classes" />
+          </classpath>
+          <formatter type="plain" usefile="false" />
+          <batchtest>
+              <fileset dir="${dir.src}/test" />
+          </batchtest>
+      </junit>
+  </target>
+  
+  <target name="debug-tests" depends="create" description="Run Ant tests in debug mode">
+      <property name="debug" value="true" />
+      <antcall target="clean" />
+      <antcall target="jar" />
+      <javac srcdir="${dir.src}/test" classpathref="test.classpath" destdir="${dir.build}/test/classes" includeantruntime="true" debug="true" />
+      <copy todir="${dir.build}/test/classes">
+          <fileset file="${dir.src}/test/*" />
+      </copy>
+      <nbjpdastart addressproperty="jpda.address" name="VehicleCommander" transport="dt_socket">
+          <classpath>
+              <path refid="test.classpath" />
+              <path location="${dir.build}/test/classes" />
+          </classpath>
+      </nbjpdastart>
+      <junit printsummary="no" fork="yes" forkmode="once">
+          <jvmarg value="-Xdebug"/>
+          <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address}"/>
+          <classpath>
+              <path refid="test.classpath" />
+              <path location="${dir.build}/test/classes" />
+          </classpath>
+          <formatter type="plain" usefile="false" />
+          <batchtest>
+              <fileset dir="${dir.src}/test" />
+          </batchtest>
+      </junit>
   </target>
 
 </project>

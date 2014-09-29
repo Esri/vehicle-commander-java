@@ -34,7 +34,7 @@ Hardware requirements for this template are the same as those for ArcGIS Runtime
 
 ### Software Requirements
 * Building Requirements
-    * ArcGIS Runtime SDK for Java (10.1.1 or later).
+    * [ArcGIS Runtime SDK for Java](https://developers.arcgis.com/java/) (10.2.3 or later).
     * [Java SE Development Kit (JDK)](http://www.oracle.com/technetwork/java/javase/downloads/index.html) 6 or higher.
     * [Apache Ant](http://ant.apache.org/).
     * Optionally, an integrated development environment (IDE). This template’s source code includes project files for the following IDEs:
@@ -43,7 +43,7 @@ Hardware requirements for this template are the same as those for ArcGIS Runtime
 * Deployed Application Requirements
     * Software requirements for this template are the same as those for ArcGIS Runtime SDK for Java.  See the Runtime SDK documentation for more information. 
     * Some important items to note: 
-        * The need for Java 6 or 7 using the Java Runtime Environment (JRE) from Oracle.
+        * ArcGIS Runtime for Java requires Java 6 or higher using the Java Runtime Environment (JRE) from Oracle.
         * The ArcGIS Runtime does not run in a Remote Desktop session or as a remote X client.
         * The appropriate driver for display adapter should be installed.
 
@@ -84,6 +84,14 @@ This section is for developers who just need to quickly build and run the applic
     * See the [user guide](documentation/UserGuide.md) for more detailed command line options
 
 ## Release Notes / Known Issues
+
+### 10.2.3
+
+#### What's New in Vehicle Commander 10.2.3
+* Uses ArcGIS Runtime 10.2.3.
+* Improved window sizing and positioning.
+* Removed Vehicle Commander version/build number (no longer relevant since Vehicle Commander went open source).
+* Bug fixes and performance improvements.
 
 ### 10.2
 
@@ -191,7 +199,7 @@ Esri welcomes contributions from anyone and everyone. Please see our [guidelines
 
 ## Licensing
 
-Copyright 2012-2013 Esri
+Copyright 2012-2014 Esri
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

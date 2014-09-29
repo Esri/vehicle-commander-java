@@ -374,11 +374,17 @@ public class AppConfigController {
     /**
      * Saves the specified UDP port number for messaging to the application configuration settings.
      * @param port the messaging port number.
+     * @throws IllegalArgumentException if port is less than 0 or more than 0xFFFF.
      */
-    public void setPort(int port) {
-        setPreference(KEY_PORT, port);
-        if (null != messageController) {
-            messageController.setPort(port);
+    public void setPort(int port) throws IllegalArgumentException {
+        if (port < 0 || port > 0xFFFF) {
+            //Invalid port number; do nothing
+            Logger.getLogger(AppConfigController.class.getName()).log(Level.WARNING, "Invalid port number: {0}", port);
+        } else {
+            setPreference(KEY_PORT, port);
+            if (null != messageController) {
+                messageController.setPort(port);
+            }
         }
     }
 
@@ -454,6 +460,7 @@ public class AppConfigController {
     private void resetLocationController() throws ParserConfigurationException, SAXException, IOException {
         if (null != locationController) {
             locationController.pause();
+            locationController.reset();
             if (getLocationMode().equals(LocationMode.SIMULATOR)) {
                 locationController.setGpxFile(null == getGpx() ? null : new File(getGpx()));
             }

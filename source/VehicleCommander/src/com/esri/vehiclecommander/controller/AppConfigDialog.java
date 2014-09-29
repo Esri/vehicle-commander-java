@@ -129,7 +129,6 @@ public class AppConfigDialog extends javax.swing.JDialog {
         jSpinner_speedMultiplier = new javax.swing.JSpinner();
         jLabel_speedMultiplier = new javax.swing.JLabel();
         jCheckBox_showMessageLabels = new javax.swing.JCheckBox();
-        jLabel_appBuild = new javax.swing.JLabel();
         jCheckBox_decorated = new javax.swing.JCheckBox();
         jCheckBox_showLocalTimeZone = new javax.swing.JCheckBox();
         jLabel_vehicleStatusMessageInterval = new javax.swing.JLabel();
@@ -224,10 +223,6 @@ public class AppConfigDialog extends javax.swing.JDialog {
         jCheckBox_showMessageLabels.setText("Show Message Labels");
         jCheckBox_showMessageLabels.setFocusable(false);
 
-        jLabel_appBuild.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
-        jLabel_appBuild.setText("Vehicle Commander Build ");
-        jLabel_appBuild.setText(jLabel_appBuild.getText() + Utilities.getBuildId());
-
         jCheckBox_decorated.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
         jCheckBox_decorated.setSelected(appConfigController.isDecorated());
         jCheckBox_decorated.setText("Decorated");
@@ -282,8 +277,7 @@ public class AppConfigDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jButton_resetAll, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jLabel_appBuild)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jButton_ok)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton_cancel))
@@ -390,8 +384,7 @@ public class AppConfigDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton_cancel)
-                    .addComponent(jButton_ok)
-                    .addComponent(jLabel_appBuild))
+                    .addComponent(jButton_ok))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -485,7 +478,6 @@ public class AppConfigDialog extends javax.swing.JDialog {
     private javax.swing.JCheckBox jCheckBox_showMessageLabels;
     private javax.swing.JComboBox jComboBox_geomessageVersion;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel_appBuild;
     private javax.swing.JLabel jLabel_geomessageVersion;
     private javax.swing.JLabel jLabel_messagingPort;
     private javax.swing.JLabel jLabel_positionMessageInterval;
