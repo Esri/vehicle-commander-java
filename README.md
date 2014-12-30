@@ -88,6 +88,7 @@ This section is for developers who just need to quickly build and run the applic
 ### 10.2.4
 
 #### What's New in Vehicle Commander 10.2.4
+* Uses ArcGIS Runtime 10.2.4.
 * Java 8 or higher is required. ArcGIS Runtime 10.2.4 requires Java 7 or higher, but Oracle included [a bug fix in Java 8](http://bugs.java.com/bugdatabase/view_bug.do?bug_id=7107883) that allows UDP networking to behave properly for wired and Wi-Fi networks. Vehicle Commander's messaging depends on UDP networking. Therefore, you should use Java 8 or higher to ensure that messaging works properly.
 * Ant 1.9+ is required for building Vehicle Commander using the build script. Java 8 depends on Ant 1.9 or higher.
 * TODO
