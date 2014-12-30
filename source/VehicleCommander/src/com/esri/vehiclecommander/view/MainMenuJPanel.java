@@ -116,7 +116,7 @@ public class MainMenuJPanel extends RoundedJPanel implements LocationListener, R
         }
         this.mil2525CSymbolController = mil2525CSymbolController;
         this.spotReport = new SpotReport();
-        this.messageController = new MessageController(appConfigController.getPort());
+        this.messageController = new MessageController(appConfigController.getPort(), appConfigController.getUsername());
         this.spotReportController = new SpotReportController(mapController, messageController);
         this.appConfigController = appConfigController;
         this.routeController = routeController;

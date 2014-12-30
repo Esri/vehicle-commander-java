@@ -390,7 +390,7 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
         }
         
         
-        messageController = new MessageController(appConfigController.getPort());
+        messageController = new MessageController(appConfigController.getPort(), appConfigController.getUsername());
         appConfigController.setMessageController(messageController);
         messageController.addListener(symbolController);
         messageController.startReceiving();

@@ -34,16 +34,16 @@ Hardware requirements for this template are the same as those for ArcGIS Runtime
 
 ### Software Requirements
 * Building Requirements
-    * [ArcGIS Runtime SDK for Java](https://developers.arcgis.com/java/) (10.2.3 or later).
-    * [Java SE Development Kit (JDK)](http://www.oracle.com/technetwork/java/javase/downloads/index.html) 6 or higher.
-    * [Apache Ant](http://ant.apache.org/).
+    * [ArcGIS Runtime SDK for Java](https://developers.arcgis.com/java/) (10.2.4 or later).
+    * [Java SE Development Kit (JDK)](http://www.oracle.com/technetwork/java/javase/downloads/index.html) 8 or higher.
+    * [Apache Ant](http://ant.apache.org/) 1.9+.
     * Optionally, an integrated development environment (IDE). This template’s source code includes project files for the following IDEs:
         * [NetBeans](http://netbeans.org/) 6.9.1 or higher
         * [Eclipse](http://eclipse.org/) Indigo (3.7.1) or higher 
 * Deployed Application Requirements
     * Software requirements for this template are the same as those for ArcGIS Runtime SDK for Java.  See the Runtime SDK documentation for more information. 
     * Some important items to note: 
-        * ArcGIS Runtime for Java requires Java 6 or higher using the Java Runtime Environment (JRE) from Oracle.
+        * ArcGIS Runtime for Java requires Java 7 or higher using the Java Runtime Environment (JRE) from Oracle. However, Vehicle Commander requires Java 8 or higher. For details, see the release notes below for ArcGIS Runtime 10.2.4.
         * The ArcGIS Runtime does not run in a Remote Desktop session or as a remote X client.
         * The appropriate driver for display adapter should be installed.
 
@@ -56,7 +56,7 @@ This section is for developers who just need to quickly build and run the applic
     * Java is installed and added to your path and the environment variable `JAVA_HOME` to be set to this location
     * To verify your Java Installation: Open Command Prompt> `java -version` and verify it runs and returns the version correctly 
 * Ensure Apache Ant is installed and configured 
-    * Download Ant from the [Apache Ant Project](http://ant.apache.org/bindownload.cgi) and unzip to a location on your machine
+    * Download Ant 1.9+ from the [Apache Ant Project](http://ant.apache.org/bindownload.cgi) and unzip to a location on your machine
     * Set environment variable `ANT_HOME` to Ant Install Location
     * Add Ant\bin to your path: `%ANT_HOME%\bin`
     * To verify your Ant Installation: Open Command Prompt> `ant -version` and verify it runs and returns the help correctly 
@@ -84,6 +84,13 @@ This section is for developers who just need to quickly build and run the applic
     * See the [user guide](documentation/UserGuide.md) for more detailed command line options
 
 ## Release Notes / Known Issues
+
+### 10.2.4
+
+#### What's New in Vehicle Commander 10.2.4
+* Java 8 or higher is required. ArcGIS Runtime 10.2.4 requires Java 7 or higher, but Oracle included [a bug fix in Java 8](http://bugs.java.com/bugdatabase/view_bug.do?bug_id=7107883) that allows UDP networking to behave properly for wired and Wi-Fi networks. Vehicle Commander's messaging depends on UDP networking. Therefore, you should use Java 8 or higher to ensure that messaging works properly.
+* Ant 1.9+ is required for building Vehicle Commander using the build script. Java 8 depends on Ant 1.9 or higher.
+* TODO
 
 ### 10.2.3
 
