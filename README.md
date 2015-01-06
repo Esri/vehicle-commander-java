@@ -18,7 +18,7 @@ The documentation is divided between Quick Start, Detailed Usage, and other sect
 
 * [Hardware and software requirements](#hardware-and-software-requirements)
 * [Quick Start and Build Instructions](#quick-start-instructions)
-* [Release Notes](#release-notes--known-issues)
+* [Release Notes](#release-notes)
 * [Detailed Usage](#detailed-instructions)
 * [Conclusion](#conclusion)
 
@@ -83,7 +83,7 @@ This section is for developers who just need to quickly build and run the applic
     * `> java -jar dist\VehicleCommander.jar`
     * See the [user guide](documentation/UserGuide.md) for more detailed command line options
 
-## Release Notes / Known Issues
+## Release Notes
 
 ### 10.2.4
 
