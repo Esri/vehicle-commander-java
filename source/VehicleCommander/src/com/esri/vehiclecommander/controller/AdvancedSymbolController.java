@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2014 Esri
+ * Copyright 2012-2015 Esri
  * 
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -117,14 +117,6 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Could not parse spot report", nfe);
             return null;
         }
-    }
-    
-    @Override
-    protected String translateMessageTypeName(String geomessageTypeName) {
-        if ("trackrep".equals(geomessageTypeName)) {
-            geomessageTypeName = "position_report";
-        }
-        return geomessageTypeName;
     }
     
     @Override
