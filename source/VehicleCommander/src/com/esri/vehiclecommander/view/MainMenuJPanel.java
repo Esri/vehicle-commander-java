@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2014 Esri
+ * Copyright 2012-2015 Esri
  * 
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -81,7 +81,6 @@ public class MainMenuJPanel extends RoundedJPanel implements LocationListener, R
     private final MapController mapController;
     private final SpotReport spotReport;
     private final SpotReportController spotReportController;
-    private final MessageController messageController;
     private final AppConfigController appConfigController;
     private final AdvancedSymbolController mil2525CSymbolController;
     private final MgrsLayerController mgrsLayerController;
@@ -116,8 +115,7 @@ public class MainMenuJPanel extends RoundedJPanel implements LocationListener, R
         }
         this.mil2525CSymbolController = mil2525CSymbolController;
         this.spotReport = new SpotReport();
-        this.messageController = new MessageController(appConfigController.getPort(), appConfigController.getUsername());
-        this.spotReportController = new SpotReportController(mapController, messageController);
+        this.spotReportController = new SpotReportController(mapController, appConfigController.getMessageController());
         this.appConfigController = appConfigController;
         this.routeController = routeController;
         this.positionReportController = positionReportController;
