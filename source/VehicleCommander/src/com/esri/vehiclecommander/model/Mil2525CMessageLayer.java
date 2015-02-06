@@ -133,5 +133,17 @@ public class Mil2525CMessageLayer extends MessageGroupLayer {
             }
         }
     }
+    
+    /**
+     * Performs an identify on this layer.
+     * @param screenX
+     * @param screenY
+     * @param tolerance
+     * @return 
+     */
+    public IdentifyResultList identify(float screenX, float screenY, int tolerance) {
+//        return advancedSymbolController.identify(screenX, screenY, tolerance);
+        return new IdentifyResultList();
+    }
 
 }
