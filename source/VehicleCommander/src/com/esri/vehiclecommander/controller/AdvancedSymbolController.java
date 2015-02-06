@@ -36,6 +36,7 @@ import com.esri.militaryapps.model.Geomessage;
 import com.esri.militaryapps.util.Utilities;
 import com.esri.vehiclecommander.model.IdentifiedItem;
 import com.esri.vehiclecommander.model.IdentifyResultList;
+import com.esri.vehiclecommander.model.Mil2525CMessageLayer;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -266,16 +267,9 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
         layerList.add(spotReportLayer);
         for (Layer layer : layerList) {
             if (layer instanceof GraphicsLayer) {
-                GraphicsLayer gl = (GraphicsLayer) layer;
-                int[] graphicIds = gl.getGraphicIDs(screenX, screenY, tolerance);
-                for (int id : graphicIds) {
-                    Graphic graphic = gl.getGraphic(id);
-                    IdentifiedItem item = new IdentifiedItem(
-                            graphic.getGeometry(),
-                            -1,
-                            graphic.getAttributes(),
-                            layer.getName() + " " + graphic.getUid());
-                    results.add(item, layer);
+                IdentifyResultList theseResults = Mil2525CMessageLayer.identify((GraphicsLayer) layer, screenX, screenY, tolerance);
+                for (int i = 0; i < theseResults.size(); i++) {
+                    results.add(theseResults.get(i), layer);
                 }
             }
         }
