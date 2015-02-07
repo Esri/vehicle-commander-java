@@ -25,7 +25,6 @@ import com.esri.map.LayerInitializeCompleteListener;
 import com.esri.militaryapps.controller.LocationController;
 import com.esri.militaryapps.controller.LocationController.LocationMode;
 import com.esri.militaryapps.controller.LocationListener;
-import com.esri.militaryapps.controller.MessageController;
 import com.esri.militaryapps.controller.PositionReportController;
 import com.esri.militaryapps.controller.SpotReportController;
 import com.esri.militaryapps.model.Location;
@@ -95,6 +94,7 @@ public class MainMenuJPanel extends RoundedJPanel implements LocationListener, R
     private boolean initializedEquipmentBrowse = false;
     private String selectedCategory = null;
     private JToggleButton selectedWaypointButton = null;
+    private boolean initializedEquipmentButtons = false;
 
     /**
      * Creates the MainMenuJPanel but does not add it to the application.
@@ -130,20 +130,6 @@ public class MainMenuJPanel extends RoundedJPanel implements LocationListener, R
         ((EquipmentListJPanel) equipmentListJPanel_srEquipmentSearchResults).addButtonListener(equipmentButtonListener);
         ((EquipmentListJPanel) equipmentListJPanel_srEquipmentCategoryResults).addButtonListener(equipmentButtonListener);
 
-        JButton[] buttons = new JButton[] {
-            jButton_srEquipmentArmoredPersonnelCarrierH,
-            jButton_srEquipmentArmoredTankH,
-            jButton_srEquipmentGrenadeLauncherH,
-            jButton_srEquipmentGroundVehicleH,
-            jButton_srEquipmentHowitzerH,
-            jButton_srEquipmentIEDH,
-            jButton_srEquipmentMissileLauncherH,
-            jButton_srEquipmentRifleH
-        };
-        for (JButton button : buttons) {
-            button.setIcon(new ImageIcon(mil2525CSymbolController.getSymbolImage(button.getText())));
-        }
-
         mapController.addListener(new MapControllerListenerAdapter() {
 
             @Override
@@ -151,6 +137,15 @@ public class MainMenuJPanel extends RoundedJPanel implements LocationListener, R
                 refreshTOC();
             }
         });
+    }
+    
+    private synchronized void initEquipmentButtons(JButton[] buttons) {
+        if (!initializedEquipmentButtons) {
+            for (JButton button : buttons) {
+                button.setIcon(new ImageIcon(MainMenuJPanel.this.mil2525CSymbolController.getSymbolImage(button.getText())));
+            }
+            initializedEquipmentButtons = true;
+        }
     }
 
     /**
@@ -523,6 +518,11 @@ public class MainMenuJPanel extends RoundedJPanel implements LocationListener, R
         add(jPanel_reports, "Reports Card");
 
         jPanel_spotReport.setOpaque(false);
+        jPanel_spotReport.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentShown(java.awt.event.ComponentEvent evt) {
+                jPanel_spotReportComponentShown(evt);
+            }
+        });
 
         jButton_spotReportBack.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/esri/vehiclecommander/resources/Back-Normal.png"))); // NOI18N
         jButton_spotReportBack.setBorderPainted(false);
@@ -2654,6 +2654,20 @@ public class MainMenuJPanel extends RoundedJPanel implements LocationListener, R
     private void jButton_srSizeCommandActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_srSizeCommandActionPerformed
         setSpotReportSize(Size.COMMAND);
     }//GEN-LAST:event_jButton_srSizeCommandActionPerformed
+
+    private void jPanel_spotReportComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_jPanel_spotReportComponentShown
+        JButton[] buttons = new JButton[] {
+            jButton_srEquipmentArmoredPersonnelCarrierH,
+            jButton_srEquipmentArmoredTankH,
+            jButton_srEquipmentGrenadeLauncherH,
+            jButton_srEquipmentGroundVehicleH,
+            jButton_srEquipmentHowitzerH,
+            jButton_srEquipmentIEDH,
+            jButton_srEquipmentMissileLauncherH,
+            jButton_srEquipmentRifleH
+        };
+        initEquipmentButtons(buttons);
+    }//GEN-LAST:event_jPanel_spotReportComponentShown
 
     private void changeLocationMode(final LocationMode newMode) {
         jLabel_gpsStatus.setText("Starting...");
