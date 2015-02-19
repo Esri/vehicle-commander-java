@@ -18,6 +18,7 @@ package com.esri.vehiclecommander.view;
 import com.esri.core.geometry.AngularUnit;
 import com.esri.core.geometry.GeometryEngine;
 import com.esri.core.geometry.Point;
+import com.esri.core.geometry.SpatialReference;
 import com.esri.map.Layer;
 import com.esri.map.MapOverlay;
 import com.esri.militaryapps.controller.ChemLightController;
@@ -1168,8 +1169,8 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Vehicle Commander");
-        setPreferredSize(new java.awt.Dimension(1024, 708));
         setUndecorated(!appConfigController.isDecorated());
+        setPreferredSize(new java.awt.Dimension(1024, 708));
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 formWindowClosing(evt);
@@ -1331,8 +1332,18 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
     public void updatePosition(Point mapLocation, Double headingDegrees) {
         if (null != mapLocation) {
             try {
-                String mgrs = mapController.pointToMgrs(mapLocation, mapController.getSpatialReference());
-                jLabel_location.setText(mgrs);
+                String locationString;
+                if (appConfigController.isShowMgrs()) {
+                    locationString = mapController.pointToMgrs(mapLocation, mapController.getSpatialReference());
+                } else {
+                    SpatialReference mapSr = mapController.getSpatialReference();
+                    if (!mapSr.isWGS84()) {
+                        double[] coords = mapController.projectPoint(mapLocation.getX(), mapLocation.getY(), mapSr.getID(), Utilities.WGS84.getID());
+                        mapLocation = new Point(coords[0], coords[1]);
+                    }
+                    locationString = String.format("%06f", mapLocation.getY()) + " " + String.format("%05f", mapLocation.getX());
+                }
+                jLabel_location.setText(locationString);
             } catch (RuntimeException re) {
                 /**
                  * This probably means the map is not yet initialized, so we don't
