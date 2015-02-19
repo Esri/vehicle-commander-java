@@ -1960,7 +1960,7 @@ public class MainMenuJPanel extends RoundedJPanel implements LocationListener, R
         jLabel_options.setText("Options");
 
         jButton_aboutMe.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
-        jButton_aboutMe.setText("About Me");
+        jButton_aboutMe.setText("Settings");
         jButton_aboutMe.setFocusable(false);
         jButton_aboutMe.setMaximumSize(new java.awt.Dimension(150, 60));
         jButton_aboutMe.setMinimumSize(new java.awt.Dimension(150, 60));

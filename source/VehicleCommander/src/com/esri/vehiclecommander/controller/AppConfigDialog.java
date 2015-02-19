@@ -142,7 +142,7 @@ public class AppConfigDialog extends javax.swing.JDialog {
         jTextField_vehicleType = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("About Me");
+        setTitle("Settings");
 
         jButton_resetAll.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
         jButton_resetAll.setText("Reset");
