@@ -1,36 +1,46 @@
-/*
- | Copyright 2012-2014 Esri
- |
- | Licensed under the Apache License, Version 2.0 (the "License");
- | you may not use this file except in compliance with the License.
- | You may obtain a copy of the License at
- |
- |    http://www.apache.org/licenses/LICENSE-2.0
- |
- | Unless required by applicable law or agreed to in writing, software
- | distributed under the License is distributed on an "AS IS" BASIS,
- | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- | See the License for the specific language governing permissions and
- | limitations under the License.
+/**
+ * Copyright 2012-2015 Esri
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 package com.esri.messagesimulator;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JTable;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
+import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.Timer;
-
-import org.w3c.dom.*;
-
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -38,7 +48,10 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 class MessageSimulatorJFrame extends JFrame implements WindowListener {
@@ -67,8 +80,8 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 	int selectedTime;
 	int selectedThrough;
 	int port;
-	JSpinner spinner;
-	JSpinner Throughspinner;
+	JSpinner frequencySpinner;
+	JSpinner throughputSpinner;
 	JSpinner portSpinner;
 	Boolean simulatorRunning = false;
 
@@ -89,10 +102,10 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 		pauseButton = new JButton("Pause Simulator");
 		changeSimFile = new JButton("Load Simulation File");
 		// add action to buttons
-		startButton.addActionListener(new startApp());
-		stopButton.addActionListener(new stopApp());
-		pauseButton.addActionListener(new PauseApp());
-		changeSimFile.addActionListener(new changeFile());
+		startButton.addActionListener(new StartButtonActionListener());
+		stopButton.addActionListener(new StopButtonActionListener());
+		pauseButton.addActionListener(new PauseButtonActionListener());
+		changeSimFile.addActionListener(new FileChangeActionListener());
 
 		// disable/enable Buttons before file is loaded
 		stopButton.setEnabled(false);
@@ -138,10 +151,10 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 		// Creating the Spinners for seconds and throughput
 		JPanel spinnerPanel = new JPanel();
 		
-		// spinner for seconds
+		// frequencySpinner for seconds
 		SpinnerNumberModel spinmodel = new SpinnerNumberModel(1, 1, 10, 1);
-		spinner = new JSpinner(spinmodel);
-		spinner.addChangeListener(new sendB());
+		frequencySpinner = new JSpinner(spinmodel);
+		frequencySpinner.addChangeListener(new FrequencyChangeListener());
 		JLabel spinnerDes1 = new JLabel(
 				"<html>Simulation Frequency <br> (Broadcasts Per Second) <br></html>",
 				SwingConstants.CENTER);
@@ -150,31 +163,31 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 				SwingConstants.CENTER);
 
 		spinnerPanel.add(spinnerDes1);
-		spinnerPanel.add(spinner);
+		spinnerPanel.add(frequencySpinner);
 		spinnerPanel.add(spinnerDes2);
 
 		// Spinner for throughput
 		SpinnerNumberModel spinmodelThroughput = new SpinnerNumberModel(1, 1,
 				10, 1);
-		Throughspinner = new JSpinner(spinmodelThroughput);
+		throughputSpinner = new JSpinner(spinmodelThroughput);
 		selectedThrough = 1;
-		Throughspinner.addChangeListener(new sendThrough());
-		spinnerPanel.add(Throughspinner);
-		// end spinner stuff		
+		throughputSpinner.addChangeListener(new ThroughputChangeListener());
+		spinnerPanel.add(throughputSpinner);
+		// end frequencySpinner stuff		
 		
 		//Spinner for the port
 		SpinnerNumberModel spinModelPort = new SpinnerNumberModel(45678, 1,
 				100000, 1);
 		portSpinner = new JSpinner(spinModelPort);
 		port = 45678;
-		portSpinner.addChangeListener(new getPort());
+		portSpinner.addChangeListener(new PortChangeListener());
 		
 		JLabel portlabel = new JLabel("Port");
 		
 		JPanel portPanel = new JPanel();
 		portPanel.add(portlabel);
 		portPanel.add(portSpinner);		
-		//end spinner for the port
+		//end frequencySpinner for the port
 
 		// adding a scroll pane to the table
 		scrollPane = new JScrollPane(table);
@@ -321,7 +334,7 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 		addRow(messageName, messageId, messageAction, symbolId, type);
 	}
 
-	private void GetNextMessage() throws TransformerException {
+	private void getNextMessage() throws TransformerException {
 
 		nextNode = nextNode.getNextSibling();
 
@@ -349,8 +362,7 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 
 	}	
 	
-	// inner class: action for the send button
-	private class getPort implements ChangeListener {
+	private class PortChangeListener implements ChangeListener {
 
 		public void stateChanged(ChangeEvent e) {
 
@@ -362,12 +374,11 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 		}
 	}
 
-	// inner class: action for the send button
-	private class sendThrough implements ChangeListener {
+	private class ThroughputChangeListener implements ChangeListener {
 
 		public void stateChanged(ChangeEvent e) {
 
-			Integer i = (Integer) Throughspinner.getValue(); 			
+			Integer i = (Integer) throughputSpinner.getValue(); 			
 			selectedThrough = i.intValue();
 
 			System.out.println("selected thoughput = " + selectedThrough);
@@ -376,12 +387,11 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 
 	}
 
-	// inner class: action for the send button
-	private class sendB implements ChangeListener {
+	private class FrequencyChangeListener implements ChangeListener {
 
 		public void stateChanged(ChangeEvent e) {
 
-			Integer i = (Integer) spinner.getValue(); 						
+			Integer i = (Integer) frequencySpinner.getValue(); 						
 			selectedTime = i.intValue();
 
 			timerDelayInMillisecs = (int) ((1.0 / (double) (selectedTime)) * 1000.0);
@@ -392,7 +402,7 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 
 	}
 
-	private class startApp implements ActionListener {
+	private class StartButtonActionListener implements ActionListener {
 
 		public void actionPerformed(ActionEvent arg0) {
 
@@ -423,8 +433,7 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 
 	}
 
-	// inner class: action for the restart app button
-	private class PauseApp implements ActionListener {
+	private class PauseButtonActionListener implements ActionListener {
 
 		public void actionPerformed(ActionEvent arg0) {
 
@@ -445,7 +454,7 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 	}
 
 	// inner class: action for the stop app button
-	private class stopApp implements ActionListener {
+	private class StopButtonActionListener implements ActionListener {
 
 		public void actionPerformed(ActionEvent arg0) {
 			status.setText("Simulation Stopped");
@@ -461,7 +470,7 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 	}
 
 	// inner class: action for Changing the simulation file
-	private class changeFile implements ActionListener {
+	private class FileChangeActionListener implements ActionListener {
 
 		public void actionPerformed(ActionEvent e) {
 			// the file is now loaded, enable buttons
@@ -499,7 +508,7 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 
 			for (int i = 0; i < selectedThrough; i++) {
 				try {
-					GetNextMessage();
+					getNextMessage();
 				} catch (TransformerException e) {
 					e.printStackTrace();
 				}
