@@ -16,6 +16,8 @@
 package com.esri.messagesimulator;
 
 import com.esri.militaryapps.controller.MessageController;
+import com.esri.militaryapps.util.Utilities;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -24,6 +26,10 @@ import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.TreeSet;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -39,6 +45,8 @@ import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -89,6 +97,9 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 
 	JFileChooser fileChooser = new JFileChooser();
 	JLabel status;
+        private final JPanel jPanel_timeOverride;
+        private final JTable jTable_timeOverride;
+        private final HashSet<String> timeOverrideFields = new HashSet<String>();
 	
 	// Constructor of main frame
 	public MessageSimulatorJFrame() {
@@ -149,6 +160,14 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 		// Change the selection color
 		table.setSelectionForeground(Color.white);
 		table.setSelectionBackground(Color.blue);
+                
+                jPanel_timeOverride = new JPanel();
+                jPanel_timeOverride.setLayout(new BorderLayout());
+                jPanel_timeOverride.add(new JLabel("Time Override Fields (use the current time in outgoing message for the value of these fields)"), BorderLayout.NORTH);
+                jTable_timeOverride = new JTable();
+                jTable_timeOverride.setFillsViewportHeight(true);
+                JScrollPane toScrollPane = new JScrollPane(jTable_timeOverride);
+                jPanel_timeOverride.add(toScrollPane, BorderLayout.CENTER);
 
 		// Creating the Spinners for seconds and throughput
 		JPanel spinnerPanel = new JPanel();
@@ -206,6 +225,8 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 		
 		getContentPane().add(mainPanel);
 		mainPanel.add(tablePanel);
+                mainPanel.add(Box.createVerticalStrut(20));
+                mainPanel.add(jPanel_timeOverride);
 		mainPanel.add(statusPanel);
 		mainPanel.add(Box.createVerticalGlue());
 		mainPanel.add(spinnerPanel);
@@ -249,6 +270,7 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 			// parse using builder to get DOM representation of the XML file
 			dom = db.parse(file);
 			geomessages = dom.getDocumentElement();
+                        populateFieldList(geomessages);
 			nextNode = geomessages.getFirstChild();
 
 		} catch (ParserConfigurationException pce) {
@@ -259,9 +281,66 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 			ioe.printStackTrace();
 		}
 	}
+        
+        private void populateFieldList(Element geomessages) {
+            TreeSet<String> fields = new TreeSet<String>();
+            Node node = geomessages.getFirstChild();
+            while (node != null) {
+                if ("geomessage".equalsIgnoreCase(node.getNodeName())) {
+                    NodeList childNodes = node.getChildNodes();
+                    for (int i = 0; i < childNodes.getLength(); i++) {
+                        Node child = childNodes.item(i);
+                        String nodeName = child.getNodeName();
+                        if (null != nodeName && !"#text".equals(nodeName)) {
+                            fields.add(nodeName);
+                        }
+                    }
+                }
+                node = node.getNextSibling();
+            }
+            
+            final DefaultTableModel model = new DefaultTableModel(0, 2) {
+
+                @Override
+                public Class<?> getColumnClass(int column) {
+                    switch (column) {
+                    case 0:
+                        return Boolean.class;
+                    case 1:
+                    default:
+                        return String.class;
+                    }
+                }
+
+            };
+            model.addTableModelListener(new TableModelListener() {
+
+                public void tableChanged(TableModelEvent e) {
+                    if (0 == e.getColumn()) {
+                        boolean checked = (Boolean) model.getValueAt(e.getFirstRow(), 0);
+                        String value = (String) model.getValueAt(e.getFirstRow(), 1);
+                        synchronized (timeOverrideFields) {
+                            if (checked) {
+                                timeOverrideFields.add(value);
+                            } else {
+                                timeOverrideFields.remove(value);
+                            }
+                        }
+                    }
+                }
+            });
+            Iterator<String> iterator = fields.iterator();
+            while (iterator.hasNext()) {
+                String field = iterator.next();
+                model.addRow(new Object[] { false, field });
+            }
+            jTable_timeOverride.setModel(model);
+        }
 
 	// to get the XML node as a string
 	public void getNodeString(Node n) throws TransformerException, IOException {
+            final String currentDateString = Utilities.DATE_FORMAT_GEOMESSAGE.format(new Date());
+            
 		// trying to get element as a string
 		Transformer transformer = TransformerFactory.newInstance()
 				.newTransformer();
@@ -284,7 +363,19 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
         Element root = doc.createElement("geomessages");
         doc.appendChild(root);
         
-        Node importedNode = doc.importNode(n, true);        
+        Node importedNode = doc.importNode(n, true);
+        
+        //Time override
+        synchronized (timeOverrideFields) {
+            NodeList fieldNodes = importedNode.getChildNodes();
+            for (int j = 0; j < fieldNodes.getLength(); j++) {
+                Node field = fieldNodes.item(j);
+                if (timeOverrideFields.contains(field.getNodeName())) {
+                    field.getFirstChild().setNodeValue(currentDateString);
+                }
+            }
+        }
+        
         root.appendChild(importedNode);
 	
 		StreamResult result = new StreamResult(new StringWriter());
@@ -300,7 +391,6 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 		
 		byte[] byteString = xmlString.getBytes();
 
-		// send xml string over network. uses class UDPBroadcastController.java
 		controller.sendMessage(byteString);
 	}
 
