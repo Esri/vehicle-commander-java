@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2014 Esri
+ * Copyright 2012-2015 Esri
  * 
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -80,6 +80,7 @@ import javax.swing.JButton;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JToggleButton;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -484,18 +485,33 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
                     + mapConfigFilename + ". This could be a problem with the XML file or with one of the layers.\n\nError details:\n\n"
                     + t.getMessage());
         }
-
+        
         try {
             symbolController = new AdvancedSymbolController(mapController,
                     ImageIO.read(getClass().getResourceAsStream("/com/esri/vehiclecommander/resources/spot_report.png")),
                     appConfigController);
             mapController.setAdvancedSymbolController(symbolController);
-            //First search is sometimes slow, so fire off the first search right here
             new Thread() {
 
                 @Override
                 public void run() {
                     try {
+                        SwingUtilities.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                Image iconImage = VehicleCommanderJFrame.this.getIconImage();
+                                final int width;
+                                final int height;
+                                if (null != iconImage) {
+                                    width = iconImage.getWidth(null);
+                                    height = iconImage.getHeight(null);
+                                } else {
+                                    width = height = 16;
+                                }
+                                setIconImage(symbolController.getSymbolImage("Ground Vehicle F", width, height));
+                            }
+                        });
+                        //First search is sometimes slow, so fire off the first search right here
                         symbolController.findSymbols("ATM Hostile");
                     } catch (IOException ex) {
                         Logger.getLogger(VehicleCommanderJFrame.class.getName()).log(Level.SEVERE, null, ex);

@@ -34,7 +34,6 @@ import com.esri.map.MessageGroupLayer;
 import com.esri.militaryapps.controller.MessageControllerListener;
 import com.esri.militaryapps.model.Geomessage;
 import com.esri.militaryapps.util.Utilities;
-import com.esri.vehiclecommander.model.IdentifiedItem;
 import com.esri.vehiclecommander.model.IdentifyResultList;
 import com.esri.vehiclecommander.model.Mil2525CMessageLayer;
 
@@ -135,12 +134,23 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
     }
     
     /**
-     * Gets the symbol image for the specified symbol name or SIC.
+     * Gets the symbol image of size 100x100 for the specified symbol name or SIC.
      * @param symbolNameOrId a symbol name or SIC.
      * @return the symbol image for the specified symbol name or SIC.
      */
     public BufferedImage getSymbolImage(String symbolNameOrId) {
-        return groupLayer.getMessageProcessor().getSymbolDictionary().getSymbolImage(symbolNameOrId, 100, 100);
+        return getSymbolImage(symbolNameOrId, 100, 100);
+    }
+        
+    /**
+     * Gets the symbol image for the specified symbol name or SIC.
+     * @param symbolNameOrId a symbol name or SIC.
+     * @param width the width (in pixels) of the generated image.
+     * @param height the height (in pixels) of the generated image.
+     * @return the symbol image for the specified symbol name or SIC.
+     */
+    public BufferedImage getSymbolImage(String symbolNameOrId, int width, int height) {
+        return groupLayer.getMessageProcessor().getSymbolDictionary().getSymbolImage(symbolNameOrId, width, height);
     }
     
     /**
