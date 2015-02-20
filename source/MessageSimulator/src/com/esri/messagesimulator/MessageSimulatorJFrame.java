@@ -165,6 +165,9 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
                 jPanel_timeOverride.setLayout(new BorderLayout());
                 jPanel_timeOverride.add(new JLabel("Time Override Fields (use the current time in outgoing message for the value of these fields)"), BorderLayout.NORTH);
                 jTable_timeOverride = new JTable();
+                jTable_timeOverride.setFocusable(false);
+                jTable_timeOverride.setTableHeader(null);
+                jTable_timeOverride.setShowGrid(false);
                 jTable_timeOverride.setFillsViewportHeight(true);
                 JScrollPane toScrollPane = new JScrollPane(jTable_timeOverride);
                 jPanel_timeOverride.add(toScrollPane, BorderLayout.CENTER);
@@ -335,6 +338,7 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
                 model.addRow(new Object[] { false, field });
             }
             jTable_timeOverride.setModel(model);
+            jTable_timeOverride.getColumnModel().getColumn(1).setPreferredWidth(Integer.MAX_VALUE);
         }
 
 	// to get the XML node as a string
