@@ -85,7 +85,7 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 
 		// creating the buttons for the gui
 		startButton = new JButton("Start Simulator");
-		stopButton = new JButton("Stop Simulater");
+		stopButton = new JButton("Stop Simulator");
 		pauseButton = new JButton("Pause Simulator");
 		changeSimFile = new JButton("Load Simulation File");
 		// add action to buttons
