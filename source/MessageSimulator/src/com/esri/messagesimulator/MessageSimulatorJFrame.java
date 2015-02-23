@@ -30,6 +30,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -66,6 +68,7 @@ import org.xml.sax.SAXException;
 class MessageSimulatorJFrame extends JFrame implements WindowListener {
 
 	private static final long serialVersionUID = 1L;
+        private static final Logger logger = Logger.getLogger(MessageSimulatorJFrame.class.getName());
         
         private final MessageController controller;
 	
@@ -390,7 +393,7 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 		
 		final boolean DEBUG_OUTPUT = false;
 		if (DEBUG_OUTPUT) {
-			System.out.println(xmlString); 
+                        logger.fine(xmlString);
 		}
 		
 		byte[] byteString = xmlString.getBytes();
@@ -465,8 +468,7 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 			Integer i = (Integer) portSpinner.getValue(); 
                         controller.setPort(i);
 
-			System.out.println("portSpinner = " + i);
-
+                        logger.log(Level.FINE, "portSpinner = {0}", i);
 		}
 	}
 
@@ -477,8 +479,7 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 			Integer i = (Integer) throughputSpinner.getValue(); 			
 			selectedThrough = i.intValue();
 
-			System.out.println("selected thoughput = " + selectedThrough);
-
+                        logger.log(Level.FINE, "selected thoughput = {0}", selectedThrough);
 		}
 
 	}
@@ -491,8 +492,8 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 			selectedTime = i.intValue();
 
 			timerDelayInMillisecs = (int) ((1.0 / (double) (selectedTime)) * 1000.0);
-			System.out.println("selected time = " + selectedTime
-					+ " add row delay =  " + timerDelayInMillisecs);
+			logger.log(Level.FINE, "selected time = {0} add row delay =  {1}",
+                                new Object[]{selectedTime, timerDelayInMillisecs});
 			rowTimer.setDelay(timerDelayInMillisecs);
 		}
 
