@@ -17,16 +17,33 @@
 
   <path id="project.classpath">
     <pathelement location="${dir.dist}\MessageSimulator.jar"/>
+    <pathelement location="${dir.src}/../military-apps-library-java/source/MilitaryAppsLibrary/lib/json.jar"/>
   </path>
 
   <target name="build" depends="create,compile,jar">
   </target>
 
   <target name="compile" depends="create">
-    <javac srcdir="${dir.src}" classpathref="project.classpath" destdir="${dir.build}" includeantruntime="true" />
+    <javac classpathref="project.classpath" destdir="${dir.build}" includeantruntime="true" debug="${debug}">
+        <src path="${dir.src}/src" />
+        <src path="${dir.src}/../military-apps-library-java/source/MilitaryAppsLibrary/src" />
+    </javac>
+    <copy todir="${dir.build}">
+      <fileset dir="${dir.src}/src" excludes="**/*.java,**/*.form" />
+      <fileset dir="${dir.src}/../military-apps-library-java/source/MilitaryAppsLibrary/src" excludes="**/*.java" />
+    </copy>
   </target>
 
   <target name="jar" depends="compile">
+    <pathconvert pathsep=" " property="project.classpath.string" refid="project.classpath">
+      <chainedmapper>
+        <flattenmapper/>
+        <filtermapper>
+          <replacestring from=" " to="%20"/>
+        </filtermapper>
+        <globmapper from="*" to="lib/*"/>
+      </chainedmapper>
+    </pathconvert>
     <jar destfile="${dir.dist}/MessageSimulator.jar">
       <fileset dir="${dir.build}" />
         <manifest>

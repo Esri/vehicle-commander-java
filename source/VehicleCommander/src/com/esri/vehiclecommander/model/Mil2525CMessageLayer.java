@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.esri.vehiclecommander.model;
 
+import com.esri.core.map.Graphic;
 import com.esri.core.renderer.DictionaryRenderer;
 import com.esri.core.symbol.advanced.Message;
 import com.esri.core.symbol.advanced.MessageProcessor;
@@ -132,6 +133,50 @@ public class Mil2525CMessageLayer extends MessageGroupLayer {
                 graphicsLayer.setRenderer(dictionaryRenderer);
             }
         }
+    }
+    
+    /**
+     * Performs an identify on this layer.
+     * @param screenX
+     * @param screenY
+     * @param tolerance
+     * @return 
+     */
+    public IdentifyResultList identify(float screenX, float screenY, int tolerance) {
+        IdentifyResultList results = new IdentifyResultList();
+        Layer[] layers = getLayers();
+        for (Layer layer : layers) {
+            if (layer instanceof GraphicsLayer) {
+                IdentifyResultList theseResults = identify((GraphicsLayer) layer, screenX, screenY, tolerance);
+                for (int i = 0; i < theseResults.size(); i++) {
+                    results.add(theseResults.get(i), layer);
+                }
+            }
+        }
+        return results;
+    }
+    
+    /**
+     * Performs an identify on a GraphicsLayer and returns the results.
+     * @param graphicsLayer
+     * @param screenX
+     * @param screenY
+     * @param tolerance
+     * @return 
+     */
+    public static IdentifyResultList identify(GraphicsLayer graphicsLayer, float screenX, float screenY, int tolerance) {
+        IdentifyResultList results = new IdentifyResultList();
+        int[] graphicIds = graphicsLayer.getGraphicIDs(screenX, screenY, tolerance);
+        for (int id : graphicIds) {
+            Graphic graphic = graphicsLayer.getGraphic(id);
+            IdentifiedItem item = new IdentifiedItem(
+                    graphic.getGeometry(),
+                    -1,
+                    graphic.getAttributes(),
+                    graphicsLayer.getName() + " " + graphic.getUid());
+            results.add(item, graphicsLayer);
+        }
+        return results;
     }
 
 }

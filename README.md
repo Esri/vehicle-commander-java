@@ -18,7 +18,7 @@ The documentation is divided between Quick Start, Detailed Usage, and other sect
 
 * [Hardware and software requirements](#hardware-and-software-requirements)
 * [Quick Start and Build Instructions](#quick-start-instructions)
-* [Release Notes](#release-notes--known-issues)
+* [Release Notes](#release-notes)
 * [Detailed Usage](#detailed-instructions)
 * [Conclusion](#conclusion)
 
@@ -34,16 +34,16 @@ Hardware requirements for this template are the same as those for ArcGIS Runtime
 
 ### Software Requirements
 * Building Requirements
-    * [ArcGIS Runtime SDK for Java](https://developers.arcgis.com/java/) (10.2.3 or later).
-    * [Java SE Development Kit (JDK)](http://www.oracle.com/technetwork/java/javase/downloads/index.html) 6 or higher.
-    * [Apache Ant](http://ant.apache.org/).
+    * [ArcGIS Runtime SDK for Java](https://developers.arcgis.com/java/) (10.2.4 or later).
+    * [Java SE Development Kit (JDK)](http://www.oracle.com/technetwork/java/javase/downloads/index.html) 8 or higher.
+    * [Apache Ant](http://ant.apache.org/) 1.9+.
     * Optionally, an integrated development environment (IDE). This template’s source code includes project files for the following IDEs:
         * [NetBeans](http://netbeans.org/) 6.9.1 or higher
         * [Eclipse](http://eclipse.org/) Indigo (3.7.1) or higher 
 * Deployed Application Requirements
     * Software requirements for this template are the same as those for ArcGIS Runtime SDK for Java.  See the Runtime SDK documentation for more information. 
     * Some important items to note: 
-        * ArcGIS Runtime for Java requires Java 6 or higher using the Java Runtime Environment (JRE) from Oracle.
+        * ArcGIS Runtime for Java requires Java 7 or higher using the Java Runtime Environment (JRE) from Oracle. However, Vehicle Commander requires Java 8 or higher. For details, see the release notes below for ArcGIS Runtime 10.2.4.
         * The ArcGIS Runtime does not run in a Remote Desktop session or as a remote X client.
         * The appropriate driver for display adapter should be installed.
 
@@ -56,7 +56,7 @@ This section is for developers who just need to quickly build and run the applic
     * Java is installed and added to your path and the environment variable `JAVA_HOME` to be set to this location
     * To verify your Java Installation: Open Command Prompt> `java -version` and verify it runs and returns the version correctly 
 * Ensure Apache Ant is installed and configured 
-    * Download Ant from the [Apache Ant Project](http://ant.apache.org/bindownload.cgi) and unzip to a location on your machine
+    * Download Ant 1.9+ from the [Apache Ant Project](http://ant.apache.org/bindownload.cgi) and unzip to a location on your machine
     * Set environment variable `ANT_HOME` to Ant Install Location
     * Add Ant\bin to your path: `%ANT_HOME%\bin`
     * To verify your Ant Installation: Open Command Prompt> `ant -version` and verify it runs and returns the help correctly 
@@ -83,7 +83,15 @@ This section is for developers who just need to quickly build and run the applic
     * `> java -jar dist\VehicleCommander.jar`
     * See the [user guide](documentation/UserGuide.md) for more detailed command line options
 
-## Release Notes / Known Issues
+## Release Notes
+
+### 10.2.4
+
+#### What's New in Vehicle Commander 10.2.4
+* Uses ArcGIS Runtime 10.2.4.
+* Java 8 or higher is required. ArcGIS Runtime 10.2.4 requires Java 7 or higher, but Oracle included [a bug fix in Java 8](http://bugs.java.com/bugdatabase/view_bug.do?bug_id=7107883) that allows UDP networking to behave properly for wired and Wi-Fi networks. Vehicle Commander's messaging depends on UDP networking. Therefore, you should use Java 8 or higher to ensure that messaging works properly.
+* Ant 1.9+ is required for building Vehicle Commander using the build script. Java 8 depends on Ant 1.9 or higher.
+* TODO
 
 ### 10.2.3
 
@@ -112,15 +120,6 @@ This section is for developers who just need to quickly build and run the applic
     * Works with OpenGL 2.1 and higher.
 * Uses new directory structure.
 * Bug fixes and performance improvements.
-
-#### Release Notes 
-* To deploy this application, you need to rebuild with your own license string or provide your own license strings via the -license and -exts command line switches. 
-* The Buddies and Observations buttons in the main menu currently do nothing. In a future release, each of these buttons will be either implemented or removed.
-* Onboard GPS works only on Windows, not on Linux. This is a limitation of ArcGIS Runtime 10.1.1.
-* (Linux) Rotating by holding the V and B keys rotates only one step at a time. This happens because of a [documented JRE bug](http://bugs.sun.com/view_bug.do?bug_id=4153069) on Linux. This issue might be worked around in a future Vehicle Commander release or a future JRE release.
-* Attempting to navigate to an invalid MGRS location can crash Vehicle Commander. This is a behavior of ArcGIS Runtime. Vehicle Commander attempts to ignore or repair invalid MGRS strings. Even if the string matches the basic MGRS patterns or can be made to match, that does not guarantee that the combination of grid zone identifier, 100,000-meter square identification, and easting/northing is valid in the MGRS. A future release of ArcGIS Runtime will address this issue.
-* (Linux) When running in undecorated mode (no title bar), application dialogs can pop under the main application and become difficult to access. Since the checkbox for changing between decorated and undecorated mode is itself on a dialog, decorated mode is now the default. You can use undecorated mode on Linux, but dialogs will be difficult to use.
-* (Linux) If you run the application from a USB drive on a Linux machine, the Runtime deployment (ArcGISRuntime10.1.1 directory) will no longer work on other Linux machines. This limitation is documented in the [ArcGIS Runtime 10.1.1 release notes](http://resources.arcgis.com/en/help/runtime-java/concepts/index.html#//01qv00000036000000). One solution is to copy the application to the hard drive before running. Another solution is to make a backup copy of the ArcGISRuntime10.1.1 directory, especially the ClientLx and LocalServerLx subdirectories.
 
 ## Detailed Instructions 
 
@@ -196,7 +195,17 @@ see the site for concepts, samples, and references for using the API to create m
 
 ## Issues
 
-Find a bug or want to request a new feature?  Please let us know by submitting an issue.
+Find a bug or want to request a new feature?  Please let us know by [submitting an issue](issues/new).
+
+### Known Issues
+
+* If you build the application from source, you need to use your own license string in the code or provide your own license strings via the -license and -exts command line switches. 
+* The Buddies and Observations buttons in the main menu currently do nothing. In a future release, each of these buttons will be either implemented or removed.
+* Onboard GPS works only on Windows, not on Linux. This is a limitation of ArcGIS Runtime as of 10.1.1.
+* (Linux) Rotating by holding the V and B keys rotates only one step at a time. This happens because of a [documented JRE bug](http://bugs.sun.com/view_bug.do?bug_id=4153069) on Linux. This issue might be worked around in a future Vehicle Commander release or a future JRE release.
+* Attempting to navigate to an invalid MGRS location can crash Vehicle Commander. This is a behavior of ArcGIS Runtime. Vehicle Commander attempts to ignore or repair invalid MGRS strings. Even if the string matches the basic MGRS patterns or can be made to match, that does not guarantee that the combination of grid zone identifier, 100,000-meter square identification, and easting/northing is valid in the MGRS. A future release of ArcGIS Runtime will address this issue.
+* (Linux) When running in undecorated mode (no title bar), application dialogs can pop under the main application and become difficult to access. Since the checkbox for changing between decorated and undecorated mode is itself on a dialog, decorated mode is now the default. You can use undecorated mode on Linux, but dialogs will be difficult to use.
+* (Linux) If you run the application from a USB drive on a Linux machine, the Runtime deployment (ArcGISRuntime10.1.1 directory) will no longer work on other Linux machines. This limitation is documented in the [ArcGIS Runtime 10.1.1 release notes](http://resources.arcgis.com/en/help/runtime-java/concepts/index.html#//01qv00000036000000). One solution is to copy the application to the hard drive before running. Another solution is to make a backup copy of the ArcGISRuntime10.1.1 directory, especially the ClientLx and LocalServerLx subdirectories.
 
 ## Contributing
 
