@@ -305,7 +305,7 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
                 node = node.getNextSibling();
             }
             
-            final DefaultTableModel model = new DefaultTableModel(0, 2) {
+            final DefaultTableModel timeOverrideTableModel = new DefaultTableModel(0, 2) {
 
                 @Override
                 public Class<?> getColumnClass(int column) {
@@ -319,12 +319,12 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
                 }
 
             };
-            model.addTableModelListener(new TableModelListener() {
+            timeOverrideTableModel.addTableModelListener(new TableModelListener() {
 
                 public void tableChanged(TableModelEvent e) {
                     if (0 == e.getColumn()) {
-                        boolean checked = (Boolean) model.getValueAt(e.getFirstRow(), 0);
-                        String value = (String) model.getValueAt(e.getFirstRow(), 1);
+                        boolean checked = (Boolean) timeOverrideTableModel.getValueAt(e.getFirstRow(), 0);
+                        String value = (String) timeOverrideTableModel.getValueAt(e.getFirstRow(), 1);
                         synchronized (timeOverrideFields) {
                             if (checked) {
                                 timeOverrideFields.add(value);
@@ -338,9 +338,9 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
             Iterator<String> iterator = fields.iterator();
             while (iterator.hasNext()) {
                 String field = iterator.next();
-                model.addRow(new Object[] { false, field });
+                timeOverrideTableModel.addRow(new Object[] { false, field });
             }
-            jTable_timeOverride.setModel(model);
+            jTable_timeOverride.setModel(timeOverrideTableModel);
             jTable_timeOverride.getColumnModel().getColumn(1).setPreferredWidth(Integer.MAX_VALUE);
         }
 
@@ -506,7 +506,7 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 			geomessages = dom.getDocumentElement();
 			nextNode = geomessages.getFirstChild();
 
-			if (startButton.getText() == "Start Simulator") {
+			if ("Start Simulator".equals(startButton.getText())) {
 				status.setText("Simulation Started");
 				stopButton.setEnabled(true);
 				pauseButton.setEnabled(true);
@@ -534,7 +534,7 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 
 		public void actionPerformed(ActionEvent arg0) {
 
-			if (pauseButton.getText() == "Pause Simulator") {
+			if ("Pause Simulator".equals(pauseButton.getText())) {
 				status.setText("Simulation Paused");
 				simulatorRunning = false;
 				pauseButton.setText("Continue Simulator");
@@ -614,9 +614,15 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 
 	}
 
+        @Override
 	protected void finalize() {
+            try {
+                super.finalize();
+            } catch (Throwable ex) {
+                logger.log(Level.SEVERE, null, ex);
+            } finally {
 		System.exit(0);
-
+            }
 	}
 
 	// Main entry point for this example
