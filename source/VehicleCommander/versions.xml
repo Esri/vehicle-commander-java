@@ -9,8 +9,8 @@
 
 <!--  TODO: You may need to edit these properties to match the desired SDK version  -->
 <!-- IMPORTANT: Set these 2 properties to the current/desired version (ex. 10.X.X): -->
-<property name="dir.agsruntimejavasdk" value="${env.ARCGISRUNTIMESDKJAVA_10_2_4}"/>
-<property name="version.runtime" value="10.2.4"/>
+<property name="dir.agsruntimejavasdk" value="${env.ARCGISRUNTIMESDKJAVA_10_2_5}"/>
+<property name="version.runtime" value="10.2.5"/>
 <!-- ****************************************************************************** -->
 
 <echo message="Using ArcGIS Runtime Java SDK Location = ${dir.agsruntimejavasdk}"/>
