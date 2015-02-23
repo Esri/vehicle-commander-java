@@ -51,13 +51,13 @@ The application opens as shown in [Usage](#usage).
 
 * If the application crashes, it is possible the machine does not have the proper OpenGL capabilities. Refer to [Hardware Requirements](../README.md#hardware-requirements) to learn how to verify OpenGL.
 *  If the map opens blank, verify the paths in mapconfig.xml.
-5.If you want to change user settings, click the Main Menu button and go to Options > About Me. A dialog box lets you change the user settings described in [Deploying the Application.](../README.md#deploying-the-application)
+5.If you want to change user settings, click the Main Menu button and go to Options > Settings. A dialog box lets you change the user settings described in [Deploying the Application.](../README.md#deploying-the-application)
 
 ## Usage
 
 ![Image of Vehicle Commander](../ScreenShotLabels.png "vehicle-commander")
 
-Vehicle Commander provides high performance mapping, situational awareness, and reporting for mounted units. It is intended for touchscreen use, though it also works properly with a mouse; in that sense, the words “click” and “tap” are interchangeable in this section.
+Vehicle Commander provides high performance mapping, situational awareness, and reporting for mounted units. It is intended for touchscreen use, though it also works properly with a mouse; in that sense, the words "click" and "tap" are interchangeable in this section.
 
 ### Mapping
 
@@ -81,13 +81,13 @@ To add a map overlay, go to Main Menu > Overlays. You can add an ArcGIS map pack
 
 You can click the map to identify features from map packages, as well as MIL-STD-2525C symbols on the map. Identified items are shown in a panel. Click the previous and back buttons to view the attributes of identified items. Click the X button to close the identify panel.
 
-A panel at the bottom of the application displays the current position, heading, and time. To change the units used to display the heading, go to Main Menu > Options > About Me. For Heading Units, choose Degrees or Mils and click OK.
+A panel at the bottom of the application displays the current position, heading, and time. To change the units used to display the heading, go to Main Menu > Options > Settings. For Heading Units, choose Degrees or Mils and click OK.
 
 To close the Main Menu, click the back arrow button at the top of the menu.
 
 ### Situational awareness and reporting
 
-The map displays moving locations of friendly forces if you run the Vehicle Commander on multiple machines that are connected to the same network router. These machines must have the messaging port (default 45678; see [Deploying the Application](../README.md#deploying-the-application) ) open for UDP sending and receiving in the machine’s firewall settings. They must also have unique IDs set under Main Menu > Options > About Me > Unique ID.
+The map displays moving locations of friendly forces if you run the Vehicle Commander on multiple machines that are connected to the same network router. These machines must have the messaging port (default 45678; see [Deploying the Application](../README.md#deploying-the-application) ) open for UDP sending and receiving in the machine’s firewall settings. They must also have unique IDs set under Main Menu > Options > Settings > Unique ID.
 
 Toggle the 911 button to indicate to friendly forces that you need immediate assistance. Your position marker will flash on the display of other vehicles that receive your position reports. Toggle the 911 button off to clear your emergency status.
 

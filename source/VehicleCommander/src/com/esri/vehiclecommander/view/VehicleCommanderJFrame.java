@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2014 Esri
+ * Copyright 2012-2015 Esri
  * 
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.esri.vehiclecommander.view;
 import com.esri.core.geometry.AngularUnit;
 import com.esri.core.geometry.GeometryEngine;
 import com.esri.core.geometry.Point;
+import com.esri.core.geometry.SpatialReference;
 import com.esri.map.Layer;
 import com.esri.map.MapOverlay;
 import com.esri.militaryapps.controller.ChemLightController;
@@ -79,6 +80,7 @@ import javax.swing.JButton;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JToggleButton;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -483,18 +485,33 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
                     + mapConfigFilename + ". This could be a problem with the XML file or with one of the layers.\n\nError details:\n\n"
                     + t.getMessage());
         }
-
+        
         try {
             symbolController = new AdvancedSymbolController(mapController,
                     ImageIO.read(getClass().getResourceAsStream("/com/esri/vehiclecommander/resources/spot_report.png")),
                     appConfigController);
             mapController.setAdvancedSymbolController(symbolController);
-            //First search is sometimes slow, so fire off the first search right here
             new Thread() {
 
                 @Override
                 public void run() {
                     try {
+                        SwingUtilities.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                Image iconImage = VehicleCommanderJFrame.this.getIconImage();
+                                final int width;
+                                final int height;
+                                if (null != iconImage) {
+                                    width = iconImage.getWidth(null);
+                                    height = iconImage.getHeight(null);
+                                } else {
+                                    width = height = 16;
+                                }
+                                setIconImage(symbolController.getSymbolImage("Ground Vehicle F", width, height));
+                            }
+                        });
+                        //First search is sometimes slow, so fire off the first search right here
                         symbolController.findSymbols("ATM Hostile");
                     } catch (IOException ex) {
                         Logger.getLogger(VehicleCommanderJFrame.class.getName()).log(Level.SEVERE, null, ex);
@@ -1168,8 +1185,8 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Vehicle Commander");
-        setPreferredSize(new java.awt.Dimension(1024, 708));
         setUndecorated(!appConfigController.isDecorated());
+        setPreferredSize(new java.awt.Dimension(1024, 708));
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 formWindowClosing(evt);
@@ -1331,8 +1348,18 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
     public void updatePosition(Point mapLocation, Double headingDegrees) {
         if (null != mapLocation) {
             try {
-                String mgrs = mapController.pointToMgrs(mapLocation, mapController.getSpatialReference());
-                jLabel_location.setText(mgrs);
+                String locationString;
+                if (appConfigController.isShowMgrs()) {
+                    locationString = mapController.pointToMgrs(mapLocation, mapController.getSpatialReference());
+                } else {
+                    SpatialReference mapSr = mapController.getSpatialReference();
+                    if (!mapSr.isWGS84()) {
+                        double[] coords = mapController.projectPoint(mapLocation.getX(), mapLocation.getY(), mapSr.getID(), Utilities.WGS84.getID());
+                        mapLocation = new Point(coords[0], coords[1]);
+                    }
+                    locationString = String.format("%06f", mapLocation.getY()) + " " + String.format("%05f", mapLocation.getX());
+                }
+                jLabel_location.setText(locationString);
             } catch (RuntimeException re) {
                 /**
                  * This probably means the map is not yet initialized, so we don't
