@@ -280,11 +280,11 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 			nextNode = geomessages.getFirstChild();
 
 		} catch (ParserConfigurationException pce) {
-			pce.printStackTrace();
+                    logger.log(Level.SEVERE, "Could not read simulation file", pce);
 		} catch (SAXException se) {
-			se.printStackTrace();
+                    logger.log(Level.SEVERE, "Could not read simulation file", se);
 		} catch (IOException ioe) {
-			ioe.printStackTrace();
+                    logger.log(Level.SEVERE, "Could not read simulation file", ioe);
 		}
 	}
         
@@ -358,7 +358,7 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 		try {
 			docBuilder = docBuilderFactory.newDocumentBuilder();
 		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
+                    logger.log(Level.SEVERE, "Could not init DocumentBuilder", e);
 		}
 		if (docBuilder == null) {
 			return;
@@ -456,7 +456,7 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 		try {
 			getNodeString(nextNode);
 		} catch (IOException e) {
-			e.printStackTrace();
+                    logger.log(Level.SEVERE, "Could not getNodeString", e);
 		}
 
 	}	
@@ -607,7 +607,7 @@ class MessageSimulatorJFrame extends JFrame implements WindowListener {
 				try {
 					getNextMessage();
 				} catch (TransformerException e) {
-					e.printStackTrace();
+                                    logger.log(Level.SEVERE, "Could not getNextMessage", e);
 				}
 			}
 		}
