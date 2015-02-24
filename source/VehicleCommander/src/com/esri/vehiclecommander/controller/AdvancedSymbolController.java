@@ -31,6 +31,7 @@ import com.esri.core.symbol.advanced.SymbolProperties;
 import com.esri.map.GraphicsLayer;
 import com.esri.map.Layer;
 import com.esri.map.MessageGroupLayer;
+import com.esri.militaryapps.controller.ChemLightController;
 import com.esri.militaryapps.controller.MessageControllerListener;
 import com.esri.militaryapps.model.Geomessage;
 import com.esri.militaryapps.util.Utilities;
@@ -249,6 +250,20 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
     
     private boolean _processMessage(Message message) {
         final int layerCount = groupLayer.getLayers().length;
+        
+        /**
+         * Workaround: ArcGIS Runtime 10.2.4 requires a chem light message to have
+         * a "sic" field.
+         */
+        if (ChemLightController.REPORT_TYPE.equals(message.getProperty(MessageHelper.MESSAGE_2525C_TYPE_PROPERTY_NAME))
+                && null == message.getProperty(Geomessage.SIC_FIELD_NAME)) {
+            String sic = appConfigController.getSic();
+            if (null == sic) {
+                sic = "SFGPU----------";
+            }
+            message.setProperty(Geomessage.SIC_FIELD_NAME, sic);
+        }
+        
         boolean success = groupLayer.getMessageProcessor().processMessage(message);
         if (layerCount < groupLayer.getLayers().length) {
             toggleLabels();
