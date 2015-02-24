@@ -48,6 +48,7 @@ import com.esri.militaryapps.model.Location;
 import com.esri.militaryapps.model.LocationProvider;
 import com.esri.vehiclecommander.model.IdentifiedItem;
 import com.esri.vehiclecommander.model.IdentifyResultList;
+import com.esri.vehiclecommander.model.Mil2525CMessageLayer;
 import com.esri.vehiclecommander.util.Utilities;
 import com.esri.vehiclecommander.view.MapOverlayAdapter;
 import com.esri.vehiclecommander.view.MapOverlayListener;
@@ -587,6 +588,16 @@ public class MapController extends com.esri.militaryapps.controller.MapControlle
         }
         activateIdentify();
     }
+    
+    private void processResults(IdentifyResultList results) {
+        for (int i = 0; i < results.size(); i++) {
+            IdentifiedItem result = results.get(i);
+            synchronized (allResults) {
+                allResults.add(result);
+                resultToLayer.put(result, results.getLayer(result));
+            }
+        }
+    }
 
     private void activateIdentify() {
         trackAsync(new MapOverlayAdapter() {
@@ -602,16 +613,13 @@ public class MapController extends com.esri.militaryapps.controller.MapControlle
                 }
                 final Point mapPoint = map.toMapPoint(event.getX(), event.getY());
                 IdentifyResultList results = symbolController.identify(event.getX(), event.getY(), 5);
-                for (int i = 0; i < results.size(); i++) {
-                    IdentifiedItem result = results.get(i);
-                    synchronized (allResults) {
-                        allResults.add(result);
-                        resultToLayer.put(result, results.getLayer(result));
-                    }
-                }
+                processResults(results);
                 
                 List<Layer> overlayLayers = getOverlayLayers();
                 for (final Layer layer : overlayLayers) {
+                    if (layer instanceof Mil2525CMessageLayer) {
+                        processResults(((Mil2525CMessageLayer) layer).identify(event.getX(), event.getY(), 5));
+                    }
                     if (null != layer.getUrl()) {
                         IdentifyTask task = new IdentifyTask(layer.getUrl());
                         IdentifyParameters params = new IdentifyParameters();

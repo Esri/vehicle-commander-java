@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2014 Esri
+ * Copyright 2012-2015 Esri
  * 
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 package com.esri.vehiclecommander.controller;
 
 import com.esri.core.geometry.AngularUnit;
-import com.esri.vehiclecommander.util.Utilities;
 import java.util.Enumeration;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -31,6 +30,9 @@ import javax.swing.JOptionPane;
 public class AppConfigDialog extends javax.swing.JDialog {
 
     private static final long serialVersionUID = 7608310305216869748L;
+    private static final String MGRS = "mgrs";
+    private static final String LONLAT = "lonlat";
+    
     private final AppConfigController appConfigController;
 
     /**
@@ -91,6 +93,11 @@ public class AppConfigDialog extends javax.swing.JDialog {
         jCheckBox_showMessageLabels.setSelected(appConfigController.isShowMessageLabels());
         jCheckBox_decorated.setSelected(appConfigController.isDecorated());
         jCheckBox_showLocalTimeZone.setSelected(appConfigController.isShowLocalTimeZone());
+        if (appConfigController.isShowMgrs()) {
+            jRadioButton_mgrs.setSelected(true);
+        } else {
+            jRadioButton_lonLat.setSelected(true);
+        }
         Enumeration<AbstractButton> headingUnitsButtons = buttonGroup_headingUnits.getElements();
         while (headingUnitsButtons.hasMoreElements()) {
             AbstractButton button = headingUnitsButtons.nextElement();
@@ -111,6 +118,7 @@ public class AppConfigDialog extends javax.swing.JDialog {
     private void initComponents() {
 
         buttonGroup_headingUnits = new javax.swing.ButtonGroup();
+        buttonGroup_coordinateNotation = new javax.swing.ButtonGroup();
         jButton_resetAll = new javax.swing.JButton();
         jLabel_username = new javax.swing.JLabel();
         jLabel_uniqueId = new javax.swing.JLabel();
@@ -140,9 +148,12 @@ public class AppConfigDialog extends javax.swing.JDialog {
         jLabel_geomessageVersion = new javax.swing.JLabel();
         jLabel_vehicleType = new javax.swing.JLabel();
         jTextField_vehicleType = new javax.swing.JTextField();
+        jLabel2 = new javax.swing.JLabel();
+        jRadioButton_mgrs = new javax.swing.JRadioButton();
+        jRadioButton_lonLat = new javax.swing.JRadioButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("About Me");
+        setTitle("Settings");
 
         jButton_resetAll.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
         jButton_resetAll.setText("Reset");
@@ -244,7 +255,6 @@ public class AppConfigDialog extends javax.swing.JDialog {
 
         buttonGroup_headingUnits.add(jRadioButton_degrees);
         jRadioButton_degrees.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
-        jRadioButton_degrees.setSelected(true);
         jRadioButton_degrees.setText("Degrees");
         jRadioButton_degrees.setActionCommand(Integer.toString(AngularUnit.Code.DEGREE));
         jRadioButton_degrees.setFocusable(false);
@@ -267,6 +277,22 @@ public class AppConfigDialog extends javax.swing.JDialog {
 
         jTextField_vehicleType.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
         jTextField_vehicleType.setText("HMMWV");
+
+        jLabel2.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
+        jLabel2.setText("Coordinate Notation");
+
+        buttonGroup_coordinateNotation.add(jRadioButton_mgrs);
+        jRadioButton_mgrs.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
+        jRadioButton_mgrs.setSelected(true);
+        jRadioButton_mgrs.setText("MGRS");
+        jRadioButton_mgrs.setActionCommand(MGRS);
+        jRadioButton_mgrs.setFocusable(false);
+
+        buttonGroup_coordinateNotation.add(jRadioButton_lonLat);
+        jRadioButton_lonLat.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
+        jRadioButton_lonLat.setText("Lon/Lat");
+        jRadioButton_lonLat.setActionCommand(LONLAT);
+        jRadioButton_lonLat.setFocusable(false);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -296,7 +322,7 @@ public class AppConfigDialog extends javax.swing.JDialog {
                         .addComponent(jCheckBox_showMessageLabels)
                         .addGap(29, 29, 29)
                         .addComponent(jCheckBox_showLocalTimeZone)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 33, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jCheckBox_decorated))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel_vehicleStatusMessageInterval)
@@ -327,7 +353,14 @@ public class AppConfigDialog extends javax.swing.JDialog {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel_username)
                         .addGap(223, 223, 223)
-                        .addComponent(jTextField_username)))
+                        .addComponent(jTextField_username))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jRadioButton_mgrs)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jRadioButton_lonLat)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -374,7 +407,12 @@ public class AppConfigDialog extends javax.swing.JDialog {
                     .addComponent(jCheckBox_showMessageLabels)
                     .addComponent(jCheckBox_decorated)
                     .addComponent(jCheckBox_showLocalTimeZone))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(jRadioButton_mgrs)
+                    .addComponent(jRadioButton_lonLat))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(jRadioButton_degrees)
@@ -427,6 +465,7 @@ public class AppConfigDialog extends javax.swing.JDialog {
         appConfigController.setShowMessageLabels(jCheckBox_showMessageLabels.isSelected());
         appConfigController.setDecorated(jCheckBox_decorated.isSelected());
         appConfigController.setShowLocalTimeZone(jCheckBox_showLocalTimeZone.isSelected());
+        appConfigController.setShowMgrs(MGRS.equals(buttonGroup_coordinateNotation.getSelection().getActionCommand()));
         try {
             appConfigController.setHeadingUnits(Integer.parseInt(buttonGroup_headingUnits.getSelection().getActionCommand()));
         } catch (NumberFormatException nfe) {
@@ -468,6 +507,7 @@ public class AppConfigDialog extends javax.swing.JDialog {
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup buttonGroup_coordinateNotation;
     private javax.swing.ButtonGroup buttonGroup_headingUnits;
     private javax.swing.JButton jButton_cancel;
     private javax.swing.JButton jButton_generateUniqueId;
@@ -478,6 +518,7 @@ public class AppConfigDialog extends javax.swing.JDialog {
     private javax.swing.JCheckBox jCheckBox_showMessageLabels;
     private javax.swing.JComboBox jComboBox_geomessageVersion;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel_geomessageVersion;
     private javax.swing.JLabel jLabel_messagingPort;
     private javax.swing.JLabel jLabel_positionMessageInterval;
@@ -488,6 +529,8 @@ public class AppConfigDialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel_vehicleStatusMessageInterval;
     private javax.swing.JLabel jLabel_vehicleType;
     private javax.swing.JRadioButton jRadioButton_degrees;
+    private javax.swing.JRadioButton jRadioButton_lonLat;
+    private javax.swing.JRadioButton jRadioButton_mgrs;
     private javax.swing.JRadioButton jRadioButton_mils;
     private javax.swing.JSpinner jSpinner_messagingPort;
     private javax.swing.JSpinner jSpinner_positionMessageInterval;

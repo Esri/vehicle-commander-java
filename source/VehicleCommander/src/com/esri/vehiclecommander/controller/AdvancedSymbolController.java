@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2014 Esri
+ * Copyright 2012-2015 Esri
  * 
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ import com.esri.map.MessageGroupLayer;
 import com.esri.militaryapps.controller.MessageControllerListener;
 import com.esri.militaryapps.model.Geomessage;
 import com.esri.militaryapps.util.Utilities;
-import com.esri.vehiclecommander.model.IdentifiedItem;
 import com.esri.vehiclecommander.model.IdentifyResultList;
+import com.esri.vehiclecommander.model.Mil2525CMessageLayer;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -53,6 +53,8 @@ import java.util.logging.Logger;
  * the application.
  */
 public class AdvancedSymbolController extends com.esri.militaryapps.controller.AdvancedSymbolController implements MessageControllerListener {
+    
+    public static final String SPOT_REPORT_LAYER_NAME = "Spot Reports";
 
     private final MapController mapController;
     private final MessageGroupLayer groupLayer;
@@ -74,7 +76,7 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
         this.appConfigController = appConfigController;
         
         spotReportLayer = new GraphicsLayer();
-        spotReportLayer.setName("Spot Report");
+        spotReportLayer.setName(SPOT_REPORT_LAYER_NAME);
         mapController.addLayer(spotReportLayer, false);
         
         groupLayer = new MessageGroupLayer(SymbolDictionary.DictionaryType.Mil2525C);
@@ -120,14 +122,6 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
     }
     
     @Override
-    protected String translateMessageTypeName(String geomessageTypeName) {
-        if ("trackrep".equals(geomessageTypeName)) {
-            geomessageTypeName = "position_report";
-        }
-        return geomessageTypeName;
-    }
-    
-    @Override
     protected String translateColorString(String geomessageColorString) {
         if ("1".equals(geomessageColorString)) {
             geomessageColorString = "red";
@@ -142,12 +136,23 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
     }
     
     /**
-     * Gets the symbol image for the specified symbol name or SIC.
+     * Gets the symbol image of size 100x100 for the specified symbol name or SIC.
      * @param symbolNameOrId a symbol name or SIC.
      * @return the symbol image for the specified symbol name or SIC.
      */
     public BufferedImage getSymbolImage(String symbolNameOrId) {
-        return groupLayer.getMessageProcessor().getSymbolDictionary().getSymbolImage(symbolNameOrId, 100, 100);
+        return getSymbolImage(symbolNameOrId, 100, 100);
+    }
+        
+    /**
+     * Gets the symbol image for the specified symbol name or SIC.
+     * @param symbolNameOrId a symbol name or SIC.
+     * @param width the width (in pixels) of the generated image.
+     * @param height the height (in pixels) of the generated image.
+     * @return the symbol image for the specified symbol name or SIC.
+     */
+    public BufferedImage getSymbolImage(String symbolNameOrId, int width, int height) {
+        return groupLayer.getMessageProcessor().getSymbolDictionary().getSymbolImage(symbolNameOrId, width, height);
     }
     
     /**
@@ -274,16 +279,9 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
         layerList.add(spotReportLayer);
         for (Layer layer : layerList) {
             if (layer instanceof GraphicsLayer) {
-                GraphicsLayer gl = (GraphicsLayer) layer;
-                int[] graphicIds = gl.getGraphicIDs(screenX, screenY, tolerance);
-                for (int id : graphicIds) {
-                    Graphic graphic = gl.getGraphic(id);
-                    IdentifiedItem item = new IdentifiedItem(
-                            graphic.getGeometry(),
-                            -1,
-                            graphic.getAttributes(),
-                            layer.getName() + " " + graphic.getUid());
-                    results.add(item, layer);
+                IdentifyResultList theseResults = Mil2525CMessageLayer.identify((GraphicsLayer) layer, screenX, screenY, tolerance);
+                for (int i = 0; i < theseResults.size(); i++) {
+                    results.add(theseResults.get(i), layer);
                 }
             }
         }
@@ -302,6 +300,27 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
 
     public void datagramReceived(String contents) {
         
+    }
+
+    @Override
+    public void clearLayer(String layerName) {
+        if (SPOT_REPORT_LAYER_NAME.equals(layerName)) {
+            spotReportLayer.removeAll();
+        }
+        Layer layer = groupLayer.getLayer(layerName);
+        if (null != layer && layer instanceof GraphicsLayer) {
+            ((GraphicsLayer) layer).removeAll();
+        }
+    }
+
+    @Override
+    public String[] getMessageLayerNames() {
+        Layer[] layers = groupLayer.getLayers();
+        String[] names = new String[layers.length];
+        for (int i = 0; i < layers.length; i++) {
+            names[i] = layers[i].getName();
+        }
+        return names;
     }
 
 }

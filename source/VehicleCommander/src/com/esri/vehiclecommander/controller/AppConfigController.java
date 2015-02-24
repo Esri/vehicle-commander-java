@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2014 Esri
+ * Copyright 2012-2015 Esri
  * 
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ public class AppConfigController {
     private static final String KEY_DECORATED = AppConfigController.class.getSimpleName() + "decorated";
     private static final String KEY_SHOW_MGRS_GRID = AppConfigController.class.getSimpleName() + "showMgrsGrid";
     private static final String KEY_SHOW_LOCAL_TIME_ZONE = AppConfigController.class.getSimpleName() + "showLocalTimeZone";
+    private static final String KEY_MGRS_COORDINATE_NOTATION = AppConfigController.class.getSimpleName() + "useMgrs";
     private static final String KEY_HEADING_UNITS = AppConfigController.class.getSimpleName() + "headingUnits";
     private static final String KEY_GEOMESSAGE_VERSION = AppConfigController.class.getSimpleName() + "geomessageVersion";
 
@@ -70,6 +71,10 @@ public class AppConfigController {
         if (null != messageController && -1 != getPort()) {
             messageController.setPort(getPort());
         }
+    }
+    
+    public MessageController getMessageController() {
+        return messageController;
     }
 
     private class AppConfigHandler extends DefaultHandler {
@@ -694,6 +699,26 @@ public class AppConfigController {
      */
     public void setShowLocalTimeZone(boolean showLocalTimeZone) {
         setPreference(KEY_SHOW_LOCAL_TIME_ZONE, showLocalTimeZone);
+    }
+    
+    /**
+     * Returns true if the application should display the current GPS location in
+     * MGRS coordinates.
+     * @return true if the application should display the current GPS location in
+     * MGRS coordinates and false if the application should display the current
+     * GPS location in longitude/latitude.
+     */
+    public boolean isShowMgrs() {
+        return preferences.getBoolean(KEY_MGRS_COORDINATE_NOTATION, true);
+    }
+    
+    /**
+     * Tells the application whether to use MGRS or longitude/latitude coordinate
+     * notation for coordinate display.
+     * @param useMgrs true for MGRS and false for longitude/latitude.
+     */
+    public void setShowMgrs(boolean showMgrs) {
+        setPreference(KEY_MGRS_COORDINATE_NOTATION, showMgrs);
     }
     
     /**
