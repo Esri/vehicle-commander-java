@@ -89,6 +89,8 @@ To close the Main Menu, click the back arrow button at the top of the menu.
 
 The map displays moving locations of friendly forces if you run the Vehicle Commander on multiple machines that are connected to the same network router. These machines must have the messaging port (default 45678; see [Deploying the Application](../README.md#deploying-the-application) ) open for UDP sending and receiving in the machine’s firewall settings. They must also have unique IDs set under Main Menu > Options > Settings > Unique ID.
 
+You can use [GeoMessage Simulator](https://github.com/Esri/geomessage-simulator-qt) to send messages to Vehicle Commander if desired. Vehicle Commander and GeoMessage Simulator must be set to the same UDP port and must be connected to a router that allows UDP traffic. See [GeoMessage Simulator](https://github.com/Esri/geomessage-simulator-qt) for details.
+
 Toggle the 911 button to indicate to friendly forces that you need immediate assistance. Your position marker will flash on the display of other vehicles that receive your position reports. Toggle the 911 button off to clear your emergency status.
 
 Use the Chem Light buttons to create digital chem lights. Click a color, and then click the map to place a chem light. The chem light appears on your map, as well as the maps in vehicles that receive your position reports. In the field, different colors of chem lights would have different predetermined meanings to all friendly forces.
