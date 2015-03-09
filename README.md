@@ -40,6 +40,12 @@ Hardware requirements for this template are the same as those for ArcGIS Runtime
     * Optionally, an integrated development environment (IDE). This template’s source code includes project files for the following IDEs:
         * [NetBeans](http://netbeans.org/) 6.9.1 or higher
         * [Eclipse](http://eclipse.org/) Indigo (3.7.1) or higher 
+    * [ArcGIS Runtime licensing](https://developers.arcgis.com/java/guide/license-your-app.htm):
+        * If you want to open map packages in Vehicle Commander, you need an ArcGIS Runtime Standard license.
+        * If you want to use the viewshed function, you need an ArcGIS Runtime Standard license as well as an ArcGIS Runtime Spatial Analyst extension license.
+        * If you don't need to open map packages or run viewsheds, you can use an ArcGIS Runtime Basic license (i.e. a client ID).
+        * Vehicle Commander's source code sets the license using a client ID and license string. ArcGIS Runtime Standard can also be licensed without a license string by authenticating to ArcGIS Online or Portal for ArcGIS every 30 days ([details](https://developers.arcgis.com/java/guide/license-your-app.htm#ESRI_SECTION2_54BBB83D9DAA41099375E14B0B53EE07)), but Vehicle Commander does not currently contain code for that licensing option. If you would like to add that code to your fork and submit a pull request, we would happily consider it.
+        
 * Deployed Application Requirements
     * Software requirements for this template are the same as those for ArcGIS Runtime SDK for Java.  See the Runtime SDK documentation for more information. 
     * Some important items to note: 
