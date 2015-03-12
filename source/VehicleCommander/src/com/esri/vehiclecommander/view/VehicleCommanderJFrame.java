@@ -397,7 +397,7 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
         messageController.addListener(symbolController);
         messageController.startReceiving();
         
-        chemLightController = new ChemLightController(messageController);
+        chemLightController = new ChemLightController(messageController, appConfigController.getUsername());
 
         positionReportController = new PositionReportController(
                 mapController.getLocationController(),
@@ -489,7 +489,7 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
         try {
             symbolController = new AdvancedSymbolController(mapController,
                     ImageIO.read(getClass().getResourceAsStream("/com/esri/vehiclecommander/resources/spot_report.png")),
-                    appConfigController);
+                    messageController, appConfigController);
             mapController.setAdvancedSymbolController(symbolController);
             new Thread() {
 

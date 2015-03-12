@@ -32,13 +32,19 @@ import com.esri.map.GraphicsLayer;
 import com.esri.map.Layer;
 import com.esri.map.MessageGroupLayer;
 import com.esri.militaryapps.controller.ChemLightController;
+import com.esri.militaryapps.controller.MessageController;
 import com.esri.militaryapps.controller.MessageControllerListener;
 import com.esri.militaryapps.model.Geomessage;
 import com.esri.militaryapps.util.Utilities;
+import com.esri.runtime.ArcGISRuntime;
 import com.esri.vehiclecommander.model.IdentifyResultList;
 import com.esri.vehiclecommander.model.Mil2525CMessageLayer;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,6 +53,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.json.JSONObject;
 
 
 /**
@@ -61,6 +68,8 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
     private final MessageGroupLayer groupLayer;
     private final GraphicsLayer spotReportLayer;
     private final Symbol spotReportSymbol;
+    private final MessageController messageController;
+    private final File symDictDir;
     private final AppConfigController appConfigController;
 
     /**
@@ -71,6 +80,7 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
     public AdvancedSymbolController(
             MapController mapController,
             BufferedImage spotReportIcon,
+            MessageController messageController,
             AppConfigController appConfigController) {
         super(mapController);
         this.mapController = mapController;
@@ -86,6 +96,9 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
         spotReportSymbol = new PictureMarkerSymbol(spotReportIcon);
         
         setShowLabels(appConfigController.isShowMessageLabels());
+        
+        this.messageController = messageController;
+        symDictDir = new File(ArcGISRuntime.getRuntimeBinariesDir(), "../../resources/symbols/mil2525c");
     }
 
     @Override
@@ -308,6 +321,11 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
         Message message = MessageHelper.createRemoveMessage(DictionaryType.Mil2525C, geomessageId, messageType);
         _processMessage(message);
     }
+    
+    @Override
+    protected void removeSpotReportGraphic(int graphicId) {
+        spotReportLayer.removeGraphic(graphicId);
+    }
 
     public void geomessageReceived(Geomessage geomessage) {
         processGeomessage(geomessage);
@@ -316,18 +334,21 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
     public void datagramReceived(String contents) {
         
     }
-
+    
     @Override
-    public void clearLayer(String layerName) {
-        if (SPOT_REPORT_LAYER_NAME.equals(layerName)) {
-            spotReportLayer.removeAll();
+    public void clearLayer(String layerName, boolean sendRemoveMessageForOwnMessages) {
+        if ("spot_reports".equals(layerName)) {
+            int[] graphicIds = spotReportLayer.getGraphicIDs();
+            loopAndRemove(graphicIds, spotReportLayer, sendRemoveMessageForOwnMessages, true);
         }
         Layer layer = groupLayer.getLayer(layerName);
-        if (null != layer && layer instanceof GraphicsLayer) {
-            ((GraphicsLayer) layer).removeAll();
+        if (layer instanceof GraphicsLayer) {
+            GraphicsLayer graphicsLayer = (GraphicsLayer) layer;
+            int[] graphicIds = graphicsLayer.getGraphicIDs();
+            loopAndRemove(graphicIds, graphicsLayer, sendRemoveMessageForOwnMessages, false);
         }
     }
-
+    
     @Override
     public String[] getMessageLayerNames() {
         Layer[] layers = groupLayer.getLayers();
@@ -336,6 +357,80 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
             names[i] = layers[i].getName();
         }
         return names;
+    }
+    
+    @Override
+    public String getMessageLayerName(String messageType) {
+        if (null == messageType) {
+            return null;
+        }
+        
+        File messageTypesDir = new File(symDictDir, "messagetypes");
+        File[] files = messageTypesDir.listFiles(new FilenameFilter() {
+            
+            @Override
+            public boolean accept(File dir, String filename) {
+                return null != filename && filename.toLowerCase().endsWith(".json");
+            }
+        });
+        for (File file : files) {
+            BufferedReader in = null;
+            try {
+                in = new BufferedReader(new FileReader(file));
+                StringBuffer sb = new StringBuffer();
+                String line = null;
+                while (null != (line = in.readLine())) {
+                    sb.append(line);
+                }
+                JSONObject obj = new JSONObject(sb.toString());
+                if (messageType.equals(obj.getString("type"))) {
+                    return obj.getString("layerName");
+                }
+            } catch (Throwable t) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Could not read and parse " + file.getAbsolutePath(), t);
+            } finally {
+                if (null != in) {
+                    try {
+                        in.close();
+                    } catch (IOException e) {
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Could not close file", e);
+                    }
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    private void loopAndRemove(int[] graphicIds, GraphicsLayer graphicsLayer, boolean sendRemoveMessageForOwnMessages, boolean removeGraphics) {
+        if (null != graphicIds) {
+            for (int graphicId : graphicIds) {
+                Graphic graphic = graphicsLayer.getGraphic(graphicId);
+                removeGeomessage(graphic, sendRemoveMessageForOwnMessages);
+                if (removeGraphics) {
+                    graphicsLayer.removeGraphic(graphicId);
+                }
+            }
+        }
+    }
+    
+    private void removeGeomessage(Graphic graphic, boolean sendRemoveMessageForOwnMessages) {
+        final String geomessageId = (String) graphic.getAttributeValue(Geomessage.ID_FIELD_NAME);
+        final String geomessageType = (String) graphic.getAttributeValue(Geomessage.TYPE_FIELD_NAME);
+        String uniqueDesignation = (String) graphic.getAttributeValue("uniquedesignation");
+        if (sendRemoveMessageForOwnMessages && null != uniqueDesignation && uniqueDesignation.equals(messageController.getSenderUsername())) {
+            new Thread() {
+                public void run() {
+                    try {
+                        sendRemoveMessage(messageController, geomessageId, geomessageType);
+                    } catch (Throwable t) {
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Couldn't send REMOVE message", t);
+                    }
+                }
+            }.start();
+        } else {
+            processRemoveGeomessage(geomessageId, geomessageType);
+        }
     }
 
 }
