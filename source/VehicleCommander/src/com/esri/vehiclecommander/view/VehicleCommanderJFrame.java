@@ -616,6 +616,7 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
         jPanel_mainToolbar = new javax.swing.JPanel();
         jPanel_subToolbar = new javax.swing.JPanel();
         jPanel_subToolbar.setVisible(false);
+        jButton_clearMessages = new javax.swing.JButton();
         map = new com.esri.map.JMap();
         map.setShowingEsriLogo(false);
 
@@ -1120,6 +1121,21 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
         jPanel_subToolbar.setOpaque(false);
         jPanel_subToolbar.setLayout(new javax.swing.BoxLayout(jPanel_subToolbar, javax.swing.BoxLayout.LINE_AXIS));
 
+        jButton_clearMessages.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/esri/vehiclecommander/resources/Discard-Normal.png"))); // NOI18N
+        jButton_clearMessages.setBorderPainted(false);
+        jButton_clearMessages.setContentAreaFilled(false);
+        jButton_clearMessages.setFocusable(false);
+        jButton_clearMessages.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        jButton_clearMessages.setMaximumSize(new java.awt.Dimension(50, 50));
+        jButton_clearMessages.setMinimumSize(new java.awt.Dimension(50, 50));
+        jButton_clearMessages.setPreferredSize(new java.awt.Dimension(50, 50));
+        jButton_clearMessages.setPressedIcon(new javax.swing.ImageIcon(getClass().getResource("/com/esri/vehiclecommander/resources/Discard-Pressed.png"))); // NOI18N
+        jButton_clearMessages.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton_clearMessagesActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout floatingPanelLayout = new javax.swing.GroupLayout(floatingPanel);
         floatingPanel.setLayout(floatingPanelLayout);
         floatingPanelLayout.setHorizontalGroup(
@@ -1128,29 +1144,31 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
                 .addContainerGap()
                 .addGroup(floatingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(floatingPanelLayout.createSequentialGroup()
+                        .addComponent(jToggleButton_mainMenu, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jToggleButton_grid, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(86, 86, 86)
+                        .addComponent(jPanel_footer, javax.swing.GroupLayout.DEFAULT_SIZE, 476, Short.MAX_VALUE))
+                    .addGroup(floatingPanelLayout.createSequentialGroup()
+                        .addGroup(floatingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jPanel_left, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jToggleButton_openBasemapPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGroup(floatingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(floatingPanelLayout.createSequentialGroup()
-                                .addComponent(jToggleButton_mainMenu, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jToggleButton_grid, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(86, 86, 86)
-                                .addComponent(jPanel_footer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGap(128, 128, 128))
-                            .addGroup(floatingPanelLayout.createSequentialGroup()
-                                .addGroup(floatingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(jPanel_left, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jToggleButton_openBasemapPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jToggleButton_openAnalysisToolbar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(floatingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jPanel_subToolbar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jPanel_mainToolbar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addGap(6, 6, 6)))
-                        .addComponent(jToggleButton_911, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(jPanel_mainToolbar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(floatingPanelLayout.createSequentialGroup()
+                                .addGap(70, 70, 70)
+                                .addComponent(jPanel_subToolbar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(floatingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(floatingPanelLayout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jPanel_navigation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jButton_clearMessages, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jToggleButton_911, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jPanel_navigation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(10, 10, 10))
             .addComponent(jPanel_header, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
@@ -1177,7 +1195,9 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
                             .addComponent(jPanel_footer, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jToggleButton_grid, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(floatingPanelLayout.createSequentialGroup()
-                        .addComponent(jToggleButton_911, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(floatingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jToggleButton_911, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButton_clearMessages, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jPanel_navigation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(11, 11, 11))
@@ -1340,6 +1360,10 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
         prefs.putInt(KEY_FRAME_LOCATION_Y, (int) Math.round(location.getY()));
     }//GEN-LAST:event_formWindowClosing
 
+    private void jButton_clearMessagesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_clearMessagesActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton_clearMessagesActionPerformed
+
     /**
      * Updates the position panel with the specified location and heading.
      * @param mapLocation the location to display.
@@ -1483,6 +1507,7 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
     private javax.swing.ButtonGroup buttonGroup_tools;
     private javax.swing.Box.Filler filler1;
     private javax.swing.JPanel floatingPanel;
+    private javax.swing.JButton jButton_clearMessages;
     private javax.swing.JButton jButton_panDown;
     private javax.swing.JButton jButton_panLeft;
     private javax.swing.JButton jButton_panRight;
