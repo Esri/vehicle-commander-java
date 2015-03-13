@@ -67,6 +67,7 @@ import java.lang.reflect.Constructor;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -317,6 +318,9 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
             }     
         });
         
+        messageController = new MessageController(appConfigController.getPort(), appConfigController.getUsername());
+        appConfigController.setMessageController(messageController);
+
         resetMapConfig();
         
         //Set up extensions
@@ -391,9 +395,6 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
             Utilities.showGPSErrorMessage(t.getMessage());
         }
         
-        
-        messageController = new MessageController(appConfigController.getPort(), appConfigController.getUsername());
-        appConfigController.setMessageController(messageController);
         messageController.addListener(symbolController);
         messageController.startReceiving();
         
@@ -1361,7 +1362,16 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
     }//GEN-LAST:event_formWindowClosing
 
     private void jButton_clearMessagesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_clearMessagesActionPerformed
-        // TODO add your handling code here:
+        ArrayList<String> layerNames = new ArrayList<>();
+        String[] messageLayerNames = symbolController.getMessageLayerNames();
+        for (String layerName : messageLayerNames) {
+            layerNames.add(layerName);
+        }
+        layerNames.add(AdvancedSymbolController.SPOT_REPORT_LAYER_NAME);
+        ClearMessagesDialog dialog = ClearMessagesDialog.getInstance(this, false, layerNames, symbolController);
+        java.awt.Point buttonLocation = jButton_clearMessages.getLocationOnScreen();
+        dialog.setLocation(buttonLocation.x - dialog.getWidth() + jButton_clearMessages.getWidth(), buttonLocation.y + jButton_clearMessages.getHeight());
+        dialog.setVisible(true);
     }//GEN-LAST:event_jButton_clearMessagesActionPerformed
 
     /**
