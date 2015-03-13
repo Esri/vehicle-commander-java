@@ -337,7 +337,7 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
     
     @Override
     public void clearLayer(String layerName, boolean sendRemoveMessageForOwnMessages) {
-        if ("spot_reports".equals(layerName)) {
+        if (SPOT_REPORT_LAYER_NAME.equals(layerName)) {
             int[] graphicIds = spotReportLayer.getGraphicIDs();
             loopAndRemove(graphicIds, spotReportLayer, sendRemoveMessageForOwnMessages, true);
         }
@@ -352,10 +352,11 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
     @Override
     public String[] getMessageLayerNames() {
         Layer[] layers = groupLayer.getLayers();
-        String[] names = new String[layers.length];
+        String[] names = new String[layers.length + 1];
         for (int i = 0; i < layers.length; i++) {
             names[i] = layers[i].getName();
         }
+        names[layers.length] = SPOT_REPORT_LAYER_NAME;
         return names;
     }
     

@@ -152,9 +152,9 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
     private static final String KEY_FRAME_LOCATION_X = VehicleCommanderJFrame.class.getSimpleName() + "frameLocationX";
     private static final String KEY_FRAME_LOCATION_Y = VehicleCommanderJFrame.class.getSimpleName() + "frameLocationY";
     public static final String LICENSE_NOT_SET = "NOT SET (insert license string here)";
-    public static final String BUILT_IN_LICENSE_STRING = LICENSE_NOT_SET; // TODO: (insert license string here)
-    public static final String BUILT_IN_EXTS_STRING = LICENSE_NOT_SET;    // TODO: (insert extension license string(s) here)
-    public static final String BUILT_IN_CLIENT_ID = LICENSE_NOT_SET;      // TODO: (insert client ID here)
+    public static final String BUILT_IN_LICENSE_STRING = "runtimestandard,101,rud220711504,29-nov-2015,JFA30RFPZM07LKZAD025"; // TODO: (insert license string here)
+    public static final String BUILT_IN_EXTS_STRING = "runtimespatial,101,rud338012293,29-nov-2015,ZZYH0C06LEFG0ZZEM111";    // TODO: (insert extension license string(s) here)
+    public static final String BUILT_IN_CLIENT_ID = "fQvw64OEIpBjXdMM";      // TODO: (insert client ID here)
     private final MainMenuJPanel mainMenu;
     private final BasemapsJPanel basemapsPanel;
     private final IdentifyResultsJPanel identifyPanel;
@@ -1367,7 +1367,6 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
         for (String layerName : messageLayerNames) {
             layerNames.add(layerName);
         }
-        layerNames.add(AdvancedSymbolController.SPOT_REPORT_LAYER_NAME);
         ClearMessagesDialog dialog = ClearMessagesDialog.getInstance(this, false, layerNames, symbolController);
         java.awt.Point buttonLocation = jButton_clearMessages.getLocationOnScreen();
         dialog.setLocation(buttonLocation.x - dialog.getWidth() + jButton_clearMessages.getWidth(), buttonLocation.y + jButton_clearMessages.getHeight());
