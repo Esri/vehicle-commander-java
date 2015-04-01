@@ -232,7 +232,12 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
         addToolbarButton((ToolbarToggleButton) jToggleButton_viewshed);
         addToolbarButton((ToolbarToggleButton) jToggleButton_route);
 
-        mapController = new MapController(map, this, appConfigController);
+        messageController = new MessageController(appConfigController.getPort(), appConfigController.getUsername());
+        appConfigController.setMessageController(messageController);
+
+        chemLightController = new ChemLightController(messageController, appConfigController.getUsername());
+
+        mapController = new MapController(map, this, appConfigController, chemLightController);
 
         new Timer(1000 / 24, new ActionListener() {
 
@@ -318,9 +323,6 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
             }     
         });
         
-        messageController = new MessageController(appConfigController.getPort(), appConfigController.getUsername());
-        appConfigController.setMessageController(messageController);
-
         resetMapConfig();
         
         //Set up extensions
@@ -398,8 +400,6 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
         messageController.addListener(symbolController);
         messageController.startReceiving();
         
-        chemLightController = new ChemLightController(messageController, appConfigController.getUsername());
-
         positionReportController = new PositionReportController(
                 mapController.getLocationController(),
                 messageController,

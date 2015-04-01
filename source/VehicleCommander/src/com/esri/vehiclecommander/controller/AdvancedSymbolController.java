@@ -34,6 +34,7 @@ import com.esri.map.MessageGroupLayer;
 import com.esri.militaryapps.controller.ChemLightController;
 import com.esri.militaryapps.controller.MessageController;
 import com.esri.militaryapps.controller.MessageControllerListener;
+import com.esri.militaryapps.controller.SpotReportController;
 import com.esri.militaryapps.model.Geomessage;
 import com.esri.militaryapps.util.Utilities;
 import com.esri.runtime.ArcGISRuntime;
@@ -315,6 +316,27 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
         }
         return results;
     }
+    
+    /**
+     * Identifies at most one Graphic in the specified layer within the specified tolerance.
+     * @param layerName the layer name.
+     * @param screenX the X value in pixels.
+     * @param screenY the Y value in pixels.
+     * @param tolerance the tolerance in pixels.
+     * @return the Graphic in the specified layer within the specified tolerance that is closest
+     *         to the point specified by screenX and screenY, or null if no such Graphic exists.
+     */
+    public Graphic identifyOneGraphic(String layerName, float screenX, float screenY, int tolerance) {
+        Layer layer = SPOT_REPORT_LAYER_NAME.equals(layerName) ? spotReportLayer : groupLayer.getLayer(layerName);
+        if (null != layer && layer instanceof GraphicsLayer) {
+            GraphicsLayer gl = (GraphicsLayer) layer;
+            int[] graphicIds = gl.getGraphicIDs(screenX, screenY, tolerance, 1);
+            if (0 < graphicIds.length) {
+                return gl.getGraphic(graphicIds[0]);
+            }
+        }
+        return null;
+    }
 
     @Override
     protected void processRemoveGeomessage(String geomessageId, String messageType) {
@@ -364,6 +386,10 @@ public class AdvancedSymbolController extends com.esri.militaryapps.controller.A
     public String getMessageLayerName(String messageType) {
         if (null == messageType) {
             return null;
+        }
+        
+        if (SpotReportController.REPORT_TYPE.equals(messageType)) {
+            return SPOT_REPORT_LAYER_NAME;
         }
         
         File messageTypesDir = new File(symDictDir, "messagetypes");
