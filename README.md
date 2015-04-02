@@ -95,10 +95,29 @@ This section is for developers who just need to quickly build and run the applic
 
 #### What's New in Vehicle Commander 10.2.4
 * Uses ArcGIS Runtime 10.2.4.
+* User can change between MGRS and longitude/latitude for coordinate display.
+* Added an app icon.
+* GeoMessage management (e.g. chem lights, spot reports, and position reports):
+    * The user can remove all messages of a certain type or all messages of all types from the map, with the option to send a remove message for messages created by this user to other clients.
+    * The user can modify or remove a chem light.
+    * The app recognizes the new "removeall" GeoMessage action, which removes all messages of a certain type:
+    ```
+        <geomessage v="1.0">
+            <_type>chemlight</_type>
+            <_action>removeall</_action>
+            <_id>{2e50e7ea-c76a-11e4-8731-1681e6b88ec1}</_id>
+        </geomessage>
+    ```
+* Split pre-compiled app into four downloads instead of two:
+    * Windows 64-bit
+    * Windows 32-bit
+    * Linux 64-bit
+    * Linux 32-bit.
+* Simplified versions.xml file that sets the ArcGIS Runtime version used to build from source.
 * Java 8 or higher is required. ArcGIS Runtime 10.2.4 requires Java 7 or higher, but Oracle included [a bug fix in Java 8](http://bugs.java.com/bugdatabase/view_bug.do?bug_id=7107883) that allows UDP networking to behave properly for wired and Wi-Fi networks. Vehicle Commander's messaging depends on UDP networking. Therefore, you should use Java 8 or higher to ensure that messaging works properly.
 * Ant 1.9+ is required for building Vehicle Commander using the build script. Java 8 depends on Ant 1.9 or higher.
 * The Java version of Message Simulator was retired. Use the [GeoMessage Simulator](https://github.com/Esri/geomessage-simulator-qt) instead.
-* TODO
+* Minor bug fixes and performance improvements ([issues resolved](https://github.com/Esri/vehicle-commander-java/issues?utf8=%E2%9C%93&q=milestone%3A%22Vehicle+Commander+10.2.4%22+))
 
 ### 10.2.3
 
