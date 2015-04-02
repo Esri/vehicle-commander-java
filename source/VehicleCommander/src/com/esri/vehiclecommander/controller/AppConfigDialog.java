@@ -16,6 +16,7 @@
 package com.esri.vehiclecommander.controller;
 
 import com.esri.core.geometry.AngularUnit;
+import com.esri.vehiclecommander.util.Utilities;
 import java.util.Enumeration;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -151,6 +152,7 @@ public class AppConfigDialog extends javax.swing.JDialog {
         jLabel2 = new javax.swing.JLabel();
         jRadioButton_mgrs = new javax.swing.JRadioButton();
         jRadioButton_lonLat = new javax.swing.JRadioButton();
+        jLabel_appVersion = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Settings");
@@ -294,6 +296,9 @@ public class AppConfigDialog extends javax.swing.JDialog {
         jRadioButton_lonLat.setActionCommand(LONLAT);
         jRadioButton_lonLat.setFocusable(false);
 
+        jLabel_appVersion.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
+        jLabel_appVersion.setText("Vehicle Commander " + Utilities.APP_VERSION);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -303,7 +308,8 @@ public class AppConfigDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jButton_resetAll, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jLabel_appVersion)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButton_ok)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton_cancel))
@@ -422,7 +428,8 @@ public class AppConfigDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton_cancel)
-                    .addComponent(jButton_ok))
+                    .addComponent(jButton_ok)
+                    .addComponent(jLabel_appVersion))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -519,6 +526,7 @@ public class AppConfigDialog extends javax.swing.JDialog {
     private javax.swing.JComboBox jComboBox_geomessageVersion;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel_appVersion;
     private javax.swing.JLabel jLabel_geomessageVersion;
     private javax.swing.JLabel jLabel_messagingPort;
     private javax.swing.JLabel jLabel_positionMessageInterval;

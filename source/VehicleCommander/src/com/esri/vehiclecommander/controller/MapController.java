@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2014 Esri
+ * Copyright 2012-2015 Esri
  * 
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -44,14 +44,19 @@ import com.esri.map.LayerList;
 import com.esri.map.MapEvent;
 import com.esri.map.MapEventListenerAdapter;
 import com.esri.map.MapOverlay;
+import com.esri.map.popup.PopupDialog;
+import com.esri.militaryapps.controller.ChemLightController;
 import com.esri.militaryapps.model.Location;
 import com.esri.militaryapps.model.LocationProvider;
 import com.esri.vehiclecommander.model.IdentifiedItem;
 import com.esri.vehiclecommander.model.IdentifyResultList;
 import com.esri.vehiclecommander.model.Mil2525CMessageLayer;
 import com.esri.vehiclecommander.util.Utilities;
+import com.esri.vehiclecommander.view.ChemLightJPanel;
 import com.esri.vehiclecommander.view.MapOverlayAdapter;
 import com.esri.vehiclecommander.view.MapOverlayListener;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
@@ -62,6 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JComponent;
 
 /**
  * A class for interacting with the JMap map control, for convenience and abstraction.
@@ -113,11 +119,13 @@ public class MapController extends com.esri.militaryapps.controller.MapControlle
     private final Map<Layer, Map<Integer, ArcGISFeatureLayer>> layerToFeatureLayer = new HashMap<Layer, Map<Integer, ArcGISFeatureLayer>>();
     private final IdentifyListener identifyListener;
     private final Object lastLocationLock = new Object(); 
+    private final ChemLightController chemLightController;
     
     private AdvancedSymbolController symbolController;
     private MapOverlay trackOverlay = null;
     private boolean autoPan = false;
     private Point lastLocation = null;
+    private PopupDialog chemLightPopupDialog = null;
 
     /**
      * Constructs a MapController with a JMap
@@ -127,7 +135,9 @@ public class MapController extends com.esri.militaryapps.controller.MapControlle
     public MapController(
             JMap map,
             IdentifyListener identifyListener,
-            AppConfigController appConfig) {
+            AppConfigController appConfig,
+            ChemLightController chemLightController) {
+        this.chemLightController = chemLightController;
         map.addMapEventListener(new MapEventListenerAdapter() {
 
             @Override
@@ -611,79 +621,106 @@ public class MapController extends com.esri.militaryapps.controller.MapControlle
                     allResults.clear();
                     resultToLayer.clear();
                 }
-                final Point mapPoint = map.toMapPoint(event.getX(), event.getY());
-                IdentifyResultList results = symbolController.identify(event.getX(), event.getY(), 5);
-                processResults(results);
-                
-                List<Layer> overlayLayers = getOverlayLayers();
-                for (final Layer layer : overlayLayers) {
-                    if (layer instanceof Mil2525CMessageLayer) {
-                        processResults(((Mil2525CMessageLayer) layer).identify(event.getX(), event.getY(), 5));
-                    }
-                    if (null != layer.getUrl()) {
-                        IdentifyTask task = new IdentifyTask(layer.getUrl());
-                        IdentifyParameters params = new IdentifyParameters();
-                        params.setSpatialReference(map.getSpatialReference());
-                        params.setGeometry(mapPoint);
-                        params.setMapExtent(map.getExtent());
-                        params.setMapWidth(map.getWidth());
-                        params.setMapHeight(map.getHeight());
-                        //TODO there might be a better way to get the DPI
-                        params.setDPI(96);
-                        CallbackListener<IdentifyResult[]> identifyListener = new CallbackListener<IdentifyResult[]>() {
-
-                            public void onCallback(IdentifyResult[] results) {
-                                synchronized (identifyListeners) {
-                                    if (identifyListeners.contains(this)) {
-                                        synchronized (results) {
-                                            for (IdentifyResult result : results) {
-                                                /**
-                                                 * Feature results have a non-null value, and
-                                                 * raster results have a null value. For now,
-                                                 * only allow feature results by checking for
-                                                 * null.
-                                                 */
-                                                if (null != result.getValue()) {
-                                                    IdentifiedItem item = new IdentifiedItem(
-                                                            result.getGeometry(),
-                                                            result.getLayerId(),
-                                                            result.getAttributes(),
-                                                            result.getValue());
-                                                    allResults.add(item);
-                                                    resultToLayer.put(item, layer);
-                                                }
-                                            }
-                                        }
-
-                                        removeListenerAndCheckResult();
-                                    }
-                                }
-                            }
-
-                            public void onError(Throwable e) {
-                                Logger.getLogger(MapController.class.getName()).log(Level.WARNING, null, e);
-                                removeListenerAndCheckResult();
-                            }
-
-                            private void removeListenerAndCheckResult() {
-                                synchronized (identifyListeners) {
-                                    identifyListeners.remove(this);
-                                    if (identifyListeners.isEmpty()) {
-                                        fireIdentifyComplete(mapPoint);
-                                    }
-                                }
-                            }
-
-                        };
-                        synchronized (identifyListeners) {
-                            identifyListeners.add(identifyListener);
-                            task.execute(params, identifyListener);
+                Graphic poppedUpChemLight = symbolController.identifyOneGraphic(
+                        symbolController.getMessageLayerName(ChemLightController.REPORT_TYPE),
+                        event.getX(), event.getY(), 5);
+                if (null != poppedUpChemLight) {
+                    ChemLightJPanel panel = new ChemLightJPanel(
+                            chemLightController,
+                            poppedUpChemLight,
+                            null != poppedUpChemLight.getSpatialReference() ?
+                            poppedUpChemLight.getSpatialReference() : getSpatialReference());
+                    Dimension panelPreferredSize = panel.getPreferredSize();
+                    chemLightPopupDialog = map.createPopup(new JComponent[] { panel }, poppedUpChemLight);
+                    Component[] components = chemLightPopupDialog.getContentPane().getComponents();
+                    for (Component c : components) {
+                        if (!(c instanceof ChemLightJPanel)) {
+                            c.setVisible(false);
                         }
                     }
-                }
-                synchronized (identifyListeners) {
-                    if (identifyListeners.isEmpty()) {
-                        fireIdentifyComplete(mapPoint);
+                    chemLightPopupDialog.setPreferredSize(panelPreferredSize);
+                    chemLightPopupDialog.pack();
+                    panel.setComponentToHide(chemLightPopupDialog);
+                    chemLightPopupDialog.setVisible(true);
+                } else {
+                    if (null != chemLightPopupDialog) {
+                        chemLightPopupDialog.setVisible(false);
+                        chemLightPopupDialog = null;
+                    }
+                    final Point mapPoint = map.toMapPoint(event.getX(), event.getY());
+                    IdentifyResultList results = symbolController.identify(event.getX(), event.getY(), 5);
+                    processResults(results);
+
+                    List<Layer> overlayLayers = getOverlayLayers();
+                    for (final Layer layer : overlayLayers) {
+                        if (layer instanceof Mil2525CMessageLayer) {
+                            processResults(((Mil2525CMessageLayer) layer).identify(event.getX(), event.getY(), 5));
+                        }
+                        if (null != layer.getUrl()) {
+                            IdentifyTask task = new IdentifyTask(layer.getUrl());
+                            IdentifyParameters params = new IdentifyParameters();
+                            params.setSpatialReference(map.getSpatialReference());
+                            params.setGeometry(mapPoint);
+                            params.setMapExtent(map.getExtent());
+                            params.setMapWidth(map.getWidth());
+                            params.setMapHeight(map.getHeight());
+                            //TODO there might be a better way to get the DPI
+                            params.setDPI(96);
+                            CallbackListener<IdentifyResult[]> identifyListener = new CallbackListener<IdentifyResult[]>() {
+
+                                public void onCallback(IdentifyResult[] results) {
+                                    synchronized (identifyListeners) {
+                                        if (identifyListeners.contains(this)) {
+                                            synchronized (results) {
+                                                for (IdentifyResult result : results) {
+                                                    /**
+                                                     * Feature results have a non-null value, and
+                                                     * raster results have a null value. For now,
+                                                     * only allow feature results by checking for
+                                                     * null.
+                                                     */
+                                                    if (null != result.getValue()) {
+                                                        IdentifiedItem item = new IdentifiedItem(
+                                                                result.getGeometry(),
+                                                                result.getLayerId(),
+                                                                result.getAttributes(),
+                                                                result.getValue());
+                                                        allResults.add(item);
+                                                        resultToLayer.put(item, layer);
+                                                    }
+                                                }
+                                            }
+
+                                            removeListenerAndCheckResult();
+                                        }
+                                    }
+                                }
+
+                                public void onError(Throwable e) {
+                                    Logger.getLogger(MapController.class.getName()).log(Level.WARNING, null, e);
+                                    removeListenerAndCheckResult();
+                                }
+
+                                private void removeListenerAndCheckResult() {
+                                    synchronized (identifyListeners) {
+                                        identifyListeners.remove(this);
+                                        if (identifyListeners.isEmpty()) {
+                                            fireIdentifyComplete(mapPoint);
+                                        }
+                                    }
+                                }
+
+                            };
+                            synchronized (identifyListeners) {
+                                identifyListeners.add(identifyListener);
+                                task.execute(params, identifyListener);
+                            }
+                        }
+                    }
+                    synchronized (identifyListeners) {
+                        if (identifyListeners.isEmpty()) {
+                            fireIdentifyComplete(mapPoint);
+                        }
                     }
                 }
             }
