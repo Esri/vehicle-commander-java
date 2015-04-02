@@ -68,13 +68,7 @@
   </target>
 
   <target name="build" depends="create,compile,jar,dist-files">
-    <echo message="*********************************************************************" />
-    <echo message="*** IMPORTANT:                                                    ***" />
-    <echo message="*** Did you remember to pull latest military-apps-library-java?   ***" />
-    <echo message="*** $ git pull https://github.com/Esri/military-apps-library-java ***" />
-    <echo message="*** - or -                                                        ***" />
-    <echo message="*** $ git submodule foreach git pull                              ***" />
-    <echo message="*********************************************************************" />  
+    <echo message="Build successful." />  
   </target>
 
   <target name="dist-files" depends="jar">
@@ -89,6 +83,15 @@
   </target>
   
   <target name="compile" depends="create">
+  
+    <echo message="*********************************************************************" />
+    <echo message="*** IMPORTANT:                                                    ***" />
+    <echo message="*** Did you remember to pull latest military-apps-library-java?   ***" />
+    <echo message="*** $ git pull https://github.com/Esri/military-apps-library-java ***" />
+    <echo message="*** - or -                                                        ***" />
+    <echo message="*** $ git submodule foreach git pull origin master                ***" />
+    <echo message="*********************************************************************" />  
+
     <javac classpathref="project.classpath" destdir="${dir.build}" includeantruntime="true" debug="${debug}">
         <src path="${dir.src}/src" />
         <src path="${dir.src}/../military-apps-library-java/source/MilitaryAppsLibrary/src" />
