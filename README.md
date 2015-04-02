@@ -1,4 +1,4 @@
-﻿# vehicle-commander
+﻿# vehicle-commander-java
 
 The Vehicle Commander template demonstrates best practices for building in-vehicle military applications with ArcGIS.  The Vehicle Commander template contains source code for an in-vehicle application and directions for building the application from source.  To download a precompiled distribution of the application, visit: 
 [ArcGIS for Defense and Intelligence](http://www.arcgis.com/home/group.html?owner=Arcgisonline_defense&title=ArcGIS%20for%20Defense%20and%20Intelligence).
@@ -40,6 +40,12 @@ Hardware requirements for this template are the same as those for ArcGIS Runtime
     * Optionally, an integrated development environment (IDE). This template’s source code includes project files for the following IDEs:
         * [NetBeans](http://netbeans.org/) 6.9.1 or higher
         * [Eclipse](http://eclipse.org/) Indigo (3.7.1) or higher 
+    * [ArcGIS Runtime licensing](https://developers.arcgis.com/java/guide/license-your-app.htm):
+        * If you want to open map packages in Vehicle Commander, you need an ArcGIS Runtime Standard license.
+        * If you want to use the viewshed function, you need an ArcGIS Runtime Standard license as well as an ArcGIS Runtime Spatial Analyst extension license.
+        * If you don't need to open map packages or run viewsheds, you can use an ArcGIS Runtime Basic license (i.e. a client ID).
+        * Vehicle Commander's source code sets the license using a client ID and license string. ArcGIS Runtime Standard can also be licensed without a license string by authenticating to ArcGIS Online or Portal for ArcGIS every 30 days ([details](https://developers.arcgis.com/java/guide/license-your-app.htm#ESRI_SECTION2_54BBB83D9DAA41099375E14B0B53EE07)), but Vehicle Commander does not currently contain code for that licensing option. If you would like to add that code to your fork and submit a pull request, we would happily consider it.
+        
 * Deployed Application Requirements
     * Software requirements for this template are the same as those for ArcGIS Runtime SDK for Java.  See the Runtime SDK documentation for more information. 
     * Some important items to note: 
@@ -91,6 +97,7 @@ This section is for developers who just need to quickly build and run the applic
 * Uses ArcGIS Runtime 10.2.4.
 * Java 8 or higher is required. ArcGIS Runtime 10.2.4 requires Java 7 or higher, but Oracle included [a bug fix in Java 8](http://bugs.java.com/bugdatabase/view_bug.do?bug_id=7107883) that allows UDP networking to behave properly for wired and Wi-Fi networks. Vehicle Commander's messaging depends on UDP networking. Therefore, you should use Java 8 or higher to ensure that messaging works properly.
 * Ant 1.9+ is required for building Vehicle Commander using the build script. Java 8 depends on Ant 1.9 or higher.
+* The Java version of Message Simulator was retired. Use the [GeoMessage Simulator](https://github.com/Esri/geomessage-simulator-qt) instead.
 * TODO
 
 ### 10.2.3
@@ -172,7 +179,7 @@ If you should want to update to the latest commit instead of the commit used by 
    * User name: a display name for position updates the Vehicle Commander application sends to other applications. This name does not need to be unique. Set the value of the <user> element’s name attribute to the desired user name.
    * User ID: an ID that uniquely identifies the user in position updates that the Vehicle Commander application sends to other applications. The ID should be unique among other machines that will be able to send and receive position updates with this machine. It is recommended, though not required, that the value be a GUID. Set the value of the &lt;user&gt; element’s id attribute to the desired unique ID.
    * User code: a MIL-STD-2525C 15-character SIC code that the Vehicle Commander application will include in the position reports it sends. Set the value of &lt;code&gt;to the desired SIC.
-   * Messaging port: the UDP port on which the Vehicle Commander sends and receives position reports. Note that the Message Simulator always sends messages on port 45678, so the <port> setting only applies to the Vehicle Commander. Set the value of <port> to the desired port number. Note that this port needs to be open in your firewall in order to see military messages on the map.
+   * Messaging port: the UDP port on which the Vehicle Commander sends and receives position reports. Set the value of <port> to the desired port number. Vehicle Commander will receive messages from [GeoEvent Simulator](https://github.com/Esri/geomessage-simulator-qt) instances that send messages over this port. It will send and receive messages to and from instances of Vehicle Commander and [Squad Leader](https://github.com/Esri/squad-leader-android), and it will send messages to the [GeoMessage Adapter](https://github.com/Esri/solutions-geoevent-java/blob/master/solutions-geoevent/adapters/geomessage-adapter/README.md) for ArcGIS GeoEvent Extension for Server. Note that this port needs to be open in your firewall in order to see military messages on the map.
    * Messaging interval: the number of milliseconds the Vehicle Commander will wait between sending out its position reports. Set the value of <interval> to the desired number of milliseconds.
    * GPS type: “simulated” for simulated GPS, or “onboard” for serial GPS. The default is “simulated.” Set the value of the <gps> element’s type attribute to the desired GPS type. [Is this installed in the Dev versions? needs a link to where to get it, unless it is in the GIT pakage, in which case we need to include it in the Template Contents section]
    * GPS GPX file: the filename of a GPX file to use when GPS type is “simulated.” Set the value of the <gps> element’s gpx attribute to the filename. If absent and the GPS type is “simulated,” the application uses a built-in GPS file over Jalalabad, Afghanistan.

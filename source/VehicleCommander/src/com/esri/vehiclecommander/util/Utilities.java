@@ -51,6 +51,12 @@ public class Utilities extends com.esri.militaryapps.util.Utilities {
 
     private static final double FIVE_PI_OVER_TWO = 5.0 * Math.PI / 2.0;
     private static final double TWO_PI = 2.0 * Math.PI;
+    
+    /**
+     * The version string of this app. Update the value of this string when a new
+     * release is created.
+     */
+    public static final String APP_VERSION = "10.2.4";
 
     /**
      * The geomessage version being sent by this application.
