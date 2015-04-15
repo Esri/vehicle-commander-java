@@ -1495,6 +1495,7 @@ public class VehicleCommanderJFrame extends javax.swing.JFrame
             }
         } catch (URISyntaxException ex) {
         }
+        System.out.println("Vehicle Commander " + Utilities.APP_VERSION);
         System.out.println("Usage: java -jar " + jarName + "\n"
                 + "\t-mapconfig \"<map config XML filename>\" (optional)\n"
                 + "\t-license \"<ArcGIS Runtime license string or filename>\" (optional)\n"
