@@ -1,7 +1,6 @@
 ﻿# vehicle-commander-java
 
-The Vehicle Commander template demonstrates best practices for building in-vehicle military applications with ArcGIS.  The Vehicle Commander template contains source code for an in-vehicle application and directions for building the application from source.  To download a precompiled distribution of the application, visit: 
-[ArcGIS for Defense and Intelligence](http://www.arcgis.com/home/group.html?owner=Arcgisonline_defense&title=ArcGIS%20for%20Defense%20and%20Intelligence).
+The Vehicle Commander template demonstrates best practices for building in-vehicle military applications with ArcGIS.  The Vehicle Commander template contains source code for an in-vehicle application and directions for building the application from source.  To download a binary distribution of the application, visit the [ArcGIS for the Military download site](http://www.esri.com/apps/products/download/index.cfm#ArcGIS_for_the_Military).
 
 ![Image of Vehicle Commander](ScreenShot.png "vehicle-commander")
 
