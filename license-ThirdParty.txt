@@ -1,7 +1,23 @@
-This application uses the following libraries whose use is governed by
-the GNU Lesser General Public License (LGPL):
+This application includes FastVisibilityByDistance.gpk, a geoprocessing package (GPK) that contains elevation data from the Shuttle Radar Topography Mission (SRTM). See below for dataset citation details.
+
+This application uses the following libraries whose use is governed by the GNU Lesser General Public License (LGPL):
 
 Beans Binding (JSR-295)
+
+See below for the text of the LGPL.
+
+*****
+
+SRTM dataset citation:
+
+Dataset Originator/Creator: National Geospatial-Intelligence Agency (NGA)
+Dataset Title: Shuttle Radar Topography Mission DTED Level 1 (3-arc second) Data (DTED-1)
+Dataset Publisher: USGS Earth Resources Observation and Science (EROS)
+Online Resource: http://egsc.usgs.gov/isb/pubs/factsheets/fs07103.html
+Use Constraints: There is no guarantee of warranty concerning the accuracy of these data. Users should be aware that temporal changes may have occurred since the data was collected and that some parts of these data may no longer represent actual surface conditions. Users should not use these data for critical applications without a full awareness of their limitations. Acknowledgement of the originating agencies would be appreciated in products derived from these data. Any user who modifies the data set is obligated to describe the types of modifications they perform. User specifically agrees not to misrepresent the data set, nor to imply that changes made were approved or endorsed by the U.S. Geological Survey. Please refer to http://www.usgs.gov/privacy.html for the USGS disclaimer.
+Modifications: clipped to an area of interest and projected to a Universal Transverse Mercator (UTM) projection appropriate to the area of interest.
+
+*****
 
 GNU LESSER GENERAL PUBLIC LICENSE
 		       Version 2.1, February 1999
