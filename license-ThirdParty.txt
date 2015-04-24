@@ -10,7 +10,7 @@ See below for the text of the LGPL.
 
 SRTM dataset citation:
 
-Dataset Originator/Creator: National Geospatial-Intelligence Agency (NGA)
+Dataset Originator/Creator: U.S. Geological Survey (USGS), National Aeronautics and Space Administration (NASA), National Geospatial-Intelligence Agency (NGA)
 Dataset Title: Shuttle Radar Topography Mission DTED Level 1 (3-arc second) Data (DTED-1)
 Dataset Publisher: USGS Earth Resources Observation and Science (EROS)
 Online Resource: http://egsc.usgs.gov/isb/pubs/factsheets/fs07103.html
