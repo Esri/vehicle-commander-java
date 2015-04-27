@@ -150,13 +150,11 @@ public abstract class GPController extends GraphicsLayerController {
         fireGPDisbled();
         File gpk = new File(path);
         
-        if (!gpk.exists())
-        {
-        	if (!path.contains("http")) // Web Address 
-        	{
-	        	System.out.println("Warning - GPK does not exist: " + path);
-	        	return;
-        	}
+        if (!gpk.exists()) {
+            if (!path.contains("http")) {
+                Logger.getLogger(GPController.class.getName()).log(Level.WARNING, "Warning - GPK does not exist: {0}", path);
+                return;
+            }
         }
         
         if (gpk.exists()) {

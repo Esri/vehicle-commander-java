@@ -57,9 +57,10 @@ Hardware requirements for this template are the same as those for ArcGIS Runtime
 This section is for developers who just need to quickly build and run the application.
  
 ### Verify your development environment
-* Ensure the JavaSE SDK is installed
-    * Java is installed and added to your path and the environment variable `JAVA_HOME` to be set to this location
-    * To verify your Java Installation: Open Command Prompt> `java -version` and verify it runs and returns the version correctly 
+* Ensure the Java Development Kit (JDK) is installed
+    * The JDK is installed and added to your path and the environment variable `JAVA_HOME` to be set to this location.
+    * Note that to build the application from souce, you must have the full JDK and not merely the Java Runtime Environment (JRE).
+    * To verify your Java Installation: Open Command Prompt> `java -version` and verify it runs and returns the version correctly.
 * Ensure Apache Ant is installed and configured 
     * Download Ant 1.9+ from the [Apache Ant Project](http://ant.apache.org/bindownload.cgi) and unzip to a location on your machine
     * Set environment variable `ANT_HOME` to Ant Install Location

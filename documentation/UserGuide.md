@@ -9,6 +9,7 @@ User Guide - vehicle-commander
 This section assumes that you have deployed the Vehicle Commander application [using the developer instructions](../README.md), or you are running it from the application/VehicleCommander directory.
 
 1. Review the [software requirements](../README.md#software-requirements).
+2. Verify your Java Runtime Environment (JRE) installation by typing `java -version` at a command prompt. NOTE: you must use 32-bit Java with 32-bit Vehicle Commander and 64-bit Java with 64-bit Vehicle Commander. When you run `java -version` at the command line, if the output includes the text "64-Bit," then it is 64-bit Java; otherwise, it is 32-bit Java. If your Java version and Vehicle Commander version don't match, you can download and unzip the other Vehicle Commander or you can download the other JRE from [http://www.java.com](http://www.java.com) and install it. If you install a different Java version, you must either add the desired Java to your PATH or use an absolute or relative path to the desired java executable.
 2. In your application directory, open mapconfig.xml in a text editor. If mapconfig.xml is absent, the application will open with a blank map. You can define the following:
    * The initial extent, using a point in the map’s spatial reference and a scale.
    * The spatial reference of the map, using a well-known ID (WKID). Web Mercator (WKID 3857) is used by ArcGIS Online services and is normally recommended.
