@@ -91,9 +91,9 @@ This section is for developers who just need to quickly build and run the applic
 
 ## Release Notes
 
-### 2.2.0
+### 4.0.0
 
-#### What's New in Vehicle Commander 2.2.0
+#### What's New in Vehicle Commander 4.0.0
 * Uses ArcGIS Runtime 10.2.4.
 * User can change between MGRS and longitude/latitude for coordinate display.
 * Added an app icon.
