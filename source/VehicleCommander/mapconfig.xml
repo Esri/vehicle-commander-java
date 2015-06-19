@@ -45,15 +45,15 @@
     </layers>
     <initialextent>
         <anchor>
-            <x>7842690</x>
-            <y>4086500</y>
+            <x>-13570000</x>
+            <y>4383000</y>
         </anchor>
-        <scale>250000</scale>
+        <scale>72224</scale>
         <rotation>0</rotation>
     </initialextent>
     <viewshed>
-        <servicepath>../../data/FastVisibilityByDistance.gpk</servicepath>
-        <taskname>Fast Visibility By Distance</taskname>
+        <servicepath>../../data/FastVisibilityByDistance_MontereyCounty.gpk</servicepath>
+        <taskname>FastVisibilityByDistance</taskname>
         <observerheight>2.0</observerheight>
         <observerparamname>Observer</observerparamname>
         <observerheightparamname>ObserverHeight</observerheightparamname>
