@@ -1,4 +1,4 @@
-This application includes FastVisibilityByDistance.gpk, a geoprocessing package (GPK) that contains elevation data from the Shuttle Radar Topography Mission (SRTM). See below for dataset citation details.
+This application includes FastVisibilityByDistance-MontereyCounty.gpk, a geoprocessing package (GPK) that contains elevation data from the Shuttle Radar Topography Mission (SRTM). See below for dataset citation details.
 
 This application uses the following libraries whose use is governed by the GNU Lesser General Public License (LGPL):
 
