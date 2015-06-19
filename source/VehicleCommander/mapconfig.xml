@@ -39,9 +39,9 @@
         <!--layer name="Bihsud Bridge and Environs" visible="true" type="LocalDynamicMapLayer" basemap="false">
             <datasetpath>../../BihsudBridgeVCP.mpk</datasetpath>
         </layer> -->
-        <layer name="COA Sketch" visible="true" type="Mil2525CMessageLayer" basemap="false">
+        <!--layer name="COA Sketch" visible="true" type="Mil2525CMessageLayer" basemap="false">
             <datasetpath>../../data/coa.xml</datasetpath>
-        </layer>
+        </layer-->
     </layers>
     <initialextent>
         <anchor>
