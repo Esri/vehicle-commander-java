@@ -67,14 +67,6 @@ This section is for developers who just need to quickly build and run the applic
     * Add Ant\bin to your path: `%ANT_HOME%\bin`
     * To verify your Ant Installation: Open Command Prompt> `ant -version` and verify it runs and returns the help correctly 
 
-### Configure/copy the required files
-* Some files will need manually updated/copied on your system
-    * Copy new Message Types 
-        * In a file browser or shell, navigate to source/VehicleCommander. Copy all files named afm*.json to <RuntimeSDKJava>/ArcGISRuntime{Version}/Resources/Symbols/Mil2525c/MessageTypes. 
-        * This enables the application to display certain message types that other instances of the application send.
-* Check the contents of  source/VehicleCommander/mapconfig.xml
-    * On non-windows systems, you may need to edit the default locations in this file to locations on your system 
-
 ### Build and run the application
 * (Linux only) Initialize runtime. From a Command Prompt> `> . {RuntimeSDKHome}/init_sdk_java.sh`
 * To build or run the application with ant
@@ -90,6 +82,13 @@ This section is for developers who just need to quickly build and run the applic
     * See the [user guide](documentation/UserGuide.md) for more detailed command line options
 
 ## Release Notes
+
+### 4.1.0
+
+#### What's New in Vehicle Commander 4.1.0
+* Changed geography from Afghanistan to California.
+    * You can use mapconfig.xml to adjust the geography as desired.
+    * The Afghanistan data files are available in the [4.0.0 release](../../tree/v4.0.0).
 
 ### 4.0.0
 

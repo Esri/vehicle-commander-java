@@ -56,7 +56,7 @@ public class Utilities extends com.esri.militaryapps.util.Utilities {
      * The version string of this app. Update the value of this string when a new
      * release is created.
      */
-    public static final String APP_VERSION = "4.0.0";
+    public static final String APP_VERSION = "4.1.0";
 
     /**
      * The geomessage version being sent by this application.
