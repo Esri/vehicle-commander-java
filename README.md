@@ -91,6 +91,13 @@ This section is for developers who just need to quickly build and run the applic
 
 ## Release Notes
 
+### 4.1.0
+
+#### What's New in Vehicle Commander 4.1.0
+* Changed geography from Afghanistan to California.
+    * You can use mapconfig.xml to adjust the geography as desired.
+    * The Afghanistan data files are available in the [4.0.0 release](tree/v4.0.0).
+
 ### 4.0.0
 
 #### What's New in Vehicle Commander 4.0.0
