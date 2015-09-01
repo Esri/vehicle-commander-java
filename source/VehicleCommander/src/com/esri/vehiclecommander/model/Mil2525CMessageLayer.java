@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012-2014 Esri
+ * Copyright 2012-2015 Esri
  * 
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import com.esri.vehiclecommander.controller.MapController;
 import com.esri.vehiclecommander.controller.MapControllerListenerAdapter;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
@@ -97,7 +97,8 @@ public class Mil2525CMessageLayer extends MessageGroupLayer {
             new MessageProcessor(DictionaryType.Mil2525C, this, 1.0) :
             new MessageProcessor(DictionaryType.Mil2525C, this, symbolDictionaryPath);
         Mil2525CMessageParser parser = new Mil2525CMessageParser();
-        final ArrayList<Message> messages = parser.parseMessages(new File(xmlMessageFilename));
+        parser.parseMessages(new File(xmlMessageFilename));
+        final List<Message> messages = parser.getMessages();
         mapController.addListener(new MapControllerListenerAdapter() {
 
             @Override
