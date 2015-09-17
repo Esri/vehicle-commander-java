@@ -55,7 +55,7 @@ Hardware requirements for this template are the same as those for ArcGIS Runtime
 ## Quick Start Instructions
 
 This section is for developers who just need to quickly build and run the application.
- 
+
 ### Verify your development environment
 * Ensure the Java Development Kit (JDK) is installed
     * The JDK is installed and added to your path and the environment variable `JAVA_HOME` to be set to this location.
@@ -82,6 +82,11 @@ This section is for developers who just need to quickly build and run the applic
     * See the [user guide](documentation/UserGuide.md) for more detailed command line options
 
 ## Release Notes
+
+### 4.1.1
+
+#### What's New in Vehicle Commander 4.1.1
+* New license in the compiled app that expires on October 18, 2016.
 
 ### 4.1.0
 
