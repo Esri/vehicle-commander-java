@@ -121,7 +121,7 @@ This section is for developers who just need to quickly build and run the applic
 * Java 8 or higher is required. ArcGIS Runtime 10.2.4 requires Java 7 or higher, but Oracle included [a bug fix in Java 8](http://bugs.java.com/bugdatabase/view_bug.do?bug_id=7107883) that allows UDP networking to behave properly for wired and Wi-Fi networks. Vehicle Commander's messaging depends on UDP networking. Therefore, you should use Java 8 or higher to ensure that messaging works properly.
 * Ant 1.9+ is required for building Vehicle Commander using the build script. Java 8 depends on Ant 1.9 or higher.
 * The Java version of Message Simulator was retired. Use the [GeoMessage Simulator](https://github.com/Esri/geomessage-simulator-qt) instead.
-* Minor bug fixes and performance improvements ([issues resolved](https://github.com/Esri/vehicle-commander-java/issues?utf8=%E2%9C%93&q=milestone%3A%22Vehicle+Commander+10.2.4%22+))
+* Minor bug fixes and performance improvements ([issues resolved](https://github.com/Esri/vehicle-commander-java/issues?q=milestone%3A%22Version+-+4.0.0%22))
 
 ### 10.2.3
 
