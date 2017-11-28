@@ -1,7 +1,7 @@
-﻿# vehicle-commander-java
- 
- ___This repository is no longer maintained. For more information, please visit the [Esri Product Life Cycle](http://support.esri.com/en/content/productlifecycles) page.___
+***This repository is no longer maintained. For information on Defense Solutions apps, including the most current version of the code in this repository, please visit the [Defense Solutions Proofs of Concept](https://github.com/Esri/defense-solutions-proofs-of-concept/tree/master/apps/vehicle-commander-java/) repository.***
 
+# vehicle-commander-java
+ 
 The Vehicle Commander template demonstrates best practices for building in-vehicle military applications with ArcGIS.  The Vehicle Commander template contains source code for an in-vehicle application and directions for building the application from source. 
 
 ![Image of Vehicle Commander](ScreenShot.png "vehicle-commander")
