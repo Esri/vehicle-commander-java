@@ -1,5 +1,7 @@
 ***This repository is no longer maintained. For information on Defense Solutions apps, including the most current version of the code in this repository, please visit the [Defense Solutions Proofs of Concept](https://github.com/Esri/defense-solutions-proofs-of-concept/tree/master/apps/vehicle-commander-java/) repository.***
 
+**See also: [Dynamic Situational Awareness](https://github.com/Esri/dynamic-situational-awareness-qt) app built using the [ArcGIS Runtime SDK for Qt](https://developers.arcgis.com/qt/latest/)**
+
 # vehicle-commander-java
  
 The Vehicle Commander template demonstrates best practices for building in-vehicle military applications with ArcGIS.  The Vehicle Commander template contains source code for an in-vehicle application and directions for building the application from source. 
